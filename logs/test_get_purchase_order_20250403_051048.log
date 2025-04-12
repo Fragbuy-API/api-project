@@ -1,0 +1,130 @@
+[94m================= TESTING GET PURCHASE ORDER API =================[0m
+
+[94m======== Testing: API Health Check ========[0m
+[92m✓ PASS: Request succeeded as expected[0m
+[93m{
+  "status": "healthy",
+  "message": "API is running and database is connected",
+  "timestamp": "2025-04-03T05:10:48.839260"
+}[0m
+
+[94m======== Testing: Purchase Orders API Health Check ========[0m
+[92m✓ PASS: Request succeeded as expected[0m
+[93m{
+  "status": "healthy",
+  "message": "Purchase Order API endpoints are available",
+  "timestamp": "2025-04-03T05:10:48.842701"
+}[0m
+
+[94m======== Testing: Get Existing Purchase Order ========[0m
+[92m✓ PASS: Request succeeded as expected[0m
+[93m{
+  "status": "success",
+  "message": "Found 8 items in purchase order SVPO2000300015",
+  "purchase_order": {
+    "po_number": "SVPO2000300015",
+    "status": "In Progress",
+    "supplier_name": "Al Hussein",
+    "created_date": "2025-01-28T17:12:07.5146577Z",
+    "order_date": "2025-01-28T05:00:00.0000000Z",
+    "arrival_due_date": "2025-02-03T05:00:00.0000000Z",
+    "ship_to_warehouse": "AGP23"
+  },
+  "items": [
+    {
+      "sku": "FWAETHEREXM-100B",
+      "quantity": 96,
+      "description": "Fragrance World Aether Extrait de Parfum M 100ml Boxed"
+    },
+    {
+      "sku": "LATAFAM-100B",
+      "quantity": 96,
+      "description": "Lattafa Fakhar M Edp 100ml Boxed"
+    },
+    {
+      "sku": "FWAFTEFFEXTM-100B",
+      "quantity": 48,
+      "description": "Fragrance World After Effect Extrait De Parfum M 80ml Boxed"
+    },
+    {
+      "sku": "LATSOEDPW-100B",
+      "quantity": 48,
+      "description": "Lattafa Sondos EDP W 100ml Boxed"
+    },
+    {
+      "sku": "FWWINTM-100B",
+      "quantity": 96,
+      "description": "Fragrance World  Whiskey Intense M 100ml Boxed"
+    },
+    {
+      "sku": "RASITSESM-100B",
+      "quantity": 120,
+      "description": "Rasasi It's Essential M 100ml Boxed"
+    },
+    {
+      "sku": "LATAFAW-100B",
+      "quantity": 96,
+      "description": "Lattafa Fakhar EDP W 100ml Boxed"
+    },
+    {
+      "sku": "FRGWAPBSM-80B",
+      "quantity": 48,
+      "description": "Fragrance World Artisan Perfume Brown Sugar EDP M 100ml Boxed"
+    }
+  ],
+  "total_quantity": 648,
+  "timestamp": "2025-04-03T05:10:48.851065"
+}[0m
+[92m✓ PASS: Response contains items array[0m
+[92m✓ PASS: Response contains total_quantity[0m
+[92m✓ PASS: Contains expected number of items (found: 8, expected: 8)[0m
+
+[94m======== Testing: Get Non-existent Purchase Order ========[0m
+[92m✓ PASS: Request failed as expected with status 404[0m
+[93m{
+  "detail": {
+    "status": "error",
+    "message": "Purchase order NONEXISTENT-PO-123456789 not found in the system",
+    "error_code": "PO_NOT_FOUND",
+    "timestamp": "2025-04-03T05:10:48.856276"
+  }
+}[0m
+
+[94m======== Testing: Missing PO Number ========[0m
+[92m✓ PASS: Request failed as expected with status 422[0m
+[93m{
+  "detail": [
+    {
+      "type": "missing",
+      "loc": [
+        "body",
+        "po_number"
+      ],
+      "msg": "Field required",
+      "input": {}
+    }
+  ]
+}[0m
+
+[94m======== Testing: Empty PO Number ========[0m
+[92m✓ PASS: Request failed as expected with status 422[0m
+[93m{
+  "detail": [
+    {
+      "type": "value_error",
+      "loc": [
+        "body",
+        "po_number"
+      ],
+      "msg": "Value error, PO number cannot be empty",
+      "input": "",
+      "ctx": {
+        "error": {}
+      }
+    }
+  ]
+}[0m
+
+[94m================= TEST SUMMARY =================[0m
+Tests passed: 4/4
+[92m✓ All tests passed! Get Purchase Order API is working.[0m

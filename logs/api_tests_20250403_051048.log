@@ -1,0 +1,7 @@
+API test run started at Thu Apr  3 05:10:48 UTC 2025
+Activated Python virtual environment at /root/api/venv
+Running test: test_check_sku_api.py...
+Error: Test script not found: /root/api/tests/test_find_po.py
+Running test: test_get_purchase_order.py...
+API test run completed at Thu Apr  3 05:10:48 UTC 2025
+Results: 0 of 2 test scripts failed
