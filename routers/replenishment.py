@@ -10,6 +10,7 @@ logger = logging.getLogger(__name__)
 
 # Import database connection
 from database import execute_with_retry
+from models.replenishment import ReplenishmentOrderRequest, ReplenishmentItemPickedRequest, ReplenishmentCancelRequest, ReplenishmentCompleteRequest
 
 router = APIRouter(
     prefix="/api/v1",
@@ -83,6 +84,452 @@ async def ro_get_orders():
         error_msg = str(e)
         error_trace = traceback.format_exc()
         logger.error(f"Error in ro_get_orders: {error_msg}\n{error_trace}")
+        
+        raise HTTPException(
+            status_code=500,
+            detail={
+                "status": "error",
+                "message": f"Server error: {error_msg}",
+                "error_code": "SERVER_ERROR",
+                "timestamp": datetime.now().isoformat()
+            }
+        )
+
+@router.post("/ro_retrieve_order")
+async def ro_retrieve_order(request: ReplenishmentOrderRequest):
+    """
+    Retrieve details of a specific replenishment order by ro_id.
+    Returns all items in the order from the replen_order_items table.
+    """
+    logger.info(f"ro_retrieve_order request received for order ID: {request.ro_id}")
+    
+    try:
+        # First check if the order exists
+        order_query = text("""
+            SELECT ro_id, ro_date_created, ro_status, destination 
+            FROM replen_orders 
+            WHERE ro_id = :ro_id
+        """)
+        
+        order_result = execute_with_retry(order_query, {'ro_id': request.ro_id})
+        order_row = order_result.fetchone()
+        
+        if not order_row:
+            logger.info(f"Replenishment order not found: {request.ro_id}")
+            raise HTTPException(
+                status_code=404,
+                detail={
+                    "status": "error",
+                    "message": f"Replenishment order {request.ro_id} not found",
+                    "error_code": "RO_NOT_FOUND",
+                    "timestamp": datetime.now().isoformat()
+                }
+            )
+        
+        # Get all items in the order
+        items_query = text("""
+            SELECT id, sku, description, qty, qty_picked, created_at
+            FROM replen_order_items
+            WHERE ro_id = :ro_id
+            ORDER BY sku
+        """)
+        
+        items_result = execute_with_retry(items_query, {'ro_id': request.ro_id})
+        item_rows = items_result.fetchall()
+        
+        # Get the storage locations for each SKU
+        items = []
+        for row in item_rows:
+            # Look up storage location for this SKU
+            location_query = text("""
+                SELECT rack_location
+                FROM storage_locations
+                WHERE sku = :sku
+                LIMIT 1
+            """)
+            
+            location_result = execute_with_retry(location_query, {'sku': row[1]})
+            location_row = location_result.fetchone()
+            location = location_row[0] if location_row else None
+            
+            items.append({
+                "id": row[0],
+                "sku": row[1],
+                "description": row[2],
+                "qty": row[3],
+                "qty_picked": row[4],
+                "created_at": row[5].isoformat() if row[5] else None,
+                "rack_location": location
+            })
+        
+        # Create the response object
+        order_info = {
+            "ro_id": order_row[0],
+            "ro_date_created": order_row[1].isoformat() if order_row[1] else None,
+            "ro_status": order_row[2],
+            "destination": order_row[3],
+            "items": items,
+            "item_count": len(items)
+        }
+        
+        logger.info(f"Successfully retrieved order {request.ro_id} with {len(items)} items")
+        return {
+            "status": "success",
+            "message": f"Successfully retrieved replenishment order {request.ro_id}",
+            "order": order_info,
+            "timestamp": datetime.now().isoformat()
+        }
+    
+    except HTTPException:
+        raise
+    except Exception as e:
+        error_msg = str(e)
+        error_trace = traceback.format_exc()
+        logger.error(f"Error in ro_retrieve_order: {error_msg}\n{error_trace}")
+        
+        raise HTTPException(
+            status_code=500,
+            detail={
+                "status": "error",
+                "message": f"Server error: {error_msg}",
+                "error_code": "SERVER_ERROR",
+                "timestamp": datetime.now().isoformat()
+            }
+        )
+
+
+@router.post("/ro_item_picked")
+async def ro_item_picked(request: ReplenishmentItemPickedRequest):
+    """
+    Update the quantity picked for a specific item in a replenishment order.
+    Checks inventory (placeholder), updates qty_picked, and determines if the order is complete.
+    """
+    logger.info(f"ro_item_picked request received: RO={request.ro_id}, SKU={request.sku}, Qty={request.qty_picked}")
+    
+    try:
+        # First check if the order and item exist
+        item_query = text("""
+            SELECT roi.id, roi.qty, ro.ro_status
+            FROM replen_order_items roi
+            JOIN replen_orders ro ON roi.ro_id = ro.ro_id
+            WHERE roi.ro_id = :ro_id AND roi.sku = :sku
+        """)
+        
+        item_result = execute_with_retry(item_query, {
+            'ro_id': request.ro_id,
+            'sku': request.sku
+        })
+        
+        item_row = item_result.fetchone()
+        
+        if not item_row:
+            logger.info(f"Item not found: RO={request.ro_id}, SKU={request.sku}")
+            raise HTTPException(
+                status_code=404,
+                detail={
+                    "status": "error",
+                    "message": f"Item with SKU {request.sku} not found in replenishment order {request.ro_id}",
+                    "error_code": "ITEM_NOT_FOUND",
+                    "timestamp": datetime.now().isoformat()
+                }
+            )
+        
+        item_id = item_row[0]
+        qty_requested = item_row[1]
+        ro_status = item_row[2]
+        
+        # Check if order is already completed
+        if ro_status == 'Completed':
+            raise HTTPException(
+                status_code=400,
+                detail={
+                    "status": "error",
+                    "message": f"Replenishment order {request.ro_id} is already marked as Completed",
+                    "error_code": "ORDER_ALREADY_COMPLETED",
+                    "timestamp": datetime.now().isoformat()
+                }
+            )
+        
+        # PLACEHOLDER: Check inventory for sufficient stock
+        # In a real implementation, we would query the inventory table here
+        sufficient_stock = True  # Always return TRUE for now
+        
+        if not sufficient_stock:
+            logger.info(f"Insufficient stock for SKU={request.sku}")
+            raise HTTPException(
+                status_code=400,
+                detail={
+                    "status": "error",
+                    "message": "Insufficient stock",
+                    "error_code": "INSUFFICIENT_STOCK",
+                    "timestamp": datetime.now().isoformat()
+                }
+            )
+        
+        # Update the qty_picked value
+        update_query = text("""
+            UPDATE replen_order_items
+            SET qty_picked = :qty_picked
+            WHERE ro_id = :ro_id AND sku = :sku
+        """)
+        
+        execute_with_retry(update_query, {
+            'ro_id': request.ro_id,
+            'sku': request.sku,
+            'qty_picked': request.qty_picked
+        })
+        
+        logger.info(f"Updated qty_picked for RO={request.ro_id}, SKU={request.sku} to {request.qty_picked}")
+        
+        # PLACEHOLDER: Add code to update SkuVault
+        # This would notify SkuVault that inventory should be moved from Storage to Staging
+        logger.info("PLACEHOLDER: Would notify SkuVault of inventory movement from Storage to Staging")
+        
+        # Check if all items in the RO have been picked
+        completion_query = text("""
+            SELECT 
+                COUNT(*) as total_items,
+                SUM(CASE WHEN qty_picked > 0 THEN 1 ELSE 0 END) as picked_items
+            FROM 
+                replen_order_items
+            WHERE 
+                ro_id = :ro_id
+        """)
+        
+        completion_result = execute_with_retry(completion_query, {'ro_id': request.ro_id})
+        completion_row = completion_result.fetchone()
+        
+        total_items = completion_row[0]
+        picked_items = completion_row[1]
+        
+        completion_message = "Data Added; RO In Process"
+        
+        # If all items have been picked, update order status and message
+        if total_items == picked_items:
+            status_update_query = text("""
+                UPDATE replen_orders
+                SET ro_status = 'Completed'
+                WHERE ro_id = :ro_id
+            """)
+            
+            execute_with_retry(status_update_query, {'ro_id': request.ro_id})
+            logger.info(f"All items picked for RO={request.ro_id}, marking as Completed")
+            
+            completion_message = "Data Added; RO Complete"
+        
+        return {
+            "status": "success",
+            "message": completion_message,
+            "ro_id": request.ro_id,
+            "sku": request.sku,
+            "qty_picked": request.qty_picked,
+            "timestamp": datetime.now().isoformat()
+        }
+    
+    except HTTPException:
+        raise
+    except Exception as e:
+        error_msg = str(e)
+        error_trace = traceback.format_exc()
+        logger.error(f"Error in ro_item_picked: {error_msg}\n{error_trace}")
+        
+        raise HTTPException(
+            status_code=500,
+            detail={
+                "status": "error",
+                "message": f"Server error: {error_msg}",
+                "error_code": "SERVER_ERROR",
+                "timestamp": datetime.now().isoformat()
+            }
+        )
+
+@router.post("/ro_pick_cancelled")
+async def ro_pick_cancelled(request: ReplenishmentCancelRequest):
+    """
+    Cancel picking for a replenishment order by changing its status
+    from "In Process" back to "Unassigned".
+    """
+    logger.info(f"ro_pick_cancelled request received for order ID: {request.ro_id}")
+    
+    try:
+        # First check if the order exists and is in the correct state
+        order_query = text("""
+            SELECT ro_status
+            FROM replen_orders 
+            WHERE ro_id = :ro_id
+        """)
+        
+        order_result = execute_with_retry(order_query, {'ro_id': request.ro_id})
+        order_row = order_result.fetchone()
+        
+        if not order_row:
+            logger.info(f"Replenishment order not found: {request.ro_id}")
+            raise HTTPException(
+                status_code=404,
+                detail={
+                    "status": "error",
+                    "message": f"Replenishment order {request.ro_id} not found",
+                    "error_code": "RO_NOT_FOUND",
+                    "timestamp": datetime.now().isoformat()
+                }
+            )
+        
+        current_status = order_row[0]
+        
+        # Check if order is in the correct state to be cancelled
+        if current_status != "In Process":
+            logger.info(f"Cannot cancel order {request.ro_id} with status {current_status}")
+            raise HTTPException(
+                status_code=400,
+                detail={
+                    "status": "error",
+                    "message": f"Cannot cancel order with status {current_status}. Only orders with status 'In Process' can be cancelled.",
+                    "error_code": "INVALID_STATUS_FOR_CANCEL",
+                    "timestamp": datetime.now().isoformat()
+                }
+            )
+        
+        # Update the order status
+        update_query = text("""
+            UPDATE replen_orders
+            SET ro_status = 'Unassigned'
+            WHERE ro_id = :ro_id
+        """)
+        
+        execute_with_retry(update_query, {'ro_id': request.ro_id})
+        
+        # Reset all qty_picked values to 0
+        reset_query = text("""
+            UPDATE replen_order_items
+            SET qty_picked = 0
+            WHERE ro_id = :ro_id
+        """)
+        
+        execute_with_retry(reset_query, {'ro_id': request.ro_id})
+        
+        logger.info(f"Successfully cancelled picking for order {request.ro_id}")
+        return {
+            "status": "success",
+            "message": f"Replenishment order {request.ro_id} has been reset to Unassigned status",
+            "ro_id": request.ro_id,
+            "previous_status": current_status,
+            "new_status": "Unassigned",
+            "timestamp": datetime.now().isoformat()
+        }
+    
+    except HTTPException:
+        raise
+    except Exception as e:
+        error_msg = str(e)
+        error_trace = traceback.format_exc()
+        logger.error(f"Error in ro_pick_cancelled: {error_msg}\n{error_trace}")
+        
+        raise HTTPException(
+            status_code=500,
+            detail={
+                "status": "error",
+                "message": f"Server error: {error_msg}",
+                "error_code": "SERVER_ERROR",
+                "timestamp": datetime.now().isoformat()
+            }
+        )
+
+
+@router.post("/ro_complete")
+async def ro_complete(request: ReplenishmentCompleteRequest):
+    """
+    Mark a replenishment order as Completed after user confirmation.
+    Called after all items have been picked and the user confirms completion.
+    """
+    logger.info(f"ro_complete request received for order ID: {request.ro_id}")
+    
+    try:
+        # First check if the order exists 
+        order_query = text("""
+            SELECT ro_status
+            FROM replen_orders 
+            WHERE ro_id = :ro_id
+        """)
+        
+        order_result = execute_with_retry(order_query, {'ro_id': request.ro_id})
+        order_row = order_result.fetchone()
+        
+        if not order_row:
+            logger.info(f"Replenishment order not found: {request.ro_id}")
+            raise HTTPException(
+                status_code=404,
+                detail={
+                    "status": "error",
+                    "message": f"Replenishment order {request.ro_id} not found",
+                    "error_code": "RO_NOT_FOUND",
+                    "timestamp": datetime.now().isoformat()
+                }
+            )
+        
+        current_status = order_row[0]
+        
+        # Check if order is already completed
+        if current_status == "Completed":
+            logger.info(f"Order {request.ro_id} is already completed")
+            return {
+                "status": "success",
+                "message": f"Replenishment order {request.ro_id} is already marked as Completed",
+                "ro_id": request.ro_id,
+                "timestamp": datetime.now().isoformat()
+            }
+        
+        # Check if all items have been picked
+        completion_query = text("""
+            SELECT 
+                COUNT(*) as total_items,
+                SUM(CASE WHEN qty_picked > 0 THEN 1 ELSE 0 END) as picked_items
+            FROM 
+                replen_order_items
+            WHERE 
+                ro_id = :ro_id
+        """)
+        
+        completion_result = execute_with_retry(completion_query, {'ro_id': request.ro_id})
+        completion_row = completion_result.fetchone()
+        
+        total_items = completion_row[0]
+        picked_items = completion_row[1]
+        
+        # If not all items have been picked, return a warning
+        if total_items > picked_items:
+            logger.warning(f"Not all items have been picked for order {request.ro_id}")
+            return {
+                "status": "warning",
+                "message": f"Not all items have been picked for order {request.ro_id}. {picked_items} of {total_items} items have been picked.",
+                "ro_id": request.ro_id,
+                "timestamp": datetime.now().isoformat()
+            }
+        
+        # Update the order status to Completed
+        update_query = text("""
+            UPDATE replen_orders
+            SET ro_status = 'Completed'
+            WHERE ro_id = :ro_id
+        """)
+        
+        execute_with_retry(update_query, {'ro_id': request.ro_id})
+        
+        logger.info(f"Successfully marked order {request.ro_id} as Completed")
+        return {
+            "status": "success",
+            "message": f"Replenishment order {request.ro_id} has been marked as Completed",
+            "ro_id": request.ro_id,
+            "previous_status": current_status,
+            "new_status": "Completed",
+            "timestamp": datetime.now().isoformat()
+        }
+    
+    except HTTPException:
+        raise
+    except Exception as e:
+        error_msg = str(e)
+        error_trace = traceback.format_exc()
+        logger.error(f"Error in ro_complete: {error_msg}\n{error_trace}")
         
         raise HTTPException(
             status_code=500,
