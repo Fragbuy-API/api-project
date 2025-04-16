@@ -100,6 +100,7 @@ async def ro_retrieve_order(request: ReplenishmentOrderRequest):
     """
     Retrieve details of a specific replenishment order by ro_id.
     Returns all items in the order from the replen_order_items table.
+    Also changes the order status to "In Process" if it's currently "Unassigned".
     """
     logger.info(f"ro_retrieve_order request received for order ID: {request.ro_id}")
     
@@ -126,9 +127,25 @@ async def ro_retrieve_order(request: ReplenishmentOrderRequest):
                 }
             )
         
+        current_status = order_row[2]
+        
+        # If the order is Unassigned, change it to In Process
+        status_changed = False
+        if current_status == "Unassigned":
+            status_update_query = text("""
+                UPDATE replen_orders
+                SET ro_status = 'In Process'
+                WHERE ro_id = :ro_id
+            """)
+            
+            execute_with_retry(status_update_query, {'ro_id': request.ro_id})
+            logger.info(f"Changed status for order {request.ro_id} from Unassigned to In Process")
+            status_changed = True
+            current_status = "In Process"  # Update for the response
+        
         # Get all items in the order
         items_query = text("""
-            SELECT id, sku, description, qty, qty_picked, created_at
+            SELECT id, sku, description, qty, qty_picked, created_at, rack_location, note
             FROM replen_order_items
             WHERE ro_id = :ro_id
             ORDER BY sku
@@ -137,46 +154,46 @@ async def ro_retrieve_order(request: ReplenishmentOrderRequest):
         items_result = execute_with_retry(items_query, {'ro_id': request.ro_id})
         item_rows = items_result.fetchall()
         
-        # Get the storage locations for each SKU
+        # Process the items
         items = []
         for row in item_rows:
-            # Look up storage location for this SKU
-            location_query = text("""
-                SELECT rack_location
-                FROM storage_locations
-                WHERE sku = :sku
-                LIMIT 1
-            """)
-            
-            location_result = execute_with_retry(location_query, {'sku': row[1]})
-            location_row = location_result.fetchone()
-            location = location_row[0] if location_row else None
-            
-            items.append({
+            item = {
                 "id": row[0],
                 "sku": row[1],
                 "description": row[2],
                 "qty": row[3],
                 "qty_picked": row[4],
                 "created_at": row[5].isoformat() if row[5] else None,
-                "rack_location": location
-            })
+                "rack_location": row[6]
+            }
+            
+            # Only include note if it's not None/NULL
+            if row[7]:
+                item["note"] = row[7]
+                
+            items.append(item)
         
         # Create the response object
         order_info = {
             "ro_id": order_row[0],
             "ro_date_created": order_row[1].isoformat() if order_row[1] else None,
-            "ro_status": order_row[2],
+            "ro_status": current_status,  # Use updated status if changed
             "destination": order_row[3],
             "items": items,
             "item_count": len(items)
         }
         
+        # Add status change info to the message if applicable
+        message = f"Successfully retrieved replenishment order {request.ro_id}"
+        if status_changed:
+            message += ". Status changed from Unassigned to In Process"
+        
         logger.info(f"Successfully retrieved order {request.ro_id} with {len(items)} items")
         return {
             "status": "success",
-            "message": f"Successfully retrieved replenishment order {request.ro_id}",
+            "message": message,
             "order": order_info,
+            "status_changed": status_changed,
             "timestamp": datetime.now().isoformat()
         }
     
@@ -197,38 +214,41 @@ async def ro_retrieve_order(request: ReplenishmentOrderRequest):
             }
         )
 
-
 @router.post("/ro_item_picked")
 async def ro_item_picked(request: ReplenishmentItemPickedRequest):
     """
     Update the quantity picked for a specific item in a replenishment order.
-    Checks inventory (placeholder), updates qty_picked, and determines if the order is complete.
+    Uses ro_id, sku, and rack_location to identify the item.
+    Optionally accepts a note explaining quantity changes.
     """
-    logger.info(f"ro_item_picked request received: RO={request.ro_id}, SKU={request.sku}, Qty={request.qty_picked}")
+    logger.info(f"ro_item_picked request received: RO={request.ro_id}, SKU={request.sku}, Location={request.rack_location}, Qty={request.qty_picked}")
     
     try:
-        # First check if the order and item exist
+        # First check if the order and item exist with the specific rack_location
         item_query = text("""
             SELECT roi.id, roi.qty, ro.ro_status
             FROM replen_order_items roi
             JOIN replen_orders ro ON roi.ro_id = ro.ro_id
-            WHERE roi.ro_id = :ro_id AND roi.sku = :sku
+            WHERE roi.ro_id = :ro_id 
+              AND roi.sku = :sku
+              AND roi.rack_location = :rack_location
         """)
         
         item_result = execute_with_retry(item_query, {
             'ro_id': request.ro_id,
-            'sku': request.sku
+            'sku': request.sku,
+            'rack_location': request.rack_location
         })
         
         item_row = item_result.fetchone()
         
         if not item_row:
-            logger.info(f"Item not found: RO={request.ro_id}, SKU={request.sku}")
+            logger.info(f"Item not found: RO={request.ro_id}, SKU={request.sku}, Location={request.rack_location}")
             raise HTTPException(
                 status_code=404,
                 detail={
                     "status": "error",
-                    "message": f"Item with SKU {request.sku} not found in replenishment order {request.ro_id}",
+                    "message": f"Item with SKU {request.sku} at location {request.rack_location} not found in replenishment order {request.ro_id}",
                     "error_code": "ITEM_NOT_FOUND",
                     "timestamp": datetime.now().isoformat()
                 }
@@ -255,7 +275,7 @@ async def ro_item_picked(request: ReplenishmentItemPickedRequest):
         sufficient_stock = True  # Always return TRUE for now
         
         if not sufficient_stock:
-            logger.info(f"Insufficient stock for SKU={request.sku}")
+            logger.info(f"Insufficient stock for SKU={request.sku} at location {request.rack_location}")
             raise HTTPException(
                 status_code=400,
                 detail={
@@ -266,26 +286,51 @@ async def ro_item_picked(request: ReplenishmentItemPickedRequest):
                 }
             )
         
-        # Update the qty_picked value
-        update_query = text("""
-            UPDATE replen_order_items
-            SET qty_picked = :qty_picked
-            WHERE ro_id = :ro_id AND sku = :sku
-        """)
-        
-        execute_with_retry(update_query, {
-            'ro_id': request.ro_id,
-            'sku': request.sku,
-            'qty_picked': request.qty_picked
-        })
-        
-        logger.info(f"Updated qty_picked for RO={request.ro_id}, SKU={request.sku} to {request.qty_picked}")
+        # Update the qty_picked value and add the note if provided
+        if request.note:
+            update_query = text("""
+                UPDATE replen_order_items
+                SET qty_picked = :qty_picked, note = :note
+                WHERE id = :item_id
+            """)
+            
+            execute_with_retry(update_query, {
+                'item_id': item_id,
+                'qty_picked': request.qty_picked,
+                'note': request.note
+            })
+            
+            logger.info(f"Updated qty_picked for item ID={item_id} to {request.qty_picked} with note: {request.note}")
+        else:
+            update_query = text("""
+                UPDATE replen_order_items
+                SET qty_picked = :qty_picked
+                WHERE id = :item_id
+            """)
+            
+            execute_with_retry(update_query, {
+                'item_id': item_id,
+                'qty_picked': request.qty_picked
+            })
+            
+            logger.info(f"Updated qty_picked for item ID={item_id} to {request.qty_picked}")
         
         # PLACEHOLDER: Add code to update SkuVault
         # This would notify SkuVault that inventory should be moved from Storage to Staging
         logger.info("PLACEHOLDER: Would notify SkuVault of inventory movement from Storage to Staging")
         
-        # Check if all items in the RO have been picked
+        # If status is Unassigned, change it to In Process
+        if ro_status == 'Unassigned':
+            status_update_query = text("""
+                UPDATE replen_orders
+                SET ro_status = 'In Process'
+                WHERE ro_id = :ro_id
+            """)
+            
+            execute_with_retry(status_update_query, {'ro_id': request.ro_id})
+            logger.info(f"Changed status for RO={request.ro_id} from Unassigned to In Process")
+        
+        # Check if all items have been picked (for informational purposes only)
         completion_query = text("""
             SELECT 
                 COUNT(*) as total_items,
@@ -302,29 +347,25 @@ async def ro_item_picked(request: ReplenishmentItemPickedRequest):
         total_items = completion_row[0]
         picked_items = completion_row[1]
         
+        # We always return this message
         completion_message = "Data Added; RO In Process"
         
-        # If all items have been picked, update order status and message
-        if total_items == picked_items:
-            status_update_query = text("""
-                UPDATE replen_orders
-                SET ro_status = 'Completed'
-                WHERE ro_id = :ro_id
-            """)
-            
-            execute_with_retry(status_update_query, {'ro_id': request.ro_id})
-            logger.info(f"All items picked for RO={request.ro_id}, marking as Completed")
-            
-            completion_message = "Data Added; RO Complete"
-        
-        return {
+        # Build the response
+        response = {
             "status": "success",
             "message": completion_message,
             "ro_id": request.ro_id,
             "sku": request.sku,
+            "rack_location": request.rack_location,
             "qty_picked": request.qty_picked,
             "timestamp": datetime.now().isoformat()
         }
+        
+        # Include note in response if provided
+        if request.note:
+            response["note"] = request.note
+        
+        return response
     
     except HTTPException:
         raise

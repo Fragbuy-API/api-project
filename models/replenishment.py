@@ -21,7 +21,9 @@ class ReplenishmentOrderRequest(BaseModel):
 class ReplenishmentItemPickedRequest(BaseModel):
     ro_id: str
     sku: str
+    rack_location: str
     qty_picked: int
+    note: Optional[str] = None
     
     @validator('ro_id')
     def validate_ro_id(cls, v):
@@ -33,6 +35,12 @@ class ReplenishmentItemPickedRequest(BaseModel):
     def validate_sku(cls, v):
         if not v or v.strip() == "":
             raise ValueError('SKU cannot be empty')
+        return v
+    
+    @validator('rack_location')
+    def validate_rack_location(cls, v):
+        if not v or v.strip() == "":
+            raise ValueError('Rack location cannot be empty')
         return v
     
     @validator('qty_picked')

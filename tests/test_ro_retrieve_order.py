@@ -86,6 +86,9 @@ def test_retrieve_valid_order():
     test_ro_id = response["orders"][0]["ro_id"]
     print(f"Using replenishment order ID: {test_ro_id}")
     
+    # Print exactly what we're sending
+    print(f"Making POST request to {BASE_URL}/ro_retrieve_order with data: {{'ro_id': '{test_ro_id}'}}")
+    
     # Now test retrieving this order
     return make_api_call("ro_retrieve_order", {"ro_id": test_ro_id})
 
