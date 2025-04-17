@@ -1,0 +1,31 @@
+Qboid API Test Summary - Thu Apr 17 04:00:01 UTC 2025
+============================================
+
+❌ FAILED: test_check_sku_api.py - 1 failures detected
+   Failure details:
+   [94m======== Testing: API Health Check ========[0m
+   [91m✗ FAIL: Expected success but got status 502[0m
+   [93m{
+     "error": "Invalid JSON response",
+     "raw": "<html>\r\n<head><title>502 Bad Gateway</title></head>\r\n<body>\r\n<center><h1>502 Bad Gateway</h1></center>\r\n<hr><center>nginx/1.22.1</center>\r\n</body>\r\n</html>\r\n"
+
+❌ FAILED: test_purchase_orders.py - 1 failures detected
+   Failure details:
+   [94m======== Testing: API Health Check ========[0m
+   [91m✗ FAIL: Expected success but got status 502[0m
+   [93m{
+     "error": "Invalid JSON response",
+     "raw": "<html>\r\n<head><title>502 Bad Gateway</title></head>\r\n<body>\r\n<center><h1>502 Bad Gateway</h1></center>\r\n<hr><center>nginx/1.22.1</center>\r\n</body>\r\n</html>\r\n"
+
+❌ FAILED: test_update_po_status.py - 1 failures detected
+   Failure details:
+   [94m======== Testing: API Health Check ========[0m
+   [91m✗ FAIL: Expected success but got status 502[0m
+   [93m{
+     "error": "Invalid JSON response",
+     "raw": "<html>\r\n<head><title>502 Bad Gateway</title></head>\r\n<body>\r\n<center><h1>502 Bad Gateway</h1></center>\r\n<hr><center>nginx/1.22.1</center>\r\n</body>\r\n</html>\r\n"
+
+
+============================================
+SUMMARY: 3 of 3 test scripts failed
+Test run completed at Thu Apr 17 04:00:03 UTC 2025

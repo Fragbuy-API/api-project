@@ -1,0 +1,109 @@
+[94m================= TESTING UPDATE PO STATUS API =================[0m
+
+[94m======== Testing: API Health Check ========[0m
+[92m✓ PASS: Request succeeded as expected[0m
+[93m{
+  "status": "healthy",
+  "message": "API is running and database is connected",
+  "timestamp": "2025-04-17T16:00:04.455079"
+}[0m
+
+[94m======== Testing: Purchase Orders API Health Check ========[0m
+[92m✓ PASS: Request succeeded as expected[0m
+[93m{
+  "status": "healthy",
+  "message": "Purchase Order API endpoints are available",
+  "timestamp": "2025-04-17T16:00:04.469825"
+}[0m
+
+[94m======== Testing: Update PO Status to Complete ========[0m
+[92m✓ PASS: Request succeeded as expected[0m
+[93m{
+  "status": "success",
+  "message": "Purchase order PO-TEST-001 status updated to Completed",
+  "po_number": "PO-TEST-001",
+  "timestamp": "2025-04-17T16:00:04.525676",
+  "partner_api_notification": {
+    "success": true,
+    "timestamp": "2025-04-17T16:00:04.525621"
+  }
+}[0m
+
+[94m======== Testing: Update PO Status to Incomplete ========[0m
+[92m✓ PASS: Request succeeded as expected[0m
+[93m{
+  "status": "success",
+  "message": "Purchase order PO-TEST-002 status updated to In Progress",
+  "po_number": "PO-TEST-002",
+  "timestamp": "2025-04-17T16:00:04.561233"
+}[0m
+
+[94m======== Testing: Update Non-existent PO ========[0m
+[92m✓ PASS: Request failed as expected with status 404[0m
+[93m{
+  "detail": {
+    "status": "error",
+    "message": "Purchase order NONEXISTENT-PO not found in the system",
+    "error_code": "PO_NOT_FOUND",
+    "timestamp": "2025-04-17T16:00:04.572522"
+  }
+}[0m
+
+[94m======== Testing: Missing Status ========[0m
+[92m✓ PASS: Request failed as expected with status 422[0m
+[93m{
+  "detail": [
+    {
+      "type": "missing",
+      "loc": [
+        "body",
+        "status"
+      ],
+      "msg": "Field required",
+      "input": {
+        "po_number": "PO-TEST-001"
+      }
+    }
+  ]
+}[0m
+
+[94m======== Testing: Missing PO Number ========[0m
+[92m✓ PASS: Request failed as expected with status 422[0m
+[93m{
+  "detail": [
+    {
+      "type": "missing",
+      "loc": [
+        "body",
+        "po_number"
+      ],
+      "msg": "Field required",
+      "input": {
+        "status": "Complete"
+      }
+    }
+  ]
+}[0m
+
+[94m======== Testing: Invalid Status ========[0m
+[92m✓ PASS: Request failed as expected with status 422[0m
+[93m{
+  "detail": [
+    {
+      "type": "literal_error",
+      "loc": [
+        "body",
+        "status"
+      ],
+      "msg": "Input should be 'Complete' or 'Incomplete'",
+      "input": "Invalid",
+      "ctx": {
+        "expected": "'Complete' or 'Incomplete'"
+      }
+    }
+  ]
+}[0m
+
+[94m================= TEST SUMMARY =================[0m
+Tests passed: 6/6
+[92m✓ All tests passed! Update PO Status API is working.[0m

@@ -273,6 +273,23 @@ async def ro_item_picked(request: ReplenishmentItemPickedRequest):
         # PLACEHOLDER: Check inventory for sufficient stock
         # In a real implementation, we would query the inventory table here
         sufficient_stock = True  # Always return TRUE for now
+
+        # Override for testing purposes
+        if request.test_insufficient_stock:
+            logger.info(f"Test flag enabled - simulating insufficient stock for SKU={request.sku}")
+            sufficient_stock = False
+
+        if not sufficient_stock:
+            logger.info(f"Insufficient stock for SKU={request.sku} at location {request.rack_location}")
+            raise HTTPException(
+                status_code=400,
+                detail={
+                    "status": "error",
+                    "message": "Insufficient stock",
+                    "error_code": "INSUFFICIENT_STOCK",
+                    "timestamp": datetime.now().isoformat()
+                }
+            )
         
         if not sufficient_stock:
             logger.info(f"Insufficient stock for SKU={request.sku} at location {request.rack_location}")

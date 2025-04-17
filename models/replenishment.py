@@ -24,6 +24,7 @@ class ReplenishmentItemPickedRequest(BaseModel):
     rack_location: str
     qty_picked: int
     note: Optional[str] = None
+    test_insufficient_stock: Optional[bool] = False
     
     @validator('ro_id')
     def validate_ro_id(cls, v):
