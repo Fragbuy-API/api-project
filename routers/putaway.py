@@ -13,8 +13,6 @@ logger = logging.getLogger(__name__)
 from models.putaway import PutawayOrder
 from api.database import execute_with_retry
 
-# Rest of the file remains the same
-
 router = APIRouter(
     prefix="/api/v1",
     tags=["putaway"]
