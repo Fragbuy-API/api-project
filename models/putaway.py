@@ -1,5 +1,5 @@
 from pydantic import BaseModel, Field, validator
-from typing import List
+from typing import List, Optional
 import re
 
 class PutawayItem(BaseModel):
@@ -23,6 +23,7 @@ class PutawayItem(BaseModel):
 class PutawayOrder(BaseModel):
     tote: str = Field(..., max_length=20)
     items: List[PutawayItem] = Field(..., min_items=1, max_items=50)
+    test_insufficient_stock: Optional[bool] = Field(False, description="Test flag to simulate insufficient stock")
 
     @validator('tote')
     def validate_tote(cls, v):

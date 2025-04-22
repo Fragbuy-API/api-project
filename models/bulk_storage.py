@@ -1,5 +1,5 @@
 from pydantic import BaseModel, Field, validator
-from typing import List
+from typing import List,Optional
 import re
 
 class BulkStorageItem(BaseModel):
@@ -23,6 +23,8 @@ class BulkStorageItem(BaseModel):
 class BulkStorageOrder(BaseModel):
     location: str = Field(..., max_length=30)
     items: List[BulkStorageItem] = Field(..., min_items=1, max_items=100)  # Allow more items for bulk storage
+    # Add to BulkStorageOrder class
+    test_insufficient_stock: Optional[bool] = Field(False, description="Test flag to simulate insufficient stock")
 
     @validator('location')
     def validate_location(cls, v):

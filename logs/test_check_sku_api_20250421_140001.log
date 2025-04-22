@@ -1,0 +1,111 @@
+[94m================= TESTING CHECK SKU AGAINST PO API =================[0m
+
+[94m======== Testing: API Health Check ========[0m
+[92m✓ PASS: Request succeeded as expected[0m
+[93m{
+  "status": "healthy",
+  "message": "API is running and database is connected",
+  "timestamp": "2025-04-21T14:00:01.356189"
+}[0m
+
+[94m======== Testing: Purchase Orders API Health Check ========[0m
+[92m✓ PASS: Request succeeded as expected[0m
+[93m{
+  "status": "healthy",
+  "message": "Purchase Order API endpoints are available",
+  "timestamp": "2025-04-21T14:00:01.362573"
+}[0m
+
+[94m======== Testing: Check SKU In PO (Should return True) ========[0m
+[92m✓ PASS: Request succeeded as expected[0m
+[93m{
+  "status": "success",
+  "result": true,
+  "po_number": "PO-TEST-001",
+  "barcode": "1234567890123",
+  "sku": "4711M-50B",
+  "timestamp": "2025-04-21T14:00:01.388541"
+}[0m
+[92m✓ PASS: API returned TRUE as expected[0m
+
+[94m======== Testing: Check SKU Not In PO (Should return False) ========[0m
+[92m✓ PASS: Request succeeded as expected[0m
+[93m{
+  "status": "success",
+  "result": false,
+  "po_number": "PO-TEST-003",
+  "barcode": "1234567890123",
+  "sku": "4711M-50B",
+  "timestamp": "2025-04-21T14:00:01.410165"
+}[0m
+[92m✓ PASS: API returned FALSE as expected[0m
+
+[94m======== Testing: Check SKU with Non-existent Barcode ========[0m
+[92m✓ PASS: Request failed as expected with status 404[0m
+[93m{
+  "detail": {
+    "status": "error",
+    "message": "Barcode 9999999999999 not found in the system",
+    "error_code": "BARCODE_NOT_FOUND",
+    "timestamp": "2025-04-21T14:00:01.426561"
+  }
+}[0m
+
+[94m======== Testing: Missing PO Number ========[0m
+[92m✓ PASS: Request failed as expected with status 422[0m
+[93m{
+  "detail": [
+    {
+      "type": "missing",
+      "loc": [
+        "body",
+        "po_number"
+      ],
+      "msg": "Field required",
+      "input": {
+        "barcode": "1234567890123"
+      }
+    }
+  ]
+}[0m
+
+[94m======== Testing: Missing Barcode ========[0m
+[92m✓ PASS: Request failed as expected with status 422[0m
+[93m{
+  "detail": [
+    {
+      "type": "missing",
+      "loc": [
+        "body",
+        "barcode"
+      ],
+      "msg": "Field required",
+      "input": {
+        "po_number": "PO-TEST-001"
+      }
+    }
+  ]
+}[0m
+
+[94m======== Testing: Invalid Barcode Format ========[0m
+[92m✓ PASS: Request failed as expected with status 422[0m
+[93m{
+  "detail": [
+    {
+      "type": "value_error",
+      "loc": [
+        "body",
+        "barcode"
+      ],
+      "msg": "Value error, Barcode must be between 8 and 14 digits",
+      "input": "123",
+      "ctx": {
+        "error": {}
+      }
+    }
+  ]
+}[0m
+
+[94m================= TEST SUMMARY =================[0m
+Tests passed: 6/6
+[92m✓ All tests passed! Check SKU Against PO API is working.[0m

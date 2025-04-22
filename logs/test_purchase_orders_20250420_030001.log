@@ -1,0 +1,390 @@
+[94m================= TESTING ENHANCED PURCHASE ORDER SEARCH API =================[0m
+
+[94m======== Testing: API Health Check ========[0m
+[92m✓ PASS: Request succeeded as expected[0m
+[93m{
+  "status": "healthy",
+  "message": "API is running and database is connected",
+  "timestamp": "2025-04-20T03:00:01.861479"
+}[0m
+
+[94m======== Testing: Purchase Orders API Health Check ========[0m
+[92m✓ PASS: Request succeeded as expected[0m
+[93m{
+  "status": "healthy",
+  "message": "Purchase Order API endpoints are available",
+  "timestamp": "2025-04-20T03:00:01.877799"
+}[0m
+
+[94m======== Testing: Find Purchase Order by PO Number ========[0m
+[92m✓ PASS: Request succeeded as expected[0m
+[93m{
+  "status": "success",
+  "message": "Found 26 matching purchase orders",
+  "results": [
+    {
+      "po_number": "SVPO2000300004",
+      "status": "PartiallyReceived",
+      "supplier_name": "PutawayTest",
+      "created_date": "2024-07-13T02:30:02.5006437Z",
+      "order_date": "2024-07-12T04:00:00.0000000Z",
+      "arrival_due_date": "2024-07-12T04:00:00.0000000Z",
+      "ship_to_warehouse": "N/A"
+    },
+    {
+      "po_number": "SVPO2000300011",
+      "status": "NoneReceived",
+      "supplier_name": "Perfume Network",
+      "created_date": "2025-01-28T16:03:37.4157150Z",
+      "order_date": "2025-01-28T05:00:00.0000000Z",
+      "arrival_due_date": "2025-02-03T05:00:00.0000000Z",
+      "ship_to_warehouse": "AGP23"
+    },
+    {
+      "po_number": "SVPO2000300012",
+      "status": "NoneReceived",
+      "supplier_name": "A.A. Irie Perfume",
+      "created_date": "2025-01-28T16:20:26.5322339Z",
+      "order_date": "2025-01-28T05:00:00.0000000Z",
+      "arrival_due_date": "2025-02-03T05:00:00.0000000Z",
+      "ship_to_warehouse": "AGP23"
+    },
+    {
+      "po_number": "SVPO2000300013",
+      "status": "NoneReceived",
+      "supplier_name": "House Of Brands",
+      "created_date": "2025-01-28T16:48:07.8365823Z",
+      "order_date": "2025-01-28T05:00:00.0000000Z",
+      "arrival_due_date": "2025-02-03T05:00:00.0000000Z",
+      "ship_to_warehouse": "AGP23"
+    },
+    {
+      "po_number": "SVPO2000300014",
+      "status": "NoneReceived",
+      "supplier_name": "Al Alba",
+      "created_date": "2025-01-28T17:01:55.4645072Z",
+      "order_date": "2025-01-28T05:00:00.0000000Z",
+      "arrival_due_date": "2025-02-11T05:00:00.0000000Z",
+      "ship_to_warehouse": "AGP23"
+    },
+    {
+      "po_number": "SVPO2000300015",
+      "status": "In Progress",
+      "supplier_name": "Al Hussein",
+      "created_date": "2025-01-28T17:12:07.5146577Z",
+      "order_date": "2025-01-28T05:00:00.0000000Z",
+      "arrival_due_date": "2025-02-03T05:00:00.0000000Z",
+      "ship_to_warehouse": "AGP23"
+    },
+    {
+      "po_number": "SVPO2000300016",
+      "status": "NoneReceived",
+      "supplier_name": "Avyos Cosmotrade LLC",
+      "created_date": "2025-01-28T17:39:48.8522586Z",
+      "order_date": "2025-01-28T05:00:00.0000000Z",
+      "arrival_due_date": "2025-01-31T05:00:00.0000000Z",
+      "ship_to_warehouse": "AGP23"
+    },
+    {
+      "po_number": "SVPO2000300017",
+      "status": "NoneReceived",
+      "supplier_name": "HAZ International Inc",
+      "created_date": "2025-01-28T18:18:47.7495339Z",
+      "order_date": "2025-01-28T05:00:00.0000000Z",
+      "arrival_due_date": "2025-01-31T05:00:00.0000000Z",
+      "ship_to_warehouse": "AGP23"
+    },
+    {
+      "po_number": "SVPO2000300018",
+      "status": "NoneReceived",
+      "supplier_name": "Sanya International",
+      "created_date": "2025-01-28T18:51:36.8470771Z",
+      "order_date": "2025-01-28T05:00:00.0000000Z",
+      "arrival_due_date": "2025-02-03T05:00:00.0000000Z",
+      "ship_to_warehouse": "AGP23"
+    },
+    {
+      "po_number": "SVPO2000300019",
+      "status": "NoneReceived",
+      "supplier_name": "Scents Forever",
+      "created_date": "2025-01-28T20:23:06.5748100Z",
+      "order_date": "2025-01-28T05:00:00.0000000Z",
+      "arrival_due_date": "2025-02-03T05:00:00.0000000Z",
+      "ship_to_warehouse": "AGP23"
+    },
+    {
+      "po_number": "SVPO2000300020",
+      "status": "NoneReceived",
+      "supplier_name": "Perfume Center of America",
+      "created_date": "2025-01-28T21:24:57.1092753Z",
+      "order_date": "2025-01-28T05:00:00.0000000Z",
+      "arrival_due_date": "2025-01-28T05:00:00.0000000Z",
+      "ship_to_warehouse": "AGP23"
+    },
+    {
+      "po_number": "SVPO2000300021",
+      "status": "NoneReceived",
+      "supplier_name": "Perfumeria Internacional",
+      "created_date": "2025-01-29T18:37:40.8901378Z",
+      "order_date": "2025-01-29T05:00:00.0000000Z",
+      "arrival_due_date": "2025-01-29T05:00:00.0000000Z",
+      "ship_to_warehouse": "AGP23"
+    },
+    {
+      "po_number": "SVPO2000300022",
+      "status": "NoneReceived",
+      "supplier_name": "B&S Fragrances",
+      "created_date": "2025-01-29T20:52:34.0325166Z",
+      "order_date": "2025-01-29T05:00:00.0000000Z",
+      "arrival_due_date": "2025-01-29T05:00:00.0000000Z",
+      "ship_to_warehouse": "AGP23"
+    },
+    {
+      "po_number": "SVPO2000300023",
+      "status": "NoneReceived",
+      "supplier_name": "Affinity Fragrances",
+      "created_date": "2025-01-29T21:35:32.9792264Z",
+      "order_date": "2025-01-29T05:00:00.0000000Z",
+      "arrival_due_date": "2025-01-29T05:00:00.0000000Z",
+      "ship_to_warehouse": "AGP23"
+    },
+    {
+      "po_number": "SVPO2000300024",
+      "status": "NoneReceived",
+      "supplier_name": "Perfume International",
+      "created_date": "2025-01-29T21:55:11.0122121Z",
+      "order_date": "2025-01-29T05:00:00.0000000Z",
+      "arrival_due_date": "2025-01-29T05:00:00.0000000Z",
+      "ship_to_warehouse": "AGP23"
+    },
+    {
+      "po_number": "SVPO2000300025",
+      "status": "NoneReceived",
+      "supplier_name": "TJS",
+      "created_date": "2025-01-30T01:18:08.5478130Z",
+      "order_date": "2025-01-29T05:00:00.0000000Z",
+      "arrival_due_date": "2025-02-04T05:00:00.0000000Z",
+      "ship_to_warehouse": "AGP23"
+    },
+    {
+      "po_number": "SVPO2000300026",
+      "status": "NoneReceived",
+      "supplier_name": "3B International",
+      "created_date": "2025-01-30T01:30:00.0991984Z",
+      "order_date": "2025-01-29T05:00:00.0000000Z",
+      "arrival_due_date": "2025-02-04T05:00:00.0000000Z",
+      "ship_to_warehouse": "AGP23"
+    },
+    {
+      "po_number": "SVPO2000300027",
+      "status": "NoneReceived",
+      "supplier_name": "Grand Empire",
+      "created_date": "2025-01-30T01:50:07.9847505Z",
+      "order_date": "2025-01-29T05:00:00.0000000Z",
+      "arrival_due_date": "2025-02-07T05:00:00.0000000Z",
+      "ship_to_warehouse": "AGP23"
+    },
+    {
+      "po_number": "SVPO2000300028",
+      "status": "NoneReceived",
+      "supplier_name": "P&C",
+      "created_date": "2025-01-30T06:13:47.1969233Z",
+      "order_date": "2025-01-29T05:00:00.0000000Z",
+      "arrival_due_date": "2025-01-29T05:00:00.0000000Z",
+      "ship_to_warehouse": "N/A"
+    },
+    {
+      "po_number": "SVPO2000300029",
+      "status": "NoneReceived",
+      "supplier_name": "Perfumeria Miralls",
+      "created_date": "2025-01-30T06:55:02.4214225Z",
+      "order_date": "2025-01-30T05:00:00.0000000Z",
+      "arrival_due_date": "2025-01-30T05:00:00.0000000Z",
+      "ship_to_warehouse": "N/A"
+    },
+    {
+      "po_number": "SVPO2000300030",
+      "status": "NoneReceived",
+      "supplier_name": "Fragrance Unlimited II",
+      "created_date": "2025-01-30T18:42:12.5640195Z",
+      "order_date": "2025-01-30T05:00:00.0000000Z",
+      "arrival_due_date": "2025-01-30T05:00:00.0000000Z",
+      "ship_to_warehouse": "AGP23"
+    },
+    {
+      "po_number": "SVPO2000300031",
+      "status": "NoneReceived",
+      "supplier_name": "Khanji UAE",
+      "created_date": "2025-01-30T19:01:41.9489907Z",
+      "order_date": "2025-01-30T05:00:00.0000000Z",
+      "arrival_due_date": "2025-02-06T05:00:00.0000000Z",
+      "ship_to_warehouse": "AGP23"
+    },
+    {
+      "po_number": "SVPO2000300032",
+      "status": "NoneReceived",
+      "supplier_name": "Perfume Price",
+      "created_date": "2025-01-30T19:51:28.8324659Z",
+      "order_date": "2025-01-30T05:00:00.0000000Z",
+      "arrival_due_date": "2025-02-04T05:00:00.0000000Z",
+      "ship_to_warehouse": "AGP23"
+    },
+    {
+      "po_number": "SVPO2000300033",
+      "status": "NoneReceived",
+      "supplier_name": "MB Fragrances",
+      "created_date": "2025-01-30T21:51:11.9578449Z",
+      "order_date": "2025-01-30T05:00:00.0000000Z",
+      "arrival_due_date": "2025-02-05T05:00:00.0000000Z",
+      "ship_to_warehouse": "AGP23"
+    },
+    {
+      "po_number": "SVPO2000300034",
+      "status": "NoneReceived",
+      "supplier_name": "Lux Memories",
+      "created_date": "2025-01-31T02:44:31.3226066Z",
+      "order_date": "2025-01-30T05:00:00.0000000Z",
+      "arrival_due_date": "2025-02-13T05:00:00.0000000Z",
+      "ship_to_warehouse": "AGP23"
+    },
+    {
+      "po_number": "SVPO2000300035",
+      "status": "NoneReceived",
+      "supplier_name": "A.A. Irie Perfume",
+      "created_date": "2025-01-31T15:59:21.3700841Z",
+      "order_date": "2025-01-31T05:00:00.0000000Z",
+      "arrival_due_date": "2025-02-06T05:00:00.0000000Z",
+      "ship_to_warehouse": "AGP23"
+    }
+  ],
+  "count": 26,
+  "timestamp": "2025-04-20T03:00:01.894822"
+}[0m
+[92m✓ PASS: Found 26 purchase orders matching the PO number pattern[0m
+
+[94m======== Testing: Find Purchase Order by Specific PO Number ========[0m
+[92m✓ PASS: Request succeeded as expected[0m
+[93m{
+  "status": "success",
+  "message": "Found 1 matching purchase orders",
+  "results": [
+    {
+      "po_number": "SVPO2000300015",
+      "status": "In Progress",
+      "supplier_name": "Al Hussein",
+      "created_date": "2025-01-28T17:12:07.5146577Z",
+      "order_date": "2025-01-28T05:00:00.0000000Z",
+      "arrival_due_date": "2025-02-03T05:00:00.0000000Z",
+      "ship_to_warehouse": "AGP23"
+    }
+  ],
+  "count": 1,
+  "timestamp": "2025-04-20T03:00:01.918880"
+}[0m
+[92m✓ PASS: Found 1 purchase orders with the exact PO number[0m
+
+[94m======== Testing: Find Purchase Order by Supplier Name ========[0m
+[92m✓ PASS: Request succeeded as expected[0m
+[93m{
+  "status": "success",
+  "message": "Found 1 matching purchase orders",
+  "results": [
+    {
+      "po_number": "SVPO2000300015",
+      "status": "In Progress",
+      "supplier_name": "Al Hussein",
+      "created_date": "2025-01-28T17:12:07.5146577Z",
+      "order_date": "2025-01-28T05:00:00.0000000Z",
+      "arrival_due_date": "2025-02-03T05:00:00.0000000Z",
+      "ship_to_warehouse": "AGP23"
+    }
+  ],
+  "count": 1,
+  "timestamp": "2025-04-20T03:00:01.931757"
+}[0m
+[92m✓ PASS: Found purchase orders from the specified supplier[0m
+
+[94m======== Testing: Find Purchase Order by Non-existent Text ========[0m
+[92m✓ PASS: Request succeeded as expected[0m
+[93m{
+  "status": "success",
+  "message": "No matching purchase orders found",
+  "results": [],
+  "count": 0,
+  "timestamp": "2025-04-20T03:00:01.946315"
+}[0m
+[92m✓ PASS: Returned empty results for non-existent text as expected[0m
+
+[94m======== Testing: Invalid Request - Missing Fields ========[0m
+[92m✓ PASS: Request failed as expected with status 422[0m
+[93m{
+  "detail": [
+    {
+      "type": "value_error",
+      "loc": [
+        "body"
+      ],
+      "msg": "Value error, Either po_number or barcode must be provided",
+      "input": {},
+      "ctx": {
+        "error": {}
+      }
+    }
+  ]
+}[0m
+
+[94m======== Testing: Find Purchase Order by Barcode ========[0m
+[92m✓ PASS: Request succeeded as expected[0m
+[93m{
+  "status": "success",
+  "message": "Found 1 matching purchase orders",
+  "results": [
+    {
+      "po_number": "PO-TEST-002",
+      "status": "In Progress",
+      "supplier_name": "Test Supplier B",
+      "created_date": "2025-03-05",
+      "order_date": "2025-03-06",
+      "arrival_due_date": "2025-03-30",
+      "ship_to_warehouse": "Warehouse B"
+    }
+  ],
+  "count": 1,
+  "timestamp": "2025-04-20T03:00:01.993351"
+}[0m
+
+[94m======== Testing: Find Purchase Order by Multiple Barcodes ========[0m
+[92m✓ PASS: Request succeeded as expected[0m
+[93m{
+  "status": "success",
+  "message": "No matching purchase orders found",
+  "results": [],
+  "count": 0,
+  "timestamp": "2025-04-20T03:00:02.061474"
+}[0m
+
+[94m======== Testing: Find Purchase Order by Invalid Barcode List ========[0m
+[92m✓ PASS: Request failed as expected with status 422[0m
+[93m{
+  "detail": [
+    {
+      "type": "value_error",
+      "loc": [
+        "body",
+        "barcode"
+      ],
+      "msg": "Value error, Barcode 123 must be between 8 and 14 digits",
+      "input": [
+        "1234567890123",
+        "123"
+      ],
+      "ctx": {
+        "error": {}
+      }
+    }
+  ]
+}[0m
+
+[94m================= TEST SUMMARY =================[0m
+Tests passed: 8/8
+[92m✓ All tests passed! Enhanced Purchase Order Search API is working.[0m

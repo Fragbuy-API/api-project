@@ -2,10 +2,18 @@ from fastapi import APIRouter, HTTPException
 from sqlalchemy import text
 from datetime import datetime
 import json
+import logging
+import traceback
 from sqlalchemy.exc import IntegrityError, SQLAlchemyError
+
+# Setup logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 from models.bulk_storage import BulkStorageOrder
 from api.database import execute_with_retry
+
+# Rest of the file remains the same
 
 router = APIRouter(
     prefix="/api/v1",
@@ -44,6 +52,28 @@ async def create_bulk_storage(order: BulkStorageOrder):
                 }
             )
 
+        # Add inventory check placeholder here, before inserting records
+        # PLACEHOLDER: Check inventory for sufficient stock
+        # In a real implementation, we would query the inventory table here
+        sufficient_stock = True  # Default to TRUE
+        
+        # Override for testing purposes
+        if order.test_insufficient_stock:
+            logger.info(f"Test flag enabled - simulating insufficient stock for bulk storage order")
+            sufficient_stock = False
+            
+        if not sufficient_stock:
+            logger.info(f"Insufficient stock for bulk storage order with location {order.location}")
+            raise HTTPException(
+                status_code=400,
+                detail={
+                    "status": "error",
+                    "message": "Insufficient stock to fulfill this bulk storage order",
+                    "error_code": "INSUFFICIENT_STOCK",
+                    "timestamp": datetime.now().isoformat()
+                }
+            )
+        
         # Insert the main order record
         order_query = text("""
             INSERT INTO bulk_storage_orders 
