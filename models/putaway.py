@@ -4,8 +4,8 @@ import re
 
 class PutawayItem(BaseModel):
     sku: str = Field(..., max_length=50)
-    name: str = Field(..., max_length=255)
-    barcode: str = Field(..., max_length=50)
+    name: Optional[str] = Field(None, max_length=255)
+    barcode: Optional[str] = Field(None, max_length=50)
     quantity: int = Field(..., gt=0, le=10000)  # Greater than 0, less than or equal to 10000
 
     @validator('sku')
@@ -16,7 +16,7 @@ class PutawayItem(BaseModel):
 
     @validator('barcode')
     def validate_barcode(cls, v):
-        if not re.match(r'^[0-9]{8,14}$', v):
+        if v is not None and not re.match(r'^[0-9]{8,14}$', v):
             raise ValueError('Barcode must be between 8 and 14 digits')
         return v
 
