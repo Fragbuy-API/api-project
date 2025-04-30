@@ -78,7 +78,7 @@ def test_add_operation():
         "type": "Add",
         "sku": "4711M-50B",  # Using an SKU known to exist in the products table
         "quantity": 50,
-        "to_location": "RACK-A1-01",
+        "to_location": "3SHOWROOM",
         "reason": "Restocking"
     }
     return make_api_call("art_order", data)
@@ -89,7 +89,7 @@ def test_remove_operation():
         "type": "Remove",
         "sku": "4711M-50B",
         "quantity": 20,
-        "from_location": "RACK-A1-01",
+        "from_location": "1HAI",
         "reason": "Damaged goods"
     }
     return make_api_call("art_order", data)
@@ -100,11 +100,74 @@ def test_transfer_operation():
         "type": "Transfer",
         "sku": "4711M-50B",
         "quantity": 30,
-        "from_location": "RACK-A1-01",
-        "to_location": "RACK-B2-02",
+        "from_location": "1HAI",
+        "to_location": "3SHOWROOM",
         "reason": "Reorganizing inventory"
     }
     return make_api_call("art_order", data)
+
+def test_using_qty_field():
+    print_test("Using qty instead of quantity")
+    data = {
+        "type": "Add",
+        "sku": "4711M-50B",
+        "qty": 25,  # Using qty instead of quantity
+        "to_location": "3SHOWROOM",
+        "reason": "Testing qty field"
+    }
+    return make_api_call("art_order", data)
+
+def test_empty_from_location():
+    print_test("Empty from_location String")
+    data = {
+        "type": "Remove",
+        "sku": "4711M-50B",
+        "quantity": 20,
+        "from_location": "",  # Empty string
+        "reason": "This should fail"
+    }
+    return make_api_call("art_order", data, expect_success=False)
+
+def test_whitespace_to_location():
+    print_test("Whitespace to_location String")
+    data = {
+        "type": "Add",
+        "sku": "4711M-50B",
+        "quantity": 50,
+        "to_location": "   ",  # String with only whitespace
+        "reason": "This should fail"
+    }
+    return make_api_call("art_order", data, expect_success=False)
+
+def test_various_location_formats():
+    print_test("Various Valid Location Formats")
+    
+    location_formats = [
+        "3SHOWROOM",      # Original format
+        "RACK-A1-01",     # Previous expected format
+        "DOCK",           # Simple name
+        "WAREHOUSE-123",  # Alphanumeric with hyphen
+        "Floor_1_Zone_B", # Underscores
+        "12345"           # Numeric only
+    ]
+    
+    results = {}
+    for loc in location_formats:
+        print(f"\nTesting location format: {loc}")
+        data = {
+            "type": "Add",
+            "sku": "4711M-50B",
+            "quantity": 10,
+            "to_location": loc,
+            "reason": f"Testing location format: {loc}"
+        }
+        success, _ = make_api_call("art_order", data)
+        results[loc] = success
+    
+    # Check all formats passed
+    all_passed = all(results.values())
+    print_result(all_passed, "All location formats test")
+    return all_passed, results
 
 def test_insufficient_stock():
     print_test("Insufficient Stock (Simulated)")
@@ -112,7 +175,7 @@ def test_insufficient_stock():
         "type": "Remove",
         "sku": "4711M-50B",
         "quantity": 100,
-        "from_location": "RACK-A1-01",
+        "from_location": "1HAI",
         "reason": "Testing insufficient stock",
         "sufficient_stock": False  # Simulate insufficient stock
     }
@@ -124,7 +187,7 @@ def test_invalid_sku():
         "type": "Add",
         "sku": "NONEXISTENT-SKU",
         "quantity": 50,
-        "to_location": "RACK-A1-01"
+        "to_location": "3SHOWROOM"
     }
     return make_api_call("art_order", data, expect_success=False)
 
@@ -146,24 +209,14 @@ def test_missing_to_location():
     }
     return make_api_call("art_order", data, expect_success=False)
 
-def test_invalid_location_format():
-    print_test("Invalid Location Format")
-    data = {
-        "type": "Add",
-        "sku": "4711M-50B",
-        "quantity": 50,
-        "to_location": "INVALID-LOCATION-FORMAT"
-    }
-    return make_api_call("art_order", data, expect_success=False)
-
 def test_same_locations_for_transfer():
     print_test("Same Locations for Transfer")
     data = {
         "type": "Transfer",
         "sku": "4711M-50B",
         "quantity": 30,
-        "from_location": "RACK-A1-01",
-        "to_location": "RACK-A1-01",
+        "from_location": "3SHOWROOM",
+        "to_location": "3SHOWROOM",  # Same as from_location
         "reason": "This should fail"
     }
     return make_api_call("art_order", data, expect_success=False)
@@ -187,11 +240,14 @@ if __name__ == "__main__":
         "add_operation": test_add_operation()[0],
         "remove_operation": test_remove_operation()[0],
         "transfer_operation": test_transfer_operation()[0],
+        "using_qty_field": test_using_qty_field()[0],
+        "empty_from_location": test_empty_from_location()[0],
+        "whitespace_to_location": test_whitespace_to_location()[0],
+        "various_location_formats": test_various_location_formats()[0],
         "insufficient_stock": test_insufficient_stock()[0],
         "invalid_sku": test_invalid_sku()[0],
         "missing_from_location": test_missing_from_location()[0],
         "missing_to_location": test_missing_to_location()[0],
-        "invalid_location_format": test_invalid_location_format()[0],
         "same_locations_for_transfer": test_same_locations_for_transfer()[0]
     }
     

@@ -10,10 +10,20 @@ class ArtOrder(BaseModel):
     type: Literal["Add", "Remove", "Transfer"] = Field(..., description="Type of operation")
     sku: str = Field(..., max_length=50, description="Stock Keeping Unit")
     quantity: int = Field(..., gt=0, le=1000000, description="Quantity to add, remove, or transfer")
-    from_location: Optional[str] = Field(None, max_length=30, description="Source location (required for Remove and Transfer)")
-    to_location: Optional[str] = Field(None, max_length=30, description="Destination location (required for Add and Transfer)")
+    from_location: Optional[str] = Field(None, max_length=30, description="Source location")
+    to_location: Optional[str] = Field(None, max_length=30, description="Destination location")
     reason: Optional[str] = Field(None, max_length=255, description="Reason for the operation")
     sufficient_stock: Optional[bool] = Field(None, description="Flag to simulate insufficient stock (for testing)")
+    
+    # Alias qty to quantity for backward compatibility
+    class Config:
+        allow_population_by_field_name = True
+        @staticmethod
+        def schema_extra(schema, model):
+            # Add "qty" as an alias for "quantity" in the schema
+            props = schema.get("properties", {})
+            if "quantity" in props:
+                props["qty"] = props["quantity"]
     
     @validator('sku')
     def validate_sku(cls, v):
@@ -21,10 +31,11 @@ class ArtOrder(BaseModel):
             raise ValueError('SKU must contain only letters, numbers, hyphens and underscores')
         return v.upper()  # Standardize SKUs to uppercase
     
+    # Accept any non-empty location string
     @validator('from_location', 'to_location')
-    def validate_location(cls, v, values, **kwargs):
-        if v is not None and not re.match(r'^RACK-[A-Z][0-9]-[0-9]{2}$', v):
-            raise ValueError('Location must follow format RACK-A1-01 (RACK-<section><aisle>-<position>)')
+    def validate_location(cls, v):
+        if v is not None and v.strip() == "":
+            raise ValueError('Location cannot be empty')
         return v.upper() if v else v  # Standardize locations to uppercase if not None
     
     @root_validator(pre=True, skip_on_failure=True)
@@ -32,6 +43,10 @@ class ArtOrder(BaseModel):
         order_type = values.get('type')
         from_location = values.get('from_location')
         to_location = values.get('to_location')
+        
+        # Check if qty is provided instead of quantity
+        if 'qty' in values and 'quantity' not in values:
+            values['quantity'] = values['qty']
         
         if order_type == "Add" and to_location is None:
             raise ValueError('to_location is required for Add operations')

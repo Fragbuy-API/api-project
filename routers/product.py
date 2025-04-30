@@ -9,7 +9,7 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 # Import database connection
-from api.database import execute_with_retry
+from database import execute_with_retry
 from models.product import ProductSearch
 
 router = APIRouter(
@@ -36,8 +36,9 @@ async def search_product(search: ProductSearch):
         
         # Build the SELECT part of our query using only columns that exist
         required_columns = ["sku", "description"]  # These must exist
-        optional_columns = ["weight", "length", "width", "height", 
-                           "dim_unit", "weight_unit", "category", "created_at"]
+        optional_columns = ["weight_value", "length", "width", "height", 
+                           "dimension_unit", "weight_unit", "category", "created_date_utc",
+                           "pictures", "photo_url_live", "photo_url_raw", "finalurl", "barcode"]
         
         select_columns = []
         for col in required_columns:
@@ -80,14 +81,32 @@ async def search_product(search: ProductSearch):
             
             # Convert to dictionary
             product = {}
+            has_finalurl = False  # Track if we've found a valid finalurl
+            
             for i, col in enumerate(col_names):
+                # Process different fields differently
                 if col == 'description':
                     # Map description to name in the API response
                     product['name'] = str(row[i]) if row[i] is not None else None
+                # Check for finalurl specifically
+                elif col == 'finalurl' and row[i] is not None and str(row[i]).strip():
+                    url_value = str(row[i])
+                    product[col] = url_value
+                    # Only use as image_url if it's not "NA" 
+                    if url_value != "NA":
+                        product['image_url'] = url_value
+                        has_finalurl = True
+                    else:
+                        # Store NA value but don't use as image_url
+                        product[col] = url_value
+                # Store other image fields
+                elif col in ['photo_url_live', 'photo_url_raw', 'pictures'] and row[i] is not None and str(row[i]).strip():
+                    url_value = str(row[i])
+                    product[col] = url_value
                 else:
                     # Handle different types of values
                     if row[i] is not None:
-                        if col in ['weight', 'length', 'width', 'height'] and isinstance(row[i], (int, float)):
+                        if col in ['weight_value', 'length', 'width', 'height'] and isinstance(row[i], (int, float)):
                             product[col] = float(row[i])
                         elif hasattr(row[i], 'isoformat'):  # datetime object
                             product[col] = row[i].isoformat()
@@ -95,6 +114,16 @@ async def search_product(search: ProductSearch):
                             product[col] = str(row[i])
                     else:
                         product[col] = None
+            
+            # If no valid finalurl, try to use one of the other image fields
+            if not has_finalurl:
+                for img_field in ['photo_url_live', 'photo_url_raw', 'pictures']:
+                    if img_field in product and product[img_field] and product[img_field] != "NA":
+                        product['image_url'] = product[img_field]
+                        break
+            
+            # If no valid image URL was found, don't include image_url field
+            # This avoids having "NA" as the image_url value
             
             products.append(product)
         
