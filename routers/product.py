@@ -81,28 +81,22 @@ async def search_product(search: ProductSearch):
             
             # Convert to dictionary
             product = {}
-            has_finalurl = False  # Track if we've found a valid finalurl
             
             for i, col in enumerate(col_names):
                 # Process different fields differently
                 if col == 'description':
                     # Map description to name in the API response
                     product['name'] = str(row[i]) if row[i] is not None else None
-                # Check for finalurl specifically
-                elif col == 'finalurl' and row[i] is not None and str(row[i]).strip():
-                    url_value = str(row[i])
-                    product[col] = url_value
-                    # Only use as image_url if it's not "NA" 
-                    if url_value != "NA":
-                        product['image_url'] = url_value
-                        has_finalurl = True
-                    else:
-                        # Store NA value but don't use as image_url
+                # Handle finalurl specifically for image_url
+                elif col == 'finalurl':
+                    if row[i] is not None:
+                        url_value = str(row[i])
                         product[col] = url_value
-                # Store other image fields
-                elif col in ['photo_url_live', 'photo_url_raw', 'pictures'] and row[i] is not None and str(row[i]).strip():
-                    url_value = str(row[i])
-                    product[col] = url_value
+                        # Always use finalurl as image_url even if it's "NA"
+                        product['image_url'] = url_value
+                    else:
+                        product[col] = None
+                # Store other fields normally
                 else:
                     # Handle different types of values
                     if row[i] is not None:
@@ -114,16 +108,6 @@ async def search_product(search: ProductSearch):
                             product[col] = str(row[i])
                     else:
                         product[col] = None
-            
-            # If no valid finalurl, try to use one of the other image fields
-            if not has_finalurl:
-                for img_field in ['photo_url_live', 'photo_url_raw', 'pictures']:
-                    if img_field in product and product[img_field] and product[img_field] != "NA":
-                        product['image_url'] = product[img_field]
-                        break
-            
-            # If no valid image URL was found, don't include image_url field
-            # This avoids having "NA" as the image_url value
             
             products.append(product)
         

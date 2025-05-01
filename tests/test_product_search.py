@@ -124,17 +124,18 @@ def test_image_url_presence():
         print_result(image_url_presence, 
                     f"{len(products_with_image_url)} out of {len(response['products'])} products have image_url")
         
-        # Check if image URLs are valid URLs
+        # Check if image URLs are valid URLs or "NA"
         valid_urls = True
         invalid_urls = []
         url_pattern = re.compile(r'^https?://\S+\.\S+$')
         
         for product in products_with_image_url:
-            if not url_pattern.match(product["image_url"]):
+            # Accept "NA" as a valid value or check if it's a proper URL
+            if product["image_url"] != "NA" and not url_pattern.match(product["image_url"]):
                 valid_urls = False
                 invalid_urls.append(product["image_url"])
         
-        print_result(valid_urls, "All image URLs are valid formats" if valid_urls else f"Invalid URLs: {invalid_urls}")
+        print_result(valid_urls, "All image URLs are valid formats or 'NA'" if valid_urls else f"Invalid URLs: {invalid_urls}")
         
         return success and image_url_presence and valid_urls, response
     
@@ -188,35 +189,29 @@ def test_image_fallback():
     success, response = make_api_call("product_search", data)
     
     if success and response["status"] == "success" and response.get("count", 0) > 0:
-        # Look for products without finalurl but with image_url
-        products_with_fallback = [p for p in response["products"] 
-                               if ("finalurl" not in p or not p["finalurl"]) and "image_url" in p]
+        # Since we're now always using finalurl as image_url and not doing fallbacks,
+        # we'll check if all products have finalurl and corresponding image_url values
+        all_match = True
+        products_checked = 0
         
-        if len(products_with_fallback) == 0:
-            print_result(True, "No products found needing fallback logic (all have finalurl or none have image_url)")
-            return success, response
-        
-        # Check if fallback worked correctly - image_url should match one of the other image fields
-        correct_fallback = True
-        for product in products_with_fallback:
-            other_image_fields = ["photo_url_live", "photo_url_raw", "pictures"]
-            matched = False
-            for field in other_image_fields:
-                if field in product and product[field] == product["image_url"]:
-                    matched = True
+        for product in response["products"]:
+            if "finalurl" in product and "image_url" in product:
+                products_checked += 1
+                if product["finalurl"] != product["image_url"]:
+                    all_match = False
                     break
-            if not matched:
-                correct_fallback = False
-                break
         
-        print_result(correct_fallback, 
-                   f"Fallback logic worked correctly for {len(products_with_fallback)} products" if correct_fallback 
-                   else "Fallback logic failed for some products")
+        if products_checked == 0:
+            print_result(True, "No products found with both finalurl and image_url to check")
+        else:
+            print_result(all_match, 
+                       "All products use finalurl for image_url" if all_match 
+                       else "Some products don't use finalurl for image_url")
         
-        return success and correct_fallback, response
+        return success and all_match, response
     
     if success and response.get("count", 0) == 0:
-        print_result(False, "No products found to test image fallback")
+        print_result(False, "No products found to test image URLs")
     
     return success, response
 
