@@ -105,7 +105,8 @@ def test_item_picked_valid():
     return make_api_call("ro_item_picked", {
         "ro_id": test_ro_id,
         "sku": test_sku,
-        "qty_picked": test_qty_picked
+        "qty_picked": test_qty_picked,
+        "rack_location": "123-456-789"
     })
 
 # Test ro_item_picked API with invalid order ID
@@ -114,7 +115,8 @@ def test_item_picked_invalid_ro():
     return make_api_call("ro_item_picked", {
         "ro_id": "NONEXISTENT-RO",
         "sku": "212SM-50B",
-        "qty_picked": 5
+        "qty_picked": 5,
+        "rack_location": "123-456-789"
     }, expect_success=False)
 
 # Test ro_item_picked API with invalid SKU
@@ -133,7 +135,8 @@ def test_item_picked_invalid_sku():
     return make_api_call("ro_item_picked", {
         "ro_id": test_ro_id,
         "sku": "NONEXISTENT-SKU",
-        "qty_picked": 5
+        "qty_picked": 5,
+        "rack_location": "123-456-789"
     }, expect_success=False)
 
 # Test ro_item_picked API with negative quantity
@@ -161,7 +164,8 @@ def test_item_picked_negative_qty():
     return make_api_call("ro_item_picked", {
         "ro_id": test_ro_id,
         "sku": test_sku,
-        "qty_picked": -5
+        "qty_picked": -5,
+        "rack_location": "123-456-789"
     }, expect_success=False)
 
 # Test marking all items in an order as picked
@@ -193,7 +197,8 @@ def test_complete_order():
         success, pick_response = make_api_call("ro_item_picked", {
             "ro_id": test_ro_id,
             "sku": item["sku"],
-            "qty_picked": item["qty"]  # Set to full qty requested
+            "qty_picked": item["qty"],  # Set to full qty requested
+            "rack_location": "123-456-789"
         })
         results.append(success)
         

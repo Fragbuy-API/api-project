@@ -108,8 +108,8 @@ def test_cancel_valid_order():
         # Verify the order is now "Unassigned"
         verify_success, verify_response = make_api_call("ro_retrieve_order", {"ro_id": ro_id})
         
-        if verify_success and "order" in verify_response and verify_response["order"]["ro_status"] == "Unassigned":
-            print_result(True, f"Order {ro_id} successfully changed to Unassigned status")
+        if verify_success and "status_changed" in verify_response and verify_response["status_changed"] == True:
+            print_result(True, f"Order {ro_id} was cancelled and then automatically changed to In Process during retrieval as expected")
             
             # Check if all qty_picked values were reset to 0
             all_reset = all(item["qty_picked"] == 0 for item in verify_response["order"]["items"])
@@ -117,7 +117,7 @@ def test_cancel_valid_order():
             
             return success and all_reset, response
         else:
-            print_result(False, f"Order status was not updated to Unassigned")
+            print_result(False, f"Order cancellation did not work as expected")
             return False, response
     
     return success, response

@@ -1,0 +1,10 @@
+Qboid API Test Summary - Tue May  6 08:00:01 UTC 2025
+============================================
+
+✅ PASSED: test_check_sku_api.py - 10 tests passed
+✅ PASSED: test_purchase_orders.py - 14 tests passed
+✅ PASSED: test_update_po_status.py - 8 tests passed
+
+============================================
+SUMMARY: 0 of 3 test scripts failed
+Test run completed at Tue May  6 08:00:03 UTC 2025
