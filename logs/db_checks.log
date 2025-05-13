@@ -69,3 +69,1753 @@ Issues found in these checks:
 - Invalid SKUs in bulk_storage_items table: WARNING - 34 issues found
 - Invalid SKUs in po_lines table: WARNING - 11 issues found
 - Duplicate barcodes: WARNING - 2 issues found
+Loaded schema for 20 tables
+Running check: Duplicate primary keys (id) in api_received_data table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (id) in art_operations table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (id) in bulk_storage_items table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (id) in bulk_storage_orders table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (id) in po_lines table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (sku) in prices table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (sku) in products table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (sku) in products_test table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (po_number) in purchase_orders table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (id) in putaway_items table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (id) in putaway_orders table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (deviceID) in qboid_devices table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (ro_id) in replen_orders table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (id) in replen_order_items table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (sku) in storage_locations table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (id) in warehouse_locations table
+  Status: healthy, Count: 0
+Running check: Barcodes referencing non-existent products
+  Status: healthy, Count: 0
+Running check: Putaway items referencing non-existent orders
+  Status: healthy, Count: 0
+Running check: Bulk storage items referencing non-existent orders
+  Status: healthy, Count: 0
+Running check: PO lines referencing non-existent purchase orders
+  Status: healthy, Count: 0
+Running check: Replenishment order items referencing non-existent orders
+  Status: healthy, Count: 0
+Running check: Invalid SKUs in putaway_items table
+  Status: warning, Count: 56
+Running check: Invalid SKUs in bulk_storage_items table
+  Status: warning, Count: 62
+Running check: Invalid SKUs in po_lines table
+  Status: healthy, Count: 0
+Running check: Invalid SKUs in replen_order_items table
+  Status: healthy, Count: 0
+Running check: Invalid SKUs in art_operations table
+  Status: healthy, Count: 0
+Running check: Null or empty values in products.sku
+  Status: healthy, Count: 0
+Running check: Null or empty values in barcodes.barcode
+  Status: healthy, Count: 0
+Running check: Null or empty values in purchase_orders.po_number
+  Status: healthy, Count: 0
+Running check: Null or empty values in putaway_orders.tote
+  Status: healthy, Count: 0
+Running check: Null or empty values in bulk_storage_orders.location
+  Status: healthy, Count: 0
+Running check: Duplicate barcodes
+  Status: warning, Count: 2
+Database checks completed: 32 checks, 3 warnings, False errors
+Issues found in these checks:
+- Invalid SKUs in putaway_items table: WARNING - 56 issues found
+- Invalid SKUs in bulk_storage_items table: WARNING - 62 issues found
+- Duplicate barcodes: WARNING - 2 issues found
+Loaded schema for 20 tables
+Running check: Duplicate primary keys (id) in api_received_data table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (id) in art_operations table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (id) in bulk_storage_items table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (id) in bulk_storage_orders table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (id) in po_lines table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (sku) in prices table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (sku) in products table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (sku) in products_test table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (po_number) in purchase_orders table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (id) in putaway_items table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (id) in putaway_orders table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (deviceID) in qboid_devices table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (ro_id) in replen_orders table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (id) in replen_order_items table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (sku) in storage_locations table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (id) in warehouse_locations table
+  Status: healthy, Count: 0
+Running check: Barcodes referencing non-existent products
+  Status: healthy, Count: 0
+Running check: Putaway items referencing non-existent orders
+  Status: healthy, Count: 0
+Running check: Bulk storage items referencing non-existent orders
+  Status: healthy, Count: 0
+Running check: PO lines referencing non-existent purchase orders
+  Status: healthy, Count: 0
+Running check: Replenishment order items referencing non-existent orders
+  Status: healthy, Count: 0
+Running check: Invalid SKUs in putaway_items table
+  Status: warning, Count: 80
+Running check: Invalid SKUs in bulk_storage_items table
+  Status: warning, Count: 86
+Running check: Invalid SKUs in po_lines table
+  Status: healthy, Count: 0
+Running check: Invalid SKUs in replen_order_items table
+  Status: healthy, Count: 0
+Running check: Invalid SKUs in art_operations table
+  Status: healthy, Count: 0
+Running check: Null or empty values in products.sku
+  Status: healthy, Count: 0
+Running check: Null or empty values in barcodes.barcode
+  Status: healthy, Count: 0
+Running check: Null or empty values in purchase_orders.po_number
+  Status: healthy, Count: 0
+Running check: Null or empty values in putaway_orders.tote
+  Status: healthy, Count: 0
+Running check: Null or empty values in bulk_storage_orders.location
+  Status: healthy, Count: 0
+Running check: Duplicate barcodes
+  Status: warning, Count: 2
+Database checks completed: 32 checks, 3 warnings, False errors
+Issues found in these checks:
+- Invalid SKUs in putaway_items table: WARNING - 80 issues found
+- Invalid SKUs in bulk_storage_items table: WARNING - 86 issues found
+- Duplicate barcodes: WARNING - 2 issues found
+Loaded schema for 20 tables
+Running check: Duplicate primary keys (id) in api_received_data table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (id) in art_operations table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (id) in bulk_storage_items table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (id) in bulk_storage_orders table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (id) in po_lines table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (sku) in prices table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (sku) in products table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (sku) in products_test table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (po_number) in purchase_orders table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (id) in putaway_items table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (id) in putaway_orders table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (deviceID) in qboid_devices table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (ro_id) in replen_orders table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (id) in replen_order_items table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (sku) in storage_locations table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (id) in warehouse_locations table
+  Status: healthy, Count: 0
+Running check: Barcodes referencing non-existent products
+  Status: healthy, Count: 0
+Running check: Putaway items referencing non-existent orders
+  Status: healthy, Count: 0
+Running check: Bulk storage items referencing non-existent orders
+  Status: healthy, Count: 0
+Running check: PO lines referencing non-existent purchase orders
+  Status: healthy, Count: 0
+Running check: Replenishment order items referencing non-existent orders
+  Status: healthy, Count: 0
+Running check: Invalid SKUs in putaway_items table
+  Status: warning, Count: 100
+Running check: Invalid SKUs in bulk_storage_items table
+  Status: warning, Count: 100
+Running check: Invalid SKUs in po_lines table
+  Status: healthy, Count: 0
+Running check: Invalid SKUs in replen_order_items table
+  Status: healthy, Count: 0
+Running check: Invalid SKUs in art_operations table
+  Status: healthy, Count: 0
+Running check: Null or empty values in products.sku
+  Status: healthy, Count: 0
+Running check: Null or empty values in barcodes.barcode
+  Status: healthy, Count: 0
+Running check: Null or empty values in purchase_orders.po_number
+  Status: healthy, Count: 0
+Running check: Null or empty values in putaway_orders.tote
+  Status: healthy, Count: 0
+Running check: Null or empty values in bulk_storage_orders.location
+  Status: healthy, Count: 0
+Running check: Duplicate barcodes
+  Status: warning, Count: 2
+Database checks completed: 32 checks, 3 warnings, False errors
+Issues found in these checks:
+- Invalid SKUs in putaway_items table: WARNING - 100 issues found
+- Invalid SKUs in bulk_storage_items table: WARNING - 100 issues found
+- Duplicate barcodes: WARNING - 2 issues found
+Loaded schema for 20 tables
+Running check: Duplicate primary keys (id) in api_received_data table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (id) in art_operations table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (id) in bulk_storage_items table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (id) in bulk_storage_orders table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (id) in po_lines table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (sku) in prices table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (sku) in products table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (sku) in products_test table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (po_number) in purchase_orders table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (id) in putaway_items table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (id) in putaway_orders table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (deviceID) in qboid_devices table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (ro_id) in replen_orders table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (id) in replen_order_items table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (sku) in storage_locations table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (id) in warehouse_locations table
+  Status: healthy, Count: 0
+Running check: Barcodes referencing non-existent products
+  Status: healthy, Count: 0
+Running check: Putaway items referencing non-existent orders
+  Status: healthy, Count: 0
+Running check: Bulk storage items referencing non-existent orders
+  Status: healthy, Count: 0
+Running check: PO lines referencing non-existent purchase orders
+  Status: healthy, Count: 0
+Running check: Replenishment order items referencing non-existent orders
+  Status: healthy, Count: 0
+Running check: Invalid SKUs in putaway_items table
+  Status: warning, Count: 100
+Running check: Invalid SKUs in bulk_storage_items table
+  Status: warning, Count: 100
+Running check: Invalid SKUs in po_lines table
+  Status: healthy, Count: 0
+Running check: Invalid SKUs in replen_order_items table
+  Status: healthy, Count: 0
+Running check: Invalid SKUs in art_operations table
+  Status: healthy, Count: 0
+Running check: Null or empty values in products.sku
+  Status: healthy, Count: 0
+Running check: Null or empty values in barcodes.barcode
+  Status: healthy, Count: 0
+Running check: Null or empty values in purchase_orders.po_number
+  Status: healthy, Count: 0
+Running check: Null or empty values in putaway_orders.tote
+  Status: healthy, Count: 0
+Running check: Null or empty values in bulk_storage_orders.location
+  Status: healthy, Count: 0
+Running check: Duplicate barcodes
+  Status: warning, Count: 2
+Database checks completed: 32 checks, 3 warnings, False errors
+Issues found in these checks:
+- Invalid SKUs in putaway_items table: WARNING - 100 issues found
+- Invalid SKUs in bulk_storage_items table: WARNING - 100 issues found
+- Duplicate barcodes: WARNING - 2 issues found
+Loaded schema for 20 tables
+Running check: Duplicate primary keys (id) in api_received_data table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (id) in art_operations table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (id) in bulk_storage_items table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (id) in bulk_storage_orders table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (id) in po_lines table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (sku) in prices table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (sku) in products table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (sku) in products_test table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (po_number) in purchase_orders table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (id) in putaway_items table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (id) in putaway_orders table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (deviceID) in qboid_devices table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (ro_id) in replen_orders table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (id) in replen_order_items table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (sku) in storage_locations table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (id) in warehouse_locations table
+  Status: healthy, Count: 0
+Running check: Barcodes referencing non-existent products
+  Status: healthy, Count: 0
+Running check: Putaway items referencing non-existent orders
+  Status: healthy, Count: 0
+Running check: Bulk storage items referencing non-existent orders
+  Status: healthy, Count: 0
+Running check: PO lines referencing non-existent purchase orders
+  Status: healthy, Count: 0
+Running check: Replenishment order items referencing non-existent orders
+  Status: healthy, Count: 0
+Running check: Invalid SKUs in putaway_items table
+  Status: warning, Count: 100
+Running check: Invalid SKUs in bulk_storage_items table
+  Status: warning, Count: 100
+Running check: Invalid SKUs in po_lines table
+  Status: healthy, Count: 0
+Running check: Invalid SKUs in replen_order_items table
+  Status: healthy, Count: 0
+Running check: Invalid SKUs in art_operations table
+  Status: healthy, Count: 0
+Running check: Null or empty values in products.sku
+  Status: healthy, Count: 0
+Running check: Null or empty values in barcodes.barcode
+  Status: healthy, Count: 0
+Running check: Null or empty values in purchase_orders.po_number
+  Status: healthy, Count: 0
+Running check: Null or empty values in putaway_orders.tote
+  Status: healthy, Count: 0
+Running check: Null or empty values in bulk_storage_orders.location
+  Status: healthy, Count: 0
+Running check: Duplicate barcodes
+  Status: warning, Count: 2
+Database checks completed: 32 checks, 3 warnings, False errors
+Issues found in these checks:
+- Invalid SKUs in putaway_items table: WARNING - 100 issues found
+- Invalid SKUs in bulk_storage_items table: WARNING - 100 issues found
+- Duplicate barcodes: WARNING - 2 issues found
+Loaded schema for 20 tables
+Running check: Duplicate primary keys (id) in api_received_data table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (id) in art_operations table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (id) in bulk_storage_items table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (id) in bulk_storage_orders table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (id) in po_lines table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (sku) in prices table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (sku) in products table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (sku) in products_test table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (po_number) in purchase_orders table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (id) in putaway_items table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (id) in putaway_orders table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (deviceID) in qboid_devices table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (ro_id) in replen_orders table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (id) in replen_order_items table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (sku) in storage_locations table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (id) in warehouse_locations table
+  Status: healthy, Count: 0
+Running check: Barcodes referencing non-existent products
+  Status: healthy, Count: 0
+Running check: Putaway items referencing non-existent orders
+  Status: healthy, Count: 0
+Running check: Bulk storage items referencing non-existent orders
+  Status: healthy, Count: 0
+Running check: PO lines referencing non-existent purchase orders
+  Status: healthy, Count: 0
+Running check: Replenishment order items referencing non-existent orders
+  Status: healthy, Count: 0
+Running check: Invalid SKUs in putaway_items table
+  Status: warning, Count: 100
+Running check: Invalid SKUs in bulk_storage_items table
+  Status: warning, Count: 100
+Running check: Invalid SKUs in po_lines table
+  Status: healthy, Count: 0
+Running check: Invalid SKUs in replen_order_items table
+  Status: healthy, Count: 0
+Running check: Invalid SKUs in art_operations table
+  Status: healthy, Count: 0
+Running check: Null or empty values in products.sku
+  Status: healthy, Count: 0
+Running check: Null or empty values in barcodes.barcode
+  Status: healthy, Count: 0
+Running check: Null or empty values in purchase_orders.po_number
+  Status: healthy, Count: 0
+Running check: Null or empty values in putaway_orders.tote
+  Status: healthy, Count: 0
+Running check: Null or empty values in bulk_storage_orders.location
+  Status: healthy, Count: 0
+Running check: Duplicate barcodes
+  Status: warning, Count: 2
+Database checks completed: 32 checks, 3 warnings, False errors
+Issues found in these checks:
+- Invalid SKUs in putaway_items table: WARNING - 100 issues found
+- Invalid SKUs in bulk_storage_items table: WARNING - 100 issues found
+- Duplicate barcodes: WARNING - 2 issues found
+Loaded schema for 20 tables
+Running check: Duplicate primary keys (id) in api_received_data table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (id) in art_operations table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (id) in bulk_storage_items table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (id) in bulk_storage_orders table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (id) in po_lines table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (sku) in prices table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (sku) in products table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (sku) in products_test table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (po_number) in purchase_orders table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (id) in putaway_items table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (id) in putaway_orders table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (deviceID) in qboid_devices table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (ro_id) in replen_orders table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (id) in replen_order_items table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (sku) in storage_locations table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (id) in warehouse_locations table
+  Status: healthy, Count: 0
+Running check: Barcodes referencing non-existent products
+  Status: healthy, Count: 0
+Running check: Putaway items referencing non-existent orders
+  Status: healthy, Count: 0
+Running check: Bulk storage items referencing non-existent orders
+  Status: healthy, Count: 0
+Running check: PO lines referencing non-existent purchase orders
+  Status: healthy, Count: 0
+Running check: Replenishment order items referencing non-existent orders
+  Status: healthy, Count: 0
+Running check: Invalid SKUs in putaway_items table
+  Status: warning, Count: 100
+Running check: Invalid SKUs in bulk_storage_items table
+  Status: warning, Count: 100
+Running check: Invalid SKUs in po_lines table
+  Status: healthy, Count: 0
+Running check: Invalid SKUs in replen_order_items table
+  Status: healthy, Count: 0
+Running check: Invalid SKUs in art_operations table
+  Status: healthy, Count: 0
+Running check: Null or empty values in products.sku
+  Status: healthy, Count: 0
+Running check: Null or empty values in barcodes.barcode
+  Status: healthy, Count: 0
+Running check: Null or empty values in purchase_orders.po_number
+  Status: healthy, Count: 0
+Running check: Null or empty values in putaway_orders.tote
+  Status: healthy, Count: 0
+Running check: Null or empty values in bulk_storage_orders.location
+  Status: healthy, Count: 0
+Running check: Duplicate barcodes
+  Status: warning, Count: 2
+Database checks completed: 32 checks, 3 warnings, False errors
+Issues found in these checks:
+- Invalid SKUs in putaway_items table: WARNING - 100 issues found
+- Invalid SKUs in bulk_storage_items table: WARNING - 100 issues found
+- Duplicate barcodes: WARNING - 2 issues found
+Loaded schema for 20 tables
+Running check: Duplicate primary keys (id) in api_received_data table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (id) in art_operations table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (id) in bulk_storage_items table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (id) in bulk_storage_orders table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (id) in po_lines table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (sku) in prices table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (sku) in products table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (sku) in products_test table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (po_number) in purchase_orders table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (id) in putaway_items table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (id) in putaway_orders table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (deviceID) in qboid_devices table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (ro_id) in replen_orders table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (id) in replen_order_items table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (sku) in storage_locations table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (id) in warehouse_locations table
+  Status: healthy, Count: 0
+Running check: Barcodes referencing non-existent products
+  Status: healthy, Count: 0
+Running check: Putaway items referencing non-existent orders
+  Status: healthy, Count: 0
+Running check: Bulk storage items referencing non-existent orders
+  Status: healthy, Count: 0
+Running check: PO lines referencing non-existent purchase orders
+  Status: healthy, Count: 0
+Running check: Replenishment order items referencing non-existent orders
+  Status: healthy, Count: 0
+Running check: Invalid SKUs in putaway_items table
+  Status: warning, Count: 100
+Running check: Invalid SKUs in bulk_storage_items table
+  Status: warning, Count: 100
+Running check: Invalid SKUs in po_lines table
+  Status: healthy, Count: 0
+Running check: Invalid SKUs in replen_order_items table
+  Status: healthy, Count: 0
+Running check: Invalid SKUs in art_operations table
+  Status: healthy, Count: 0
+Running check: Null or empty values in products.sku
+  Status: healthy, Count: 0
+Running check: Null or empty values in barcodes.barcode
+  Status: healthy, Count: 0
+Running check: Null or empty values in purchase_orders.po_number
+  Status: healthy, Count: 0
+Running check: Null or empty values in putaway_orders.tote
+  Status: healthy, Count: 0
+Running check: Null or empty values in bulk_storage_orders.location
+  Status: healthy, Count: 0
+Running check: Duplicate barcodes
+  Status: warning, Count: 2
+Database checks completed: 32 checks, 3 warnings, False errors
+Issues found in these checks:
+- Invalid SKUs in putaway_items table: WARNING - 100 issues found
+- Invalid SKUs in bulk_storage_items table: WARNING - 100 issues found
+- Duplicate barcodes: WARNING - 2 issues found
+Loaded schema for 20 tables
+Running check: Duplicate primary keys (id) in api_received_data table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (id) in art_operations table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (id) in bulk_storage_items table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (id) in bulk_storage_orders table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (id) in po_lines table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (sku) in prices table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (sku) in products table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (sku) in products_test table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (po_number) in purchase_orders table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (id) in putaway_items table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (id) in putaway_orders table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (deviceID) in qboid_devices table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (ro_id) in replen_orders table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (id) in replen_order_items table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (sku) in storage_locations table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (id) in warehouse_locations table
+  Status: healthy, Count: 0
+Running check: Barcodes referencing non-existent products
+  Status: healthy, Count: 0
+Running check: Putaway items referencing non-existent orders
+  Status: healthy, Count: 0
+Running check: Bulk storage items referencing non-existent orders
+  Status: healthy, Count: 0
+Running check: PO lines referencing non-existent purchase orders
+  Status: healthy, Count: 0
+Running check: Replenishment order items referencing non-existent orders
+  Status: healthy, Count: 0
+Running check: Invalid SKUs in putaway_items table
+  Status: warning, Count: 100
+Running check: Invalid SKUs in bulk_storage_items table
+  Status: warning, Count: 100
+Running check: Invalid SKUs in po_lines table
+  Status: healthy, Count: 0
+Running check: Invalid SKUs in replen_order_items table
+  Status: healthy, Count: 0
+Running check: Invalid SKUs in art_operations table
+  Status: healthy, Count: 0
+Running check: Null or empty values in products.sku
+  Status: healthy, Count: 0
+Running check: Null or empty values in barcodes.barcode
+  Status: healthy, Count: 0
+Running check: Null or empty values in purchase_orders.po_number
+  Status: healthy, Count: 0
+Running check: Null or empty values in putaway_orders.tote
+  Status: healthy, Count: 0
+Running check: Null or empty values in bulk_storage_orders.location
+  Status: healthy, Count: 0
+Running check: Duplicate barcodes
+  Status: warning, Count: 2
+Database checks completed: 32 checks, 3 warnings, False errors
+Issues found in these checks:
+- Invalid SKUs in putaway_items table: WARNING - 100 issues found
+- Invalid SKUs in bulk_storage_items table: WARNING - 100 issues found
+- Duplicate barcodes: WARNING - 2 issues found
+Loaded schema for 20 tables
+Running check: Duplicate primary keys (id) in api_received_data table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (id) in art_operations table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (id) in bulk_storage_items table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (id) in bulk_storage_orders table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (id) in po_lines table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (sku) in prices table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (sku) in products table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (sku) in products_test table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (po_number) in purchase_orders table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (id) in putaway_items table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (id) in putaway_orders table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (deviceID) in qboid_devices table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (ro_id) in replen_orders table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (id) in replen_order_items table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (sku) in storage_locations table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (id) in warehouse_locations table
+  Status: healthy, Count: 0
+Running check: Barcodes referencing non-existent products
+  Status: healthy, Count: 0
+Running check: Putaway items referencing non-existent orders
+  Status: healthy, Count: 0
+Running check: Bulk storage items referencing non-existent orders
+  Status: healthy, Count: 0
+Running check: PO lines referencing non-existent purchase orders
+  Status: healthy, Count: 0
+Running check: Replenishment order items referencing non-existent orders
+  Status: healthy, Count: 0
+Running check: Invalid SKUs in putaway_items table
+  Status: warning, Count: 100
+Running check: Invalid SKUs in bulk_storage_items table
+  Status: warning, Count: 100
+Running check: Invalid SKUs in po_lines table
+  Status: healthy, Count: 0
+Running check: Invalid SKUs in replen_order_items table
+  Status: healthy, Count: 0
+Running check: Invalid SKUs in art_operations table
+  Status: healthy, Count: 0
+Running check: Null or empty values in products.sku
+  Status: healthy, Count: 0
+Running check: Null or empty values in barcodes.barcode
+  Status: healthy, Count: 0
+Running check: Null or empty values in purchase_orders.po_number
+  Status: healthy, Count: 0
+Running check: Null or empty values in putaway_orders.tote
+  Status: healthy, Count: 0
+Running check: Null or empty values in bulk_storage_orders.location
+  Status: healthy, Count: 0
+Running check: Duplicate barcodes
+  Status: warning, Count: 2
+Database checks completed: 32 checks, 3 warnings, False errors
+Issues found in these checks:
+- Invalid SKUs in putaway_items table: WARNING - 100 issues found
+- Invalid SKUs in bulk_storage_items table: WARNING - 100 issues found
+- Duplicate barcodes: WARNING - 2 issues found
+Loaded schema for 20 tables
+Running check: Duplicate primary keys (id) in api_received_data table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (id) in art_operations table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (id) in bulk_storage_items table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (id) in bulk_storage_orders table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (id) in po_lines table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (sku) in prices table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (sku) in products table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (sku) in products_test table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (po_number) in purchase_orders table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (id) in putaway_items table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (id) in putaway_orders table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (deviceID) in qboid_devices table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (ro_id) in replen_orders table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (id) in replen_order_items table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (sku) in storage_locations table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (id) in warehouse_locations table
+  Status: healthy, Count: 0
+Running check: Barcodes referencing non-existent products
+  Status: healthy, Count: 0
+Running check: Putaway items referencing non-existent orders
+  Status: healthy, Count: 0
+Running check: Bulk storage items referencing non-existent orders
+  Status: healthy, Count: 0
+Running check: PO lines referencing non-existent purchase orders
+  Status: healthy, Count: 0
+Running check: Replenishment order items referencing non-existent orders
+  Status: healthy, Count: 0
+Running check: Invalid SKUs in putaway_items table
+  Status: warning, Count: 100
+Running check: Invalid SKUs in bulk_storage_items table
+  Status: warning, Count: 100
+Running check: Invalid SKUs in po_lines table
+  Status: healthy, Count: 0
+Running check: Invalid SKUs in replen_order_items table
+  Status: healthy, Count: 0
+Running check: Invalid SKUs in art_operations table
+  Status: healthy, Count: 0
+Running check: Null or empty values in products.sku
+  Status: healthy, Count: 0
+Running check: Null or empty values in barcodes.barcode
+  Status: healthy, Count: 0
+Running check: Null or empty values in purchase_orders.po_number
+  Status: healthy, Count: 0
+Running check: Null or empty values in putaway_orders.tote
+  Status: healthy, Count: 0
+Running check: Null or empty values in bulk_storage_orders.location
+  Status: healthy, Count: 0
+Running check: Duplicate barcodes
+  Status: warning, Count: 2
+Database checks completed: 32 checks, 3 warnings, False errors
+Issues found in these checks:
+- Invalid SKUs in putaway_items table: WARNING - 100 issues found
+- Invalid SKUs in bulk_storage_items table: WARNING - 100 issues found
+- Duplicate barcodes: WARNING - 2 issues found
+Loaded schema for 20 tables
+Running check: Duplicate primary keys (id) in api_received_data table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (id) in art_operations table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (id) in bulk_storage_items table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (id) in bulk_storage_orders table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (id) in po_lines table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (sku) in prices table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (sku) in products table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (sku) in products_test table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (po_number) in purchase_orders table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (id) in putaway_items table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (id) in putaway_orders table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (deviceID) in qboid_devices table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (ro_id) in replen_orders table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (id) in replen_order_items table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (sku) in storage_locations table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (id) in warehouse_locations table
+  Status: healthy, Count: 0
+Running check: Barcodes referencing non-existent products
+  Status: healthy, Count: 0
+Running check: Putaway items referencing non-existent orders
+  Status: healthy, Count: 0
+Running check: Bulk storage items referencing non-existent orders
+  Status: healthy, Count: 0
+Running check: PO lines referencing non-existent purchase orders
+  Status: healthy, Count: 0
+Running check: Replenishment order items referencing non-existent orders
+  Status: healthy, Count: 0
+Running check: Invalid SKUs in putaway_items table
+  Status: warning, Count: 100
+Running check: Invalid SKUs in bulk_storage_items table
+  Status: warning, Count: 100
+Running check: Invalid SKUs in po_lines table
+  Status: healthy, Count: 0
+Running check: Invalid SKUs in replen_order_items table
+  Status: healthy, Count: 0
+Running check: Invalid SKUs in art_operations table
+  Status: healthy, Count: 0
+Running check: Null or empty values in products.sku
+  Status: healthy, Count: 0
+Running check: Null or empty values in barcodes.barcode
+  Status: healthy, Count: 0
+Running check: Null or empty values in purchase_orders.po_number
+  Status: healthy, Count: 0
+Running check: Null or empty values in putaway_orders.tote
+  Status: healthy, Count: 0
+Running check: Null or empty values in bulk_storage_orders.location
+  Status: healthy, Count: 0
+Running check: Duplicate barcodes
+  Status: warning, Count: 2
+Database checks completed: 32 checks, 3 warnings, False errors
+Issues found in these checks:
+- Invalid SKUs in putaway_items table: WARNING - 100 issues found
+- Invalid SKUs in bulk_storage_items table: WARNING - 100 issues found
+- Duplicate barcodes: WARNING - 2 issues found
+Loaded schema for 20 tables
+Running check: Duplicate primary keys (id) in api_received_data table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (id) in art_operations table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (id) in bulk_storage_items table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (id) in bulk_storage_orders table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (id) in po_lines table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (sku) in prices table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (sku) in products table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (sku) in products_test table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (po_number) in purchase_orders table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (id) in putaway_items table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (id) in putaway_orders table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (deviceID) in qboid_devices table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (ro_id) in replen_orders table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (id) in replen_order_items table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (sku) in storage_locations table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (id) in warehouse_locations table
+  Status: healthy, Count: 0
+Running check: Barcodes referencing non-existent products
+  Status: healthy, Count: 0
+Running check: Putaway items referencing non-existent orders
+  Status: healthy, Count: 0
+Running check: Bulk storage items referencing non-existent orders
+  Status: healthy, Count: 0
+Running check: PO lines referencing non-existent purchase orders
+  Status: healthy, Count: 0
+Running check: Replenishment order items referencing non-existent orders
+  Status: healthy, Count: 0
+Running check: Invalid SKUs in putaway_items table
+  Status: warning, Count: 100
+Running check: Invalid SKUs in bulk_storage_items table
+  Status: warning, Count: 100
+Running check: Invalid SKUs in po_lines table
+  Status: healthy, Count: 0
+Running check: Invalid SKUs in replen_order_items table
+  Status: healthy, Count: 0
+Running check: Invalid SKUs in art_operations table
+  Status: healthy, Count: 0
+Running check: Null or empty values in products.sku
+  Status: healthy, Count: 0
+Running check: Null or empty values in barcodes.barcode
+  Status: healthy, Count: 0
+Running check: Null or empty values in purchase_orders.po_number
+  Status: healthy, Count: 0
+Running check: Null or empty values in putaway_orders.tote
+  Status: healthy, Count: 0
+Running check: Null or empty values in bulk_storage_orders.location
+  Status: healthy, Count: 0
+Running check: Duplicate barcodes
+  Status: warning, Count: 2
+Database checks completed: 32 checks, 3 warnings, False errors
+Issues found in these checks:
+- Invalid SKUs in putaway_items table: WARNING - 100 issues found
+- Invalid SKUs in bulk_storage_items table: WARNING - 100 issues found
+- Duplicate barcodes: WARNING - 2 issues found
+Loaded schema for 20 tables
+Running check: Duplicate primary keys (id) in api_received_data table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (id) in art_operations table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (id) in bulk_storage_items table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (id) in bulk_storage_orders table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (id) in po_lines table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (sku) in prices table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (sku) in products table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (sku) in products_test table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (po_number) in purchase_orders table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (id) in putaway_items table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (id) in putaway_orders table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (deviceID) in qboid_devices table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (ro_id) in replen_orders table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (id) in replen_order_items table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (sku) in storage_locations table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (id) in warehouse_locations table
+  Status: healthy, Count: 0
+Running check: Barcodes referencing non-existent products
+  Status: healthy, Count: 0
+Running check: Putaway items referencing non-existent orders
+  Status: healthy, Count: 0
+Running check: Bulk storage items referencing non-existent orders
+  Status: healthy, Count: 0
+Running check: PO lines referencing non-existent purchase orders
+  Status: healthy, Count: 0
+Running check: Replenishment order items referencing non-existent orders
+  Status: healthy, Count: 0
+Running check: Invalid SKUs in putaway_items table
+  Status: warning, Count: 100
+Running check: Invalid SKUs in bulk_storage_items table
+  Status: warning, Count: 100
+Running check: Invalid SKUs in po_lines table
+  Status: healthy, Count: 0
+Running check: Invalid SKUs in replen_order_items table
+  Status: healthy, Count: 0
+Running check: Invalid SKUs in art_operations table
+  Status: healthy, Count: 0
+Running check: Null or empty values in products.sku
+  Status: healthy, Count: 0
+Running check: Null or empty values in barcodes.barcode
+  Status: healthy, Count: 0
+Running check: Null or empty values in purchase_orders.po_number
+  Status: healthy, Count: 0
+Running check: Null or empty values in putaway_orders.tote
+  Status: healthy, Count: 0
+Running check: Null or empty values in bulk_storage_orders.location
+  Status: healthy, Count: 0
+Running check: Duplicate barcodes
+  Status: warning, Count: 2
+Database checks completed: 32 checks, 3 warnings, False errors
+Issues found in these checks:
+- Invalid SKUs in putaway_items table: WARNING - 100 issues found
+- Invalid SKUs in bulk_storage_items table: WARNING - 100 issues found
+- Duplicate barcodes: WARNING - 2 issues found
+Loaded schema for 20 tables
+Running check: Duplicate primary keys (id) in api_received_data table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (id) in art_operations table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (id) in bulk_storage_items table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (id) in bulk_storage_orders table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (id) in po_lines table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (sku) in prices table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (sku) in products table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (sku) in products_test table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (po_number) in purchase_orders table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (id) in putaway_items table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (id) in putaway_orders table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (deviceID) in qboid_devices table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (ro_id) in replen_orders table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (id) in replen_order_items table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (sku) in storage_locations table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (id) in warehouse_locations table
+  Status: healthy, Count: 0
+Running check: Barcodes referencing non-existent products
+  Status: healthy, Count: 0
+Running check: Putaway items referencing non-existent orders
+  Status: healthy, Count: 0
+Running check: Bulk storage items referencing non-existent orders
+  Status: healthy, Count: 0
+Running check: PO lines referencing non-existent purchase orders
+  Status: healthy, Count: 0
+Running check: Replenishment order items referencing non-existent orders
+  Status: healthy, Count: 0
+Running check: Invalid SKUs in putaway_items table
+  Status: warning, Count: 100
+Running check: Invalid SKUs in bulk_storage_items table
+  Status: warning, Count: 100
+Running check: Invalid SKUs in po_lines table
+  Status: healthy, Count: 0
+Running check: Invalid SKUs in replen_order_items table
+  Status: healthy, Count: 0
+Running check: Invalid SKUs in art_operations table
+  Status: healthy, Count: 0
+Running check: Null or empty values in products.sku
+  Status: healthy, Count: 0
+Running check: Null or empty values in barcodes.barcode
+  Status: healthy, Count: 0
+Running check: Null or empty values in purchase_orders.po_number
+  Status: healthy, Count: 0
+Running check: Null or empty values in putaway_orders.tote
+  Status: healthy, Count: 0
+Running check: Null or empty values in bulk_storage_orders.location
+  Status: healthy, Count: 0
+Running check: Duplicate barcodes
+  Status: warning, Count: 2
+Database checks completed: 32 checks, 3 warnings, False errors
+Issues found in these checks:
+- Invalid SKUs in putaway_items table: WARNING - 100 issues found
+- Invalid SKUs in bulk_storage_items table: WARNING - 100 issues found
+- Duplicate barcodes: WARNING - 2 issues found
+Loaded schema for 20 tables
+Running check: Duplicate primary keys (id) in api_received_data table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (id) in art_operations table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (id) in bulk_storage_items table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (id) in bulk_storage_orders table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (id) in po_lines table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (sku) in prices table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (sku) in products table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (sku) in products_test table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (po_number) in purchase_orders table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (id) in putaway_items table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (id) in putaway_orders table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (deviceID) in qboid_devices table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (ro_id) in replen_orders table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (id) in replen_order_items table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (sku) in storage_locations table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (id) in warehouse_locations table
+  Status: healthy, Count: 0
+Running check: Barcodes referencing non-existent products
+  Status: healthy, Count: 0
+Running check: Putaway items referencing non-existent orders
+  Status: healthy, Count: 0
+Running check: Bulk storage items referencing non-existent orders
+  Status: healthy, Count: 0
+Running check: PO lines referencing non-existent purchase orders
+  Status: healthy, Count: 0
+Running check: Replenishment order items referencing non-existent orders
+  Status: healthy, Count: 0
+Running check: Invalid SKUs in putaway_items table
+  Status: warning, Count: 100
+Running check: Invalid SKUs in bulk_storage_items table
+  Status: warning, Count: 100
+Running check: Invalid SKUs in po_lines table
+  Status: healthy, Count: 0
+Running check: Invalid SKUs in replen_order_items table
+  Status: healthy, Count: 0
+Running check: Invalid SKUs in art_operations table
+  Status: healthy, Count: 0
+Running check: Null or empty values in products.sku
+  Status: healthy, Count: 0
+Running check: Null or empty values in barcodes.barcode
+  Status: healthy, Count: 0
+Running check: Null or empty values in purchase_orders.po_number
+  Status: healthy, Count: 0
+Running check: Null or empty values in putaway_orders.tote
+  Status: healthy, Count: 0
+Running check: Null or empty values in bulk_storage_orders.location
+  Status: healthy, Count: 0
+Running check: Duplicate barcodes
+  Status: warning, Count: 2
+Database checks completed: 32 checks, 3 warnings, False errors
+Issues found in these checks:
+- Invalid SKUs in putaway_items table: WARNING - 100 issues found
+- Invalid SKUs in bulk_storage_items table: WARNING - 100 issues found
+- Duplicate barcodes: WARNING - 2 issues found
+Loaded schema for 20 tables
+Running check: Duplicate primary keys (id) in api_received_data table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (id) in art_operations table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (id) in bulk_storage_items table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (id) in bulk_storage_orders table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (id) in po_lines table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (sku) in prices table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (sku) in products table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (sku) in products_test table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (po_number) in purchase_orders table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (id) in putaway_items table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (id) in putaway_orders table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (deviceID) in qboid_devices table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (ro_id) in replen_orders table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (id) in replen_order_items table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (sku) in storage_locations table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (id) in warehouse_locations table
+  Status: healthy, Count: 0
+Running check: Barcodes referencing non-existent products
+  Status: healthy, Count: 0
+Running check: Putaway items referencing non-existent orders
+  Status: healthy, Count: 0
+Running check: Bulk storage items referencing non-existent orders
+  Status: healthy, Count: 0
+Running check: PO lines referencing non-existent purchase orders
+  Status: healthy, Count: 0
+Running check: Replenishment order items referencing non-existent orders
+  Status: healthy, Count: 0
+Running check: Invalid SKUs in putaway_items table
+  Status: warning, Count: 100
+Running check: Invalid SKUs in bulk_storage_items table
+  Status: warning, Count: 100
+Running check: Invalid SKUs in po_lines table
+  Status: healthy, Count: 0
+Running check: Invalid SKUs in replen_order_items table
+  Status: healthy, Count: 0
+Running check: Invalid SKUs in art_operations table
+  Status: healthy, Count: 0
+Running check: Null or empty values in products.sku
+  Status: healthy, Count: 0
+Running check: Null or empty values in barcodes.barcode
+  Status: healthy, Count: 0
+Running check: Null or empty values in purchase_orders.po_number
+  Status: healthy, Count: 0
+Running check: Null or empty values in putaway_orders.tote
+  Status: healthy, Count: 0
+Running check: Null or empty values in bulk_storage_orders.location
+  Status: healthy, Count: 0
+Running check: Duplicate barcodes
+  Status: warning, Count: 2
+Database checks completed: 32 checks, 3 warnings, False errors
+Issues found in these checks:
+- Invalid SKUs in putaway_items table: WARNING - 100 issues found
+- Invalid SKUs in bulk_storage_items table: WARNING - 100 issues found
+- Duplicate barcodes: WARNING - 2 issues found
+Loaded schema for 20 tables
+Running check: Duplicate primary keys (id) in api_received_data table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (id) in art_operations table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (id) in bulk_storage_items table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (id) in bulk_storage_orders table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (id) in po_lines table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (sku) in prices table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (sku) in products table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (sku) in products_test table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (po_number) in purchase_orders table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (id) in putaway_items table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (id) in putaway_orders table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (deviceID) in qboid_devices table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (ro_id) in replen_orders table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (id) in replen_order_items table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (sku) in storage_locations table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (id) in warehouse_locations table
+  Status: healthy, Count: 0
+Running check: Barcodes referencing non-existent products
+  Status: healthy, Count: 0
+Running check: Putaway items referencing non-existent orders
+  Status: healthy, Count: 0
+Running check: Bulk storage items referencing non-existent orders
+  Status: healthy, Count: 0
+Running check: PO lines referencing non-existent purchase orders
+  Status: healthy, Count: 0
+Running check: Replenishment order items referencing non-existent orders
+  Status: healthy, Count: 0
+Running check: Invalid SKUs in putaway_items table
+  Status: warning, Count: 100
+Running check: Invalid SKUs in bulk_storage_items table
+  Status: warning, Count: 100
+Running check: Invalid SKUs in po_lines table
+  Status: healthy, Count: 0
+Running check: Invalid SKUs in replen_order_items table
+  Status: healthy, Count: 0
+Running check: Invalid SKUs in art_operations table
+  Status: healthy, Count: 0
+Running check: Null or empty values in products.sku
+  Status: healthy, Count: 0
+Running check: Null or empty values in barcodes.barcode
+  Status: healthy, Count: 0
+Running check: Null or empty values in purchase_orders.po_number
+  Status: healthy, Count: 0
+Running check: Null or empty values in putaway_orders.tote
+  Status: healthy, Count: 0
+Running check: Null or empty values in bulk_storage_orders.location
+  Status: healthy, Count: 0
+Running check: Duplicate barcodes
+  Status: warning, Count: 2
+Database checks completed: 32 checks, 3 warnings, False errors
+Issues found in these checks:
+- Invalid SKUs in putaway_items table: WARNING - 100 issues found
+- Invalid SKUs in bulk_storage_items table: WARNING - 100 issues found
+- Duplicate barcodes: WARNING - 2 issues found
+Loaded schema for 20 tables
+Running check: Duplicate primary keys (id) in api_received_data table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (id) in art_operations table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (id) in bulk_storage_items table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (id) in bulk_storage_orders table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (id) in po_lines table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (sku) in prices table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (sku) in products table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (sku) in products_test table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (po_number) in purchase_orders table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (id) in putaway_items table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (id) in putaway_orders table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (deviceID) in qboid_devices table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (ro_id) in replen_orders table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (id) in replen_order_items table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (sku) in storage_locations table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (id) in warehouse_locations table
+  Status: healthy, Count: 0
+Running check: Barcodes referencing non-existent products
+  Status: healthy, Count: 0
+Running check: Putaway items referencing non-existent orders
+  Status: healthy, Count: 0
+Running check: Bulk storage items referencing non-existent orders
+  Status: healthy, Count: 0
+Running check: PO lines referencing non-existent purchase orders
+  Status: healthy, Count: 0
+Running check: Replenishment order items referencing non-existent orders
+  Status: healthy, Count: 0
+Running check: Invalid SKUs in putaway_items table
+  Status: warning, Count: 100
+Running check: Invalid SKUs in bulk_storage_items table
+  Status: warning, Count: 100
+Running check: Invalid SKUs in po_lines table
+  Status: healthy, Count: 0
+Running check: Invalid SKUs in replen_order_items table
+  Status: healthy, Count: 0
+Running check: Invalid SKUs in art_operations table
+  Status: healthy, Count: 0
+Running check: Null or empty values in products.sku
+  Status: healthy, Count: 0
+Running check: Null or empty values in barcodes.barcode
+  Status: healthy, Count: 0
+Running check: Null or empty values in purchase_orders.po_number
+  Status: healthy, Count: 0
+Running check: Null or empty values in putaway_orders.tote
+  Status: healthy, Count: 0
+Running check: Null or empty values in bulk_storage_orders.location
+  Status: healthy, Count: 0
+Running check: Duplicate barcodes
+  Status: warning, Count: 2
+Database checks completed: 32 checks, 3 warnings, False errors
+Issues found in these checks:
+- Invalid SKUs in putaway_items table: WARNING - 100 issues found
+- Invalid SKUs in bulk_storage_items table: WARNING - 100 issues found
+- Duplicate barcodes: WARNING - 2 issues found
+Loaded schema for 20 tables
+Running check: Duplicate primary keys (id) in api_received_data table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (id) in art_operations table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (id) in bulk_storage_items table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (id) in bulk_storage_orders table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (id) in po_lines table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (sku) in prices table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (sku) in products table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (sku) in products_test table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (po_number) in purchase_orders table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (id) in putaway_items table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (id) in putaway_orders table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (deviceID) in qboid_devices table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (ro_id) in replen_orders table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (id) in replen_order_items table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (sku) in storage_locations table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (id) in warehouse_locations table
+  Status: healthy, Count: 0
+Running check: Barcodes referencing non-existent products
+  Status: healthy, Count: 0
+Running check: Putaway items referencing non-existent orders
+  Status: healthy, Count: 0
+Running check: Bulk storage items referencing non-existent orders
+  Status: healthy, Count: 0
+Running check: PO lines referencing non-existent purchase orders
+  Status: healthy, Count: 0
+Running check: Replenishment order items referencing non-existent orders
+  Status: healthy, Count: 0
+Running check: Invalid SKUs in putaway_items table
+  Status: warning, Count: 100
+Running check: Invalid SKUs in bulk_storage_items table
+  Status: warning, Count: 100
+Running check: Invalid SKUs in po_lines table
+  Status: healthy, Count: 0
+Running check: Invalid SKUs in replen_order_items table
+  Status: healthy, Count: 0
+Running check: Invalid SKUs in art_operations table
+  Status: healthy, Count: 0
+Running check: Null or empty values in products.sku
+  Status: healthy, Count: 0
+Running check: Null or empty values in barcodes.barcode
+  Status: healthy, Count: 0
+Running check: Null or empty values in purchase_orders.po_number
+  Status: healthy, Count: 0
+Running check: Null or empty values in putaway_orders.tote
+  Status: healthy, Count: 0
+Running check: Null or empty values in bulk_storage_orders.location
+  Status: healthy, Count: 0
+Running check: Duplicate barcodes
+  Status: warning, Count: 2
+Database checks completed: 32 checks, 3 warnings, False errors
+Issues found in these checks:
+- Invalid SKUs in putaway_items table: WARNING - 100 issues found
+- Invalid SKUs in bulk_storage_items table: WARNING - 100 issues found
+- Duplicate barcodes: WARNING - 2 issues found
+Loaded schema for 20 tables
+Running check: Duplicate primary keys (id) in api_received_data table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (id) in art_operations table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (id) in bulk_storage_items table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (id) in bulk_storage_orders table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (id) in po_lines table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (sku) in prices table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (sku) in products table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (sku) in products_test table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (po_number) in purchase_orders table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (id) in putaway_items table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (id) in putaway_orders table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (deviceID) in qboid_devices table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (ro_id) in replen_orders table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (id) in replen_order_items table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (sku) in storage_locations table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (id) in warehouse_locations table
+  Status: healthy, Count: 0
+Running check: Barcodes referencing non-existent products
+  Status: healthy, Count: 0
+Running check: Putaway items referencing non-existent orders
+  Status: healthy, Count: 0
+Running check: Bulk storage items referencing non-existent orders
+  Status: healthy, Count: 0
+Running check: PO lines referencing non-existent purchase orders
+  Status: healthy, Count: 0
+Running check: Replenishment order items referencing non-existent orders
+  Status: healthy, Count: 0
+Running check: Invalid SKUs in putaway_items table
+  Status: warning, Count: 100
+Running check: Invalid SKUs in bulk_storage_items table
+  Status: warning, Count: 100
+Running check: Invalid SKUs in po_lines table
+  Status: healthy, Count: 0
+Running check: Invalid SKUs in replen_order_items table
+  Status: healthy, Count: 0
+Running check: Invalid SKUs in art_operations table
+  Status: healthy, Count: 0
+Running check: Null or empty values in products.sku
+  Status: healthy, Count: 0
+Running check: Null or empty values in barcodes.barcode
+  Status: healthy, Count: 0
+Running check: Null or empty values in purchase_orders.po_number
+  Status: healthy, Count: 0
+Running check: Null or empty values in putaway_orders.tote
+  Status: healthy, Count: 0
+Running check: Null or empty values in bulk_storage_orders.location
+  Status: healthy, Count: 0
+Running check: Duplicate barcodes
+  Status: warning, Count: 2
+Database checks completed: 32 checks, 3 warnings, False errors
+Issues found in these checks:
+- Invalid SKUs in putaway_items table: WARNING - 100 issues found
+- Invalid SKUs in bulk_storage_items table: WARNING - 100 issues found
+- Duplicate barcodes: WARNING - 2 issues found
+Loaded schema for 20 tables
+Running check: Duplicate primary keys (id) in api_received_data table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (id) in art_operations table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (id) in bulk_storage_items table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (id) in bulk_storage_orders table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (id) in po_lines table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (sku) in prices table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (sku) in products table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (sku) in products_test table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (po_number) in purchase_orders table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (id) in putaway_items table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (id) in putaway_orders table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (deviceID) in qboid_devices table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (ro_id) in replen_orders table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (id) in replen_order_items table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (sku) in storage_locations table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (id) in warehouse_locations table
+  Status: healthy, Count: 0
+Running check: Barcodes referencing non-existent products
+  Status: healthy, Count: 0
+Running check: Putaway items referencing non-existent orders
+  Status: healthy, Count: 0
+Running check: Bulk storage items referencing non-existent orders
+  Status: healthy, Count: 0
+Running check: PO lines referencing non-existent purchase orders
+  Status: healthy, Count: 0
+Running check: Replenishment order items referencing non-existent orders
+  Status: healthy, Count: 0
+Running check: Invalid SKUs in putaway_items table
+  Status: warning, Count: 100
+Running check: Invalid SKUs in bulk_storage_items table
+  Status: warning, Count: 100
+Running check: Invalid SKUs in po_lines table
+  Status: healthy, Count: 0
+Running check: Invalid SKUs in replen_order_items table
+  Status: healthy, Count: 0
+Running check: Invalid SKUs in art_operations table
+  Status: healthy, Count: 0
+Running check: Null or empty values in products.sku
+  Status: healthy, Count: 0
+Running check: Null or empty values in barcodes.barcode
+  Status: healthy, Count: 0
+Running check: Null or empty values in purchase_orders.po_number
+  Status: healthy, Count: 0
+Running check: Null or empty values in putaway_orders.tote
+  Status: healthy, Count: 0
+Running check: Null or empty values in bulk_storage_orders.location
+  Status: healthy, Count: 0
+Running check: Duplicate barcodes
+  Status: warning, Count: 2
+Database checks completed: 32 checks, 3 warnings, False errors
+Issues found in these checks:
+- Invalid SKUs in putaway_items table: WARNING - 100 issues found
+- Invalid SKUs in bulk_storage_items table: WARNING - 100 issues found
+- Duplicate barcodes: WARNING - 2 issues found
+Loaded schema for 20 tables
+Running check: Duplicate primary keys (id) in api_received_data table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (id) in art_operations table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (id) in bulk_storage_items table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (id) in bulk_storage_orders table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (id) in po_lines table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (sku) in prices table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (sku) in products table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (sku) in products_test table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (po_number) in purchase_orders table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (id) in putaway_items table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (id) in putaway_orders table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (deviceID) in qboid_devices table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (ro_id) in replen_orders table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (id) in replen_order_items table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (sku) in storage_locations table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (id) in warehouse_locations table
+  Status: healthy, Count: 0
+Running check: Barcodes referencing non-existent products
+  Status: healthy, Count: 0
+Running check: Putaway items referencing non-existent orders
+  Status: healthy, Count: 0
+Running check: Bulk storage items referencing non-existent orders
+  Status: healthy, Count: 0
+Running check: PO lines referencing non-existent purchase orders
+  Status: healthy, Count: 0
+Running check: Replenishment order items referencing non-existent orders
+  Status: healthy, Count: 0
+Running check: Invalid SKUs in putaway_items table
+  Status: warning, Count: 100
+Running check: Invalid SKUs in bulk_storage_items table
+  Status: warning, Count: 100
+Running check: Invalid SKUs in po_lines table
+  Status: healthy, Count: 0
+Running check: Invalid SKUs in replen_order_items table
+  Status: healthy, Count: 0
+Running check: Invalid SKUs in art_operations table
+  Status: healthy, Count: 0
+Running check: Null or empty values in products.sku
+  Status: healthy, Count: 0
+Running check: Null or empty values in barcodes.barcode
+  Status: healthy, Count: 0
+Running check: Null or empty values in purchase_orders.po_number
+  Status: healthy, Count: 0
+Running check: Null or empty values in putaway_orders.tote
+  Status: healthy, Count: 0
+Running check: Null or empty values in bulk_storage_orders.location
+  Status: healthy, Count: 0
+Running check: Duplicate barcodes
+  Status: warning, Count: 2
+Database checks completed: 32 checks, 3 warnings, False errors
+Issues found in these checks:
+- Invalid SKUs in putaway_items table: WARNING - 100 issues found
+- Invalid SKUs in bulk_storage_items table: WARNING - 100 issues found
+- Duplicate barcodes: WARNING - 2 issues found
+Loaded schema for 20 tables
+Running check: Duplicate primary keys (id) in api_received_data table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (id) in art_operations table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (id) in bulk_storage_items table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (id) in bulk_storage_orders table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (id) in po_lines table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (sku) in prices table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (sku) in products table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (sku) in products_test table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (po_number) in purchase_orders table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (id) in putaway_items table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (id) in putaway_orders table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (deviceID) in qboid_devices table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (ro_id) in replen_orders table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (id) in replen_order_items table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (sku) in storage_locations table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (id) in warehouse_locations table
+  Status: healthy, Count: 0
+Running check: Barcodes referencing non-existent products
+  Status: healthy, Count: 0
+Running check: Putaway items referencing non-existent orders
+  Status: healthy, Count: 0
+Running check: Bulk storage items referencing non-existent orders
+  Status: healthy, Count: 0
+Running check: PO lines referencing non-existent purchase orders
+  Status: healthy, Count: 0
+Running check: Replenishment order items referencing non-existent orders
+  Status: healthy, Count: 0
+Running check: Invalid SKUs in putaway_items table
+  Status: warning, Count: 100
+Running check: Invalid SKUs in bulk_storage_items table
+  Status: warning, Count: 100
+Running check: Invalid SKUs in po_lines table
+  Status: healthy, Count: 0
+Running check: Invalid SKUs in replen_order_items table
+  Status: healthy, Count: 0
+Running check: Invalid SKUs in art_operations table
+  Status: healthy, Count: 0
+Running check: Null or empty values in products.sku
+  Status: healthy, Count: 0
+Running check: Null or empty values in barcodes.barcode
+  Status: healthy, Count: 0
+Running check: Null or empty values in purchase_orders.po_number
+  Status: healthy, Count: 0
+Running check: Null or empty values in putaway_orders.tote
+  Status: healthy, Count: 0
+Running check: Null or empty values in bulk_storage_orders.location
+  Status: healthy, Count: 0
+Running check: Duplicate barcodes
+  Status: warning, Count: 2
+Database checks completed: 32 checks, 3 warnings, False errors
+Issues found in these checks:
+- Invalid SKUs in putaway_items table: WARNING - 100 issues found
+- Invalid SKUs in bulk_storage_items table: WARNING - 100 issues found
+- Duplicate barcodes: WARNING - 2 issues found
+Loaded schema for 20 tables
+Running check: Duplicate primary keys (id) in api_received_data table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (id) in art_operations table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (id) in bulk_storage_items table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (id) in bulk_storage_orders table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (id) in po_lines table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (sku) in prices table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (sku) in products table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (sku) in products_test table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (po_number) in purchase_orders table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (id) in putaway_items table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (id) in putaway_orders table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (deviceID) in qboid_devices table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (ro_id) in replen_orders table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (id) in replen_order_items table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (sku) in storage_locations table
+  Status: healthy, Count: 0
+Running check: Duplicate primary keys (id) in warehouse_locations table
+  Status: healthy, Count: 0
+Running check: Barcodes referencing non-existent products
+  Status: healthy, Count: 0
+Running check: Putaway items referencing non-existent orders
+  Status: healthy, Count: 0
+Running check: Bulk storage items referencing non-existent orders
+  Status: healthy, Count: 0
+Running check: PO lines referencing non-existent purchase orders
+  Status: healthy, Count: 0
+Running check: Replenishment order items referencing non-existent orders
+  Status: healthy, Count: 0
+Running check: Invalid SKUs in putaway_items table
+  Status: warning, Count: 100
+Running check: Invalid SKUs in bulk_storage_items table
+  Status: warning, Count: 100
+Running check: Invalid SKUs in po_lines table
+  Status: healthy, Count: 0
+Running check: Invalid SKUs in replen_order_items table
+  Status: healthy, Count: 0
+Running check: Invalid SKUs in art_operations table
+  Status: healthy, Count: 0
+Running check: Null or empty values in products.sku
+  Status: healthy, Count: 0
+Running check: Null or empty values in barcodes.barcode
+  Status: healthy, Count: 0
+Running check: Null or empty values in purchase_orders.po_number
+  Status: healthy, Count: 0
+Running check: Null or empty values in putaway_orders.tote
+  Status: healthy, Count: 0
+Running check: Null or empty values in bulk_storage_orders.location
+  Status: healthy, Count: 0
+Running check: Duplicate barcodes
+  Status: warning, Count: 2
+Database checks completed: 32 checks, 3 warnings, False errors
+Issues found in these checks:
+- Invalid SKUs in putaway_items table: WARNING - 100 issues found
+- Invalid SKUs in bulk_storage_items table: WARNING - 100 issues found
+- Duplicate barcodes: WARNING - 2 issues found

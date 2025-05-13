@@ -26,11 +26,11 @@ class BulkStorageOrder(BaseModel):
     # Add to BulkStorageOrder class
     test_insufficient_stock: Optional[bool] = Field(False, description="Test flag to simulate insufficient stock")
 
-    @validator('location')
-    def validate_location(cls, v):
-        if not re.match(r'^RACK-[A-Z][0-9]-[0-9]{2}$', v):
-            raise ValueError('Location must follow format RACK-A1-01 (RACK-<section><aisle>-<position>)')
-        return v.upper()
+    #@validator('location')
+    #def validate_location(cls, v):
+    #    if not re.match(r'^RACK-[A-Z][0-9]-[0-9]{2}$', v):
+    #        raise ValueError('Location must follow format RACK-A1-01 (RACK-<section><aisle>-<position>)')
+    #    return v.upper()
 
     @validator('items')
     def validate_unique_skus(cls, v):
