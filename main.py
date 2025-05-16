@@ -8,7 +8,7 @@ from datetime import datetime
 import time
 
 # Import routers
-from routers import measurements, putaway, bulk_storage, barcode, product, purchase_orders, replenishment, art_orders, warehouse_locations
+from routers import measurements, putaway, bulk_storage, barcode, product, purchase_orders, replenishment, art_orders, warehouse_locations, proship
 
 # Database connection with pooling and reconnection settings
 DATABASE_URL = "mysql+pymysql://Qboid:JY8xM2ch5#Q[@155.138.159.75/products"
@@ -145,6 +145,7 @@ app.include_router(purchase_orders.router)
 app.include_router(replenishment.router)
 app.include_router(art_orders.router)  
 app.include_router(warehouse_locations.router)
+app.include_router(proship.router)
 
 if __name__ == "__main__":
     import uvicorn

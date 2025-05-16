@@ -1,6 +1,7 @@
 from pydantic import BaseModel, Field, validator
 from typing import List, Optional
 import re
+import sys
 
 class PutawayItem(BaseModel):
     sku: str = Field(..., max_length=50)

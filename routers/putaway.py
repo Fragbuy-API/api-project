@@ -26,16 +26,16 @@ async def create_putaway_order(order: PutawayOrder):
             SELECT COUNT(*) FROM putaway_orders WHERE tote = :tote
         """)
         result = execute_with_retry(check_query, {'tote': order.tote})
-        if result.fetchone()[0] > 0:
-            raise HTTPException(
-                status_code=400,
-                detail={
-                    "status": "error",
-                    "message": f"Tote {order.tote} already exists in the system",
-                    "error_code": "DUPLICATE_TOTE",
-                    "timestamp": datetime.now().isoformat()
-                }
-            )
+        #if result.fetchone()[0] > 0:
+        #    raise HTTPException(
+        #        status_code=400,
+        #        detail={
+        #            "status": "error",
+        #            "message": f"Tote {order.tote} already exists in the system",
+        #            "error_code": "DUPLICATE_TOTE",
+        #            "timestamp": datetime.now().isoformat()
+        #        }
+        #    )
 
         # Calculate total quantity for validation
         total_quantity = sum(item.quantity for item in order.items)
