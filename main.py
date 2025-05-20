@@ -9,6 +9,13 @@ import time
 
 # Import routers
 from routers import measurements, putaway, bulk_storage, barcode, product, purchase_orders, replenishment, art_orders, warehouse_locations, proship
+from routers.filesystem import router as fs_router
+
+app = FastAPI(
+    title="Fragbuy API Project",
+    version="1.0.0",
+    openapi_url="/openapi.json",
+)
 
 # Database connection with pooling and reconnection settings
 DATABASE_URL = "mysql+pymysql://Qboid:JY8xM2ch5#Q[@155.138.159.75/products"
@@ -146,6 +153,7 @@ app.include_router(replenishment.router)
 app.include_router(art_orders.router)  
 app.include_router(warehouse_locations.router)
 app.include_router(proship.router)
+app.include_router(fs_router)
 
 if __name__ == "__main__":
     import uvicorn
