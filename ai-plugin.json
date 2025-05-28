@@ -1,0 +1,17 @@
+{
+  "schema_version": "v1",
+  "name_for_human": "API Project FS Explorer",
+  "name_for_model": "fs_explorer",
+  "description_for_human": "Browse and read files in the API project directory",
+  "description_for_model": "Plugin for listing directories and reading files under /root/api via endpoints /fs/list and /fs/read",
+  "auth": {
+    "type": "basic",
+    "instructions": "Use HTTP Basic Auth with your admin credentials."
+  },
+  "api": {
+    "type": "openapi",
+    "url": "https://155.138.159.75/openapi.json",
+    "is_user_authenticated": true
+  },
+  "contact_email": "david@ngr.ai",
+}

@@ -1,0 +1,43 @@
+API Test Summary - Mon May 19 17:00:01 UTC 2025
+=================================
+
+## Warehouse APIs
+✅ PASSED: putaway_test.py
+✅ PASSED: bulk_storage_test.py
+✅ PASSED: test_warehouse_locations.py
+✅ PASSED: test_art_orders.py
+
+Group Results: 4/4 tests passed
+
+## Orders APIs
+✅ PASSED: test_purchase_orders.py
+✅ PASSED: test_get_purchase_order.py
+✅ PASSED: test_update_po_status.py
+
+Group Results: 3/3 tests passed
+
+## Replenishment APIs
+✅ PASSED: test_ro_complete.py
+✅ PASSED: test_ro_get_orders.py
+✅ PASSED: test_ro_item_picked.py
+✅ PASSED: test_ro_pick_cancelled.py
+
+Group Results: 4/4 tests passed
+
+## Products APIs
+✅ PASSED: test_product_search.py
+✅ PASSED: barcode_lookup_test.py
+
+Group Results: 2/2 tests passed
+
+## Core APIs
+✅ PASSED: test_check_sku_api.py
+✅ PASSED: test_unified_search.py
+
+Group Results: 2/2 tests passed
+
+=================================
+Overall Results:
+Total Tests: 15
+Passed: 15
+Failed: 0
