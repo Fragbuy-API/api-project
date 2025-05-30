@@ -1,0 +1,2598 @@
+Testing Warehouse APIs...
+
+Running putaway_test.py...
+[94m================= TESTING PUTAWAY WORKFLOW =================[0m
+
+[94m======== Testing: API Health Check ========[0m
+[92m✓ PASS: Request succeeded as expected[0m
+[93m{
+  "status": "healthy",
+  "message": "API is running and database is connected",
+  "timestamp": "2025-05-28T15:00:01.542893"
+}[0m
+
+[94m======== Testing: Normal Putaway Order Creation ========[0m
+Using tote ID: TOTEZ3EKX
+[92m✓ PASS: Request succeeded as expected[0m
+[93m{
+  "status": "success",
+  "message": "Putaway order created successfully for tote TOTEZ3EKX",
+  "order_id": 1406,
+  "timestamp": "2025-05-28T15:00:01.573684",
+  "items_processed": 2,
+  "total_quantity": 8
+}[0m
+
+[94m======== Testing: Putaway Order with Insufficient Stock ========[0m
+Using tote ID: TOTE6RJK5 with insufficient stock flag
+[92m✓ PASS: Request failed as expected with status 400[0m
+[93m{
+  "detail": {
+    "status": "error",
+    "message": "Insufficient stock to fulfill this putaway order",
+    "error_code": "INSUFFICIENT_STOCK",
+    "timestamp": "2025-05-28T15:00:01.588546"
+  }
+}[0m
+
+[94m======== Testing: Duplicate Tote ID ========[0m
+[92m✓ PASS: Request succeeded as expected[0m
+[93m{
+  "status": "success",
+  "message": "Putaway order created successfully for tote TOTE9GJN8",
+  "order_id": 1407,
+  "timestamp": "2025-05-28T15:00:01.629546",
+  "items_processed": 2,
+  "total_quantity": 8
+}[0m
+Using duplicate tote ID: TOTE9GJN8
+[91m✗ FAIL: Expected failure but request succeeded[0m
+[93m{
+  "status": "success",
+  "message": "Putaway order created successfully for tote TOTE9GJN8",
+  "order_id": 1408,
+  "timestamp": "2025-05-28T15:00:01.670277",
+  "items_processed": 2,
+  "total_quantity": 8
+}[0m
+
+[94m======== Testing: Invalid Tote Format ========[0m
+[92m✓ PASS: Request failed as expected with status 422[0m
+[93m{
+  "detail": [
+    {
+      "type": "value_error",
+      "loc": [
+        "body",
+        "tote"
+      ],
+      "msg": "Value error, Tote must start with TOTE followed by up to 15 alphanumeric characters or hyphens",
+      "input": "INVALID-TOTE",
+      "ctx": {
+        "error": {}
+      }
+    }
+  ]
+}[0m
+
+[94m======== Testing: Invalid Barcode ========[0m
+[92m✓ PASS: Request failed as expected with status 422[0m
+[93m{
+  "detail": [
+    {
+      "type": "value_error",
+      "loc": [
+        "body",
+        "items",
+        0,
+        "barcode"
+      ],
+      "msg": "Value error, Barcode must be between 8 and 14 digits",
+      "input": "123",
+      "ctx": {
+        "error": {}
+      }
+    }
+  ]
+}[0m
+
+[94m================= TEST SUMMARY =================[0m
+API health check: ✓
+Normal putaway order: ✓
+Insufficient stock test: ✓
+Duplicate tote rejection: ✗
+Invalid tote format rejection: ✓
+Invalid barcode rejection: ✓
+[91m✗ Some tests failed. Check the details above.[0m
+Running bulk_storage_test.py...
+[94m================= TESTING BULK STORAGE WORKFLOW =================[0m
+
+[94m======== Testing: API Health Check ========[0m
+[92m✓ PASS: Request succeeded as expected[0m
+[93m{
+  "status": "healthy",
+  "message": "API is running and database is connected",
+  "timestamp": "2025-05-28T15:00:02.676244"
+}[0m
+
+[94m======== Testing: Normal Bulk Storage Order Creation ========[0m
+Using location: RACK-Q6-80
+[92m✓ PASS: Request succeeded as expected[0m
+[93m{
+  "status": "success",
+  "message": "Bulk storage order created successfully for location RACK-Q6-80",
+  "order_id": 1070,
+  "timestamp": "2025-05-28T15:00:02.773343",
+  "items_processed": 2,
+  "total_quantity": 75
+}[0m
+
+[94m======== Testing: Bulk Storage Order with Insufficient Stock ========[0m
+Using location: RACK-I7-81 with insufficient stock flag
+[92m✓ PASS: Request failed as expected with status 400[0m
+[93m{
+  "detail": {
+    "status": "error",
+    "message": "Insufficient stock to fulfill this bulk storage order",
+    "error_code": "INSUFFICIENT_STOCK",
+    "timestamp": "2025-05-28T15:00:02.794106"
+  }
+}[0m
+
+[94m======== Testing: Duplicate Location ========[0m
+[92m✓ PASS: Request succeeded as expected[0m
+[93m{
+  "status": "success",
+  "message": "Bulk storage order created successfully for location RACK-S5-93",
+  "order_id": 1071,
+  "timestamp": "2025-05-28T15:00:02.816410",
+  "items_processed": 2,
+  "total_quantity": 75
+}[0m
+Using duplicate location: RACK-S5-93
+[92m✓ PASS: Request failed as expected with status 400[0m
+[93m{
+  "detail": {
+    "status": "error",
+    "message": "Location RACK-S5-93 already has a pending order",
+    "error_code": "DUPLICATE_LOCATION",
+    "timestamp": "2025-05-28T15:00:02.840134"
+  }
+}[0m
+
+[94m======== Testing: Invalid Location Format ========[0m
+[92m✓ PASS: Request failed as expected with status 400[0m
+[93m{
+  "detail": {
+    "status": "error",
+    "message": "Location INVALID-LOCATION already has a pending order",
+    "error_code": "DUPLICATE_LOCATION",
+    "timestamp": "2025-05-28T15:00:02.857602"
+  }
+}[0m
+
+[94m======== Testing: Invalid Barcode ========[0m
+[92m✓ PASS: Request failed as expected with status 422[0m
+[93m{
+  "detail": [
+    {
+      "type": "value_error",
+      "loc": [
+        "body",
+        "items",
+        0,
+        "barcode"
+      ],
+      "msg": "Value error, Barcode must be between 8 and 14 digits",
+      "input": "123",
+      "ctx": {
+        "error": {}
+      }
+    }
+  ]
+}[0m
+
+[94m================= TEST SUMMARY =================[0m
+API health check: ✓
+Normal bulk storage order: ✓
+Insufficient stock test: ✓
+Duplicate location rejection: ✓
+Invalid location format rejection: ✓
+Invalid barcode rejection: ✓
+[92m✓ All tests passed! Bulk storage workflow is working correctly.[0m
+Running test_warehouse_locations.py...
+[94m================= TESTING WAREHOUSE LOCATIONS API =================[0m
+
+[94m======== Testing: API Health Check ========[0m
+[92m✓ PASS: Request succeeded as expected[0m
+[93m{
+  "status": "healthy",
+  "message": "API is running and database is connected",
+  "timestamp": "2025-05-28T15:00:03.306382"
+}[0m
+
+[94m======== Testing: Warehouse Locations API Health Check ========[0m
+[92m✓ PASS: Request succeeded as expected[0m
+[93m{
+  "status": "healthy",
+  "message": "Warehouse locations API endpoint is available",
+  "timestamp": "2025-05-28T15:00:03.323638"
+}[0m
+
+[94m======== Testing: Get All Warehouse Locations ========[0m
+[92m✓ PASS: Request succeeded as expected[0m
+[93m{
+  "status": "success",
+  "message": "Found 8 warehouse locations",
+  "count": 8,
+  "locations": [
+    {
+      "warehouse": "AGP23",
+      "location_code": "GENERAL",
+      "location_name": "General"
+    },
+    {
+      "warehouse": "AGP23",
+      "location_code": "PRESOLDRESERVE",
+      "location_name": "Presold Reserve"
+    },
+    {
+      "warehouse": "DON",
+      "location_code": "1HAI",
+      "location_name": "HAI"
+    },
+    {
+      "warehouse": "DON",
+      "location_code": "2STORAGE",
+      "location_name": "Storage"
+    },
+    {
+      "warehouse": "DON",
+      "location_code": "3SHOWROOM",
+      "location_name": "Showroom"
+    },
+    {
+      "warehouse": "DON",
+      "location_code": "4STAGING",
+      "location_name": "Staging"
+    },
+    {
+      "warehouse": "DON",
+      "location_code": "5RESERVE",
+      "location_name": "Reserve"
+    },
+    {
+      "warehouse": "DUBAI",
+      "location_code": "TEMP",
+      "location_name": "Temporary"
+    }
+  ],
+  "timestamp": "2025-05-28T15:00:03.378813"
+}[0m
+
+[94m======== Testing: Filter Locations by Warehouse ========[0m
+[92m✓ PASS: Request succeeded as expected[0m
+[93m{
+  "status": "success",
+  "message": "Found 5 warehouse locations",
+  "count": 5,
+  "locations": [
+    {
+      "warehouse": "DON",
+      "location_code": "1HAI",
+      "location_name": "HAI"
+    },
+    {
+      "warehouse": "DON",
+      "location_code": "2STORAGE",
+      "location_name": "Storage"
+    },
+    {
+      "warehouse": "DON",
+      "location_code": "3SHOWROOM",
+      "location_name": "Showroom"
+    },
+    {
+      "warehouse": "DON",
+      "location_code": "4STAGING",
+      "location_name": "Staging"
+    },
+    {
+      "warehouse": "DON",
+      "location_code": "5RESERVE",
+      "location_name": "Reserve"
+    }
+  ],
+  "timestamp": "2025-05-28T15:00:03.398272"
+}[0m
+
+[94m================= TEST SUMMARY =================[0m
+Tests passed: 2/2
+[92m✓ All tests passed! Warehouse Locations API is working.[0m
+Running test_art_orders.py...
+[94m================= TESTING ART ORDERS API =================[0m
+
+[94m======== Testing: API Health Check ========[0m
+[92m✓ PASS: Request succeeded as expected[0m
+[93m{
+  "status": "healthy",
+  "message": "API is running and database is connected",
+  "timestamp": "2025-05-28T15:00:03.780134"
+}[0m
+
+[94m======== Testing: ART Orders API Health Check ========[0m
+[92m✓ PASS: Request succeeded as expected[0m
+[93m{
+  "status": "healthy",
+  "message": "ART Orders API endpoints are available",
+  "timestamp": "2025-05-28T15:00:03.785931"
+}[0m
+
+[94m======== Testing: Add Operation ========[0m
+[92m✓ PASS: Request succeeded as expected[0m
+[93m{
+  "status": "success",
+  "message": "Successfully added 50 units of SKU 4711M-50B to location 3SHOWROOM",
+  "operation_type": "Add",
+  "sku": "4711M-50B",
+  "quantity": 50,
+  "timestamp": "2025-05-28T15:00:03.811392",
+  "to_location": "3SHOWROOM",
+  "reason": "Restocking",
+  "operation_id": 5368
+}[0m
+
+[94m======== Testing: Remove Operation ========[0m
+[92m✓ PASS: Request succeeded as expected[0m
+[93m{
+  "status": "success",
+  "message": "Successfully removed 20 units of SKU 4711M-50B from location 1HAI",
+  "operation_type": "Remove",
+  "sku": "4711M-50B",
+  "quantity": 20,
+  "timestamp": "2025-05-28T15:00:03.823407",
+  "from_location": "1HAI",
+  "reason": "Damaged goods",
+  "operation_id": 5369
+}[0m
+
+[94m======== Testing: Transfer Operation ========[0m
+[92m✓ PASS: Request succeeded as expected[0m
+[93m{
+  "status": "success",
+  "message": "Successfully transferred 30 units of SKU 4711M-50B from location 1HAI to location 3SHOWROOM",
+  "operation_type": "Transfer",
+  "sku": "4711M-50B",
+  "quantity": 30,
+  "timestamp": "2025-05-28T15:00:03.837116",
+  "from_location": "1HAI",
+  "to_location": "3SHOWROOM",
+  "reason": "Reorganizing inventory",
+  "operation_id": 5370
+}[0m
+
+[94m======== Testing: Using qty instead of quantity ========[0m
+[92m✓ PASS: Request succeeded as expected[0m
+[93m{
+  "status": "success",
+  "message": "Successfully added 25 units of SKU 4711M-50B to location 3SHOWROOM",
+  "operation_type": "Add",
+  "sku": "4711M-50B",
+  "quantity": 25,
+  "timestamp": "2025-05-28T15:00:03.858054",
+  "to_location": "3SHOWROOM",
+  "reason": "Testing qty field",
+  "operation_id": 5371
+}[0m
+
+[94m======== Testing: Empty from_location String ========[0m
+[92m✓ PASS: Request failed as expected with status 422[0m
+[93m{
+  "detail": [
+    {
+      "type": "value_error",
+      "loc": [
+        "body",
+        "from_location"
+      ],
+      "msg": "Value error, Location cannot be empty",
+      "input": "",
+      "ctx": {
+        "error": {}
+      }
+    }
+  ]
+}[0m
+
+[94m======== Testing: Whitespace to_location String ========[0m
+[92m✓ PASS: Request failed as expected with status 422[0m
+[93m{
+  "detail": [
+    {
+      "type": "value_error",
+      "loc": [
+        "body",
+        "to_location"
+      ],
+      "msg": "Value error, Location cannot be empty",
+      "input": "   ",
+      "ctx": {
+        "error": {}
+      }
+    }
+  ]
+}[0m
+
+[94m======== Testing: Various Valid Location Formats ========[0m
+
+Testing location format: 3SHOWROOM
+[92m✓ PASS: Request succeeded as expected[0m
+[93m{
+  "status": "success",
+  "message": "Successfully added 10 units of SKU 4711M-50B to location 3SHOWROOM",
+  "operation_type": "Add",
+  "sku": "4711M-50B",
+  "quantity": 10,
+  "timestamp": "2025-05-28T15:00:03.903015",
+  "to_location": "3SHOWROOM",
+  "reason": "Testing location format: 3SHOWROOM",
+  "operation_id": 5372
+}[0m
+
+Testing location format: RACK-A1-01
+[92m✓ PASS: Request succeeded as expected[0m
+[93m{
+  "status": "success",
+  "message": "Successfully added 10 units of SKU 4711M-50B to location RACK-A1-01",
+  "operation_type": "Add",
+  "sku": "4711M-50B",
+  "quantity": 10,
+  "timestamp": "2025-05-28T15:00:03.919701",
+  "to_location": "RACK-A1-01",
+  "reason": "Testing location format: RACK-A1-01",
+  "operation_id": 5373
+}[0m
+
+Testing location format: DOCK
+[92m✓ PASS: Request succeeded as expected[0m
+[93m{
+  "status": "success",
+  "message": "Successfully added 10 units of SKU 4711M-50B to location DOCK",
+  "operation_type": "Add",
+  "sku": "4711M-50B",
+  "quantity": 10,
+  "timestamp": "2025-05-28T15:00:03.944360",
+  "to_location": "DOCK",
+  "reason": "Testing location format: DOCK",
+  "operation_id": 5374
+}[0m
+
+Testing location format: WAREHOUSE-123
+[92m✓ PASS: Request succeeded as expected[0m
+[93m{
+  "status": "success",
+  "message": "Successfully added 10 units of SKU 4711M-50B to location WAREHOUSE-123",
+  "operation_type": "Add",
+  "sku": "4711M-50B",
+  "quantity": 10,
+  "timestamp": "2025-05-28T15:00:03.967938",
+  "to_location": "WAREHOUSE-123",
+  "reason": "Testing location format: WAREHOUSE-123",
+  "operation_id": 5375
+}[0m
+
+Testing location format: Floor_1_Zone_B
+[92m✓ PASS: Request succeeded as expected[0m
+[93m{
+  "status": "success",
+  "message": "Successfully added 10 units of SKU 4711M-50B to location FLOOR_1_ZONE_B",
+  "operation_type": "Add",
+  "sku": "4711M-50B",
+  "quantity": 10,
+  "timestamp": "2025-05-28T15:00:03.985326",
+  "to_location": "FLOOR_1_ZONE_B",
+  "reason": "Testing location format: Floor_1_Zone_B",
+  "operation_id": 5376
+}[0m
+
+Testing location format: 12345
+[92m✓ PASS: Request succeeded as expected[0m
+[93m{
+  "status": "success",
+  "message": "Successfully added 10 units of SKU 4711M-50B to location 12345",
+  "operation_type": "Add",
+  "sku": "4711M-50B",
+  "quantity": 10,
+  "timestamp": "2025-05-28T15:00:04.001423",
+  "to_location": "12345",
+  "reason": "Testing location format: 12345",
+  "operation_id": 5377
+}[0m
+[92m✓ PASS: All location formats test[0m
+
+[94m======== Testing: Insufficient Stock (Simulated) ========[0m
+[92m✓ PASS: Request failed as expected with status 400[0m
+[93m{
+  "detail": {
+    "status": "error",
+    "message": "Insufficient stock of SKU 4711M-50B at location 1HAI",
+    "error_code": "INSUFFICIENT_STOCK",
+    "timestamp": "2025-05-28T15:00:04.013116"
+  }
+}[0m
+
+[94m======== Testing: Invalid SKU ========[0m
+[92m✓ PASS: Request failed as expected with status 404[0m
+[93m{
+  "detail": {
+    "status": "error",
+    "message": "SKU NONEXISTENT-SKU does not exist in the products table",
+    "error_code": "INVALID_SKU",
+    "timestamp": "2025-05-28T15:00:04.021077"
+  }
+}[0m
+
+[94m======== Testing: Missing from_location in Remove Operation ========[0m
+[92m✓ PASS: Request failed as expected with status 422[0m
+[93m{
+  "detail": [
+    {
+      "type": "value_error",
+      "loc": [
+        "body"
+      ],
+      "msg": "Value error, from_location is required for Remove operations",
+      "input": {
+        "type": "Remove",
+        "sku": "4711M-50B",
+        "quantity": 20
+      },
+      "ctx": {
+        "error": {}
+      }
+    }
+  ]
+}[0m
+
+[94m======== Testing: Missing to_location in Add Operation ========[0m
+[92m✓ PASS: Request failed as expected with status 422[0m
+[93m{
+  "detail": [
+    {
+      "type": "value_error",
+      "loc": [
+        "body"
+      ],
+      "msg": "Value error, to_location is required for Add operations",
+      "input": {
+        "type": "Add",
+        "sku": "4711M-50B",
+        "quantity": 50
+      },
+      "ctx": {
+        "error": {}
+      }
+    }
+  ]
+}[0m
+
+[94m======== Testing: Same Locations for Transfer ========[0m
+[92m✓ PASS: Request failed as expected with status 422[0m
+[93m{
+  "detail": [
+    {
+      "type": "value_error",
+      "loc": [
+        "body"
+      ],
+      "msg": "Value error, from_location and to_location cannot be the same for Transfer operations",
+      "input": {
+        "type": "Transfer",
+        "sku": "4711M-50B",
+        "quantity": 30,
+        "from_location": "3SHOWROOM",
+        "to_location": "3SHOWROOM",
+        "reason": "This should fail"
+      },
+      "ctx": {
+        "error": {}
+      }
+    }
+  ]
+}[0m
+
+[94m================= TEST SUMMARY =================[0m
+Tests passed: 12/12
+[92m✓ All tests passed! ART Orders API is working.[0m
+Testing Orders APIs...
+
+Running test_purchase_orders.py...
+[94m================= TESTING ENHANCED PURCHASE ORDER SEARCH API =================[0m
+
+[94m======== Testing: API Health Check ========[0m
+[92m✓ PASS: Request succeeded as expected[0m
+[93m{
+  "status": "healthy",
+  "message": "API is running and database is connected",
+  "timestamp": "2025-05-28T15:00:04.412582"
+}[0m
+
+[94m======== Testing: Purchase Orders API Health Check ========[0m
+[92m✓ PASS: Request succeeded as expected[0m
+[93m{
+  "status": "healthy",
+  "message": "Purchase Order API endpoints are available",
+  "timestamp": "2025-05-28T15:00:04.423204"
+}[0m
+
+[94m======== Testing: Find Purchase Order by PO Number ========[0m
+[92m✓ PASS: Request succeeded as expected[0m
+[93m{
+  "status": "success",
+  "message": "Found 26 matching purchase orders",
+  "results": [
+    {
+      "po_number": "SVPO2000300004",
+      "status": "PartiallyReceived",
+      "supplier_name": "PutawayTest",
+      "created_date": "2024-07-13T02:30:02.5006437Z",
+      "order_date": "2024-07-12T04:00:00.0000000Z",
+      "arrival_due_date": "2024-07-12T04:00:00.0000000Z",
+      "ship_to_warehouse": "N/A"
+    },
+    {
+      "po_number": "SVPO2000300011",
+      "status": "In Progress",
+      "supplier_name": "Perfume Network",
+      "created_date": "2025-01-28T16:03:37.4157150Z",
+      "order_date": "2025-01-28T05:00:00.0000000Z",
+      "arrival_due_date": "2025-02-03T05:00:00.0000000Z",
+      "ship_to_warehouse": "AGP23"
+    },
+    {
+      "po_number": "SVPO2000300012",
+      "status": "In Progress",
+      "supplier_name": "A.A. Irie Perfume",
+      "created_date": "2025-01-28T16:20:26.5322339Z",
+      "order_date": "2025-01-28T05:00:00.0000000Z",
+      "arrival_due_date": "2025-02-03T05:00:00.0000000Z",
+      "ship_to_warehouse": "AGP23"
+    },
+    {
+      "po_number": "SVPO2000300013",
+      "status": "Completed",
+      "supplier_name": "House Of Brands",
+      "created_date": "2025-01-28T16:48:07.8365823Z",
+      "order_date": "2025-01-28T05:00:00.0000000Z",
+      "arrival_due_date": "2025-02-03T05:00:00.0000000Z",
+      "ship_to_warehouse": "AGP23"
+    },
+    {
+      "po_number": "SVPO2000300014",
+      "status": "In Progress",
+      "supplier_name": "Al Alba",
+      "created_date": "2025-01-28T17:01:55.4645072Z",
+      "order_date": "2025-01-28T05:00:00.0000000Z",
+      "arrival_due_date": "2025-02-11T05:00:00.0000000Z",
+      "ship_to_warehouse": "AGP23"
+    },
+    {
+      "po_number": "SVPO2000300015",
+      "status": "In Progress",
+      "supplier_name": "Al Hussein",
+      "created_date": "2025-01-28T17:12:07.5146577Z",
+      "order_date": "2025-01-28T05:00:00.0000000Z",
+      "arrival_due_date": "2025-02-03T05:00:00.0000000Z",
+      "ship_to_warehouse": "AGP23"
+    },
+    {
+      "po_number": "SVPO2000300016",
+      "status": "In Progress",
+      "supplier_name": "Avyos Cosmotrade LLC",
+      "created_date": "2025-01-28T17:39:48.8522586Z",
+      "order_date": "2025-01-28T05:00:00.0000000Z",
+      "arrival_due_date": "2025-01-31T05:00:00.0000000Z",
+      "ship_to_warehouse": "AGP23"
+    },
+    {
+      "po_number": "SVPO2000300017",
+      "status": "In Progress",
+      "supplier_name": "HAZ International Inc",
+      "created_date": "2025-01-28T18:18:47.7495339Z",
+      "order_date": "2025-01-28T05:00:00.0000000Z",
+      "arrival_due_date": "2025-01-31T05:00:00.0000000Z",
+      "ship_to_warehouse": "AGP23"
+    },
+    {
+      "po_number": "SVPO2000300018",
+      "status": "NoneReceived",
+      "supplier_name": "Sanya International",
+      "created_date": "2025-01-28T18:51:36.8470771Z",
+      "order_date": "2025-01-28T05:00:00.0000000Z",
+      "arrival_due_date": "2025-02-03T05:00:00.0000000Z",
+      "ship_to_warehouse": "AGP23"
+    },
+    {
+      "po_number": "SVPO2000300019",
+      "status": "NoneReceived",
+      "supplier_name": "Scents Forever",
+      "created_date": "2025-01-28T20:23:06.5748100Z",
+      "order_date": "2025-01-28T05:00:00.0000000Z",
+      "arrival_due_date": "2025-02-03T05:00:00.0000000Z",
+      "ship_to_warehouse": "AGP23"
+    },
+    {
+      "po_number": "SVPO2000300020",
+      "status": "NoneReceived",
+      "supplier_name": "Perfume Center of America",
+      "created_date": "2025-01-28T21:24:57.1092753Z",
+      "order_date": "2025-01-28T05:00:00.0000000Z",
+      "arrival_due_date": "2025-01-28T05:00:00.0000000Z",
+      "ship_to_warehouse": "AGP23"
+    },
+    {
+      "po_number": "SVPO2000300021",
+      "status": "NoneReceived",
+      "supplier_name": "Perfumeria Internacional",
+      "created_date": "2025-01-29T18:37:40.8901378Z",
+      "order_date": "2025-01-29T05:00:00.0000000Z",
+      "arrival_due_date": "2025-01-29T05:00:00.0000000Z",
+      "ship_to_warehouse": "AGP23"
+    },
+    {
+      "po_number": "SVPO2000300022",
+      "status": "NoneReceived",
+      "supplier_name": "B&S Fragrances",
+      "created_date": "2025-01-29T20:52:34.0325166Z",
+      "order_date": "2025-01-29T05:00:00.0000000Z",
+      "arrival_due_date": "2025-01-29T05:00:00.0000000Z",
+      "ship_to_warehouse": "AGP23"
+    },
+    {
+      "po_number": "SVPO2000300023",
+      "status": "NoneReceived",
+      "supplier_name": "Affinity Fragrances",
+      "created_date": "2025-01-29T21:35:32.9792264Z",
+      "order_date": "2025-01-29T05:00:00.0000000Z",
+      "arrival_due_date": "2025-01-29T05:00:00.0000000Z",
+      "ship_to_warehouse": "AGP23"
+    },
+    {
+      "po_number": "SVPO2000300024",
+      "status": "NoneReceived",
+      "supplier_name": "Perfume International",
+      "created_date": "2025-01-29T21:55:11.0122121Z",
+      "order_date": "2025-01-29T05:00:00.0000000Z",
+      "arrival_due_date": "2025-01-29T05:00:00.0000000Z",
+      "ship_to_warehouse": "AGP23"
+    },
+    {
+      "po_number": "SVPO2000300025",
+      "status": "NoneReceived",
+      "supplier_name": "TJS",
+      "created_date": "2025-01-30T01:18:08.5478130Z",
+      "order_date": "2025-01-29T05:00:00.0000000Z",
+      "arrival_due_date": "2025-02-04T05:00:00.0000000Z",
+      "ship_to_warehouse": "AGP23"
+    },
+    {
+      "po_number": "SVPO2000300026",
+      "status": "NoneReceived",
+      "supplier_name": "3B International",
+      "created_date": "2025-01-30T01:30:00.0991984Z",
+      "order_date": "2025-01-29T05:00:00.0000000Z",
+      "arrival_due_date": "2025-02-04T05:00:00.0000000Z",
+      "ship_to_warehouse": "AGP23"
+    },
+    {
+      "po_number": "SVPO2000300027",
+      "status": "NoneReceived",
+      "supplier_name": "Grand Empire",
+      "created_date": "2025-01-30T01:50:07.9847505Z",
+      "order_date": "2025-01-29T05:00:00.0000000Z",
+      "arrival_due_date": "2025-02-07T05:00:00.0000000Z",
+      "ship_to_warehouse": "AGP23"
+    },
+    {
+      "po_number": "SVPO2000300028",
+      "status": "NoneReceived",
+      "supplier_name": "P&C",
+      "created_date": "2025-01-30T06:13:47.1969233Z",
+      "order_date": "2025-01-29T05:00:00.0000000Z",
+      "arrival_due_date": "2025-01-29T05:00:00.0000000Z",
+      "ship_to_warehouse": "N/A"
+    },
+    {
+      "po_number": "SVPO2000300029",
+      "status": "NoneReceived",
+      "supplier_name": "Perfumeria Miralls",
+      "created_date": "2025-01-30T06:55:02.4214225Z",
+      "order_date": "2025-01-30T05:00:00.0000000Z",
+      "arrival_due_date": "2025-01-30T05:00:00.0000000Z",
+      "ship_to_warehouse": "N/A"
+    },
+    {
+      "po_number": "SVPO2000300030",
+      "status": "NoneReceived",
+      "supplier_name": "Fragrance Unlimited II",
+      "created_date": "2025-01-30T18:42:12.5640195Z",
+      "order_date": "2025-01-30T05:00:00.0000000Z",
+      "arrival_due_date": "2025-01-30T05:00:00.0000000Z",
+      "ship_to_warehouse": "AGP23"
+    },
+    {
+      "po_number": "SVPO2000300031",
+      "status": "In Progress",
+      "supplier_name": "Khanji UAE",
+      "created_date": "2025-01-30T19:01:41.9489907Z",
+      "order_date": "2025-01-30T05:00:00.0000000Z",
+      "arrival_due_date": "2025-02-06T05:00:00.0000000Z",
+      "ship_to_warehouse": "AGP23"
+    },
+    {
+      "po_number": "SVPO2000300032",
+      "status": "NoneReceived",
+      "supplier_name": "Perfume Price",
+      "created_date": "2025-01-30T19:51:28.8324659Z",
+      "order_date": "2025-01-30T05:00:00.0000000Z",
+      "arrival_due_date": "2025-02-04T05:00:00.0000000Z",
+      "ship_to_warehouse": "AGP23"
+    },
+    {
+      "po_number": "SVPO2000300033",
+      "status": "NoneReceived",
+      "supplier_name": "MB Fragrances",
+      "created_date": "2025-01-30T21:51:11.9578449Z",
+      "order_date": "2025-01-30T05:00:00.0000000Z",
+      "arrival_due_date": "2025-02-05T05:00:00.0000000Z",
+      "ship_to_warehouse": "AGP23"
+    },
+    {
+      "po_number": "SVPO2000300034",
+      "status": "In Progress",
+      "supplier_name": "Lux Memories",
+      "created_date": "2025-01-31T02:44:31.3226066Z",
+      "order_date": "2025-01-30T05:00:00.0000000Z",
+      "arrival_due_date": "2025-02-13T05:00:00.0000000Z",
+      "ship_to_warehouse": "AGP23"
+    },
+    {
+      "po_number": "SVPO2000300035",
+      "status": "In Progress",
+      "supplier_name": "A.A. Irie Perfume",
+      "created_date": "2025-01-31T15:59:21.3700841Z",
+      "order_date": "2025-01-31T05:00:00.0000000Z",
+      "arrival_due_date": "2025-02-06T05:00:00.0000000Z",
+      "ship_to_warehouse": "AGP23"
+    }
+  ],
+  "count": 26,
+  "timestamp": "2025-05-28T15:00:04.435466"
+}[0m
+[92m✓ PASS: Found 26 purchase orders matching the PO number pattern[0m
+
+[94m======== Testing: Find Purchase Order by Specific PO Number ========[0m
+[92m✓ PASS: Request succeeded as expected[0m
+[93m{
+  "status": "success",
+  "message": "Found 1 matching purchase orders",
+  "results": [
+    {
+      "po_number": "SVPO2000300015",
+      "status": "In Progress",
+      "supplier_name": "Al Hussein",
+      "created_date": "2025-01-28T17:12:07.5146577Z",
+      "order_date": "2025-01-28T05:00:00.0000000Z",
+      "arrival_due_date": "2025-02-03T05:00:00.0000000Z",
+      "ship_to_warehouse": "AGP23"
+    }
+  ],
+  "count": 1,
+  "timestamp": "2025-05-28T15:00:04.449444"
+}[0m
+[92m✓ PASS: Found 1 purchase orders with the exact PO number[0m
+
+[94m======== Testing: Find Purchase Order by Supplier Name ========[0m
+[92m✓ PASS: Request succeeded as expected[0m
+[93m{
+  "status": "success",
+  "message": "Found 1 matching purchase orders",
+  "results": [
+    {
+      "po_number": "SVPO2000300015",
+      "status": "In Progress",
+      "supplier_name": "Al Hussein",
+      "created_date": "2025-01-28T17:12:07.5146577Z",
+      "order_date": "2025-01-28T05:00:00.0000000Z",
+      "arrival_due_date": "2025-02-03T05:00:00.0000000Z",
+      "ship_to_warehouse": "AGP23"
+    }
+  ],
+  "count": 1,
+  "timestamp": "2025-05-28T15:00:04.473202"
+}[0m
+[92m✓ PASS: Found purchase orders from the specified supplier[0m
+
+[94m======== Testing: Find Purchase Order by Non-existent Text ========[0m
+[92m✓ PASS: Request succeeded as expected[0m
+[93m{
+  "status": "success",
+  "message": "No matching purchase orders found",
+  "results": [],
+  "count": 0,
+  "timestamp": "2025-05-28T15:00:04.484774"
+}[0m
+[92m✓ PASS: Returned empty results for non-existent text as expected[0m
+
+[94m======== Testing: Invalid Request - Missing Fields ========[0m
+[92m✓ PASS: Request failed as expected with status 422[0m
+[93m{
+  "detail": [
+    {
+      "type": "value_error",
+      "loc": [
+        "body"
+      ],
+      "msg": "Value error, Either po_number or barcode must be provided",
+      "input": {},
+      "ctx": {
+        "error": {}
+      }
+    }
+  ]
+}[0m
+
+[94m======== Testing: Find Purchase Order by Barcode ========[0m
+[92m✓ PASS: Request succeeded as expected[0m
+[93m{
+  "status": "success",
+  "message": "Found 1 matching purchase orders",
+  "results": [
+    {
+      "po_number": "PO-TEST-002",
+      "status": "In Progress",
+      "supplier_name": "Test Supplier B",
+      "created_date": "2025-03-05",
+      "order_date": "2025-03-06",
+      "arrival_due_date": "2025-03-30",
+      "ship_to_warehouse": "Warehouse B"
+    }
+  ],
+  "count": 1,
+  "timestamp": "2025-05-28T15:00:04.524455"
+}[0m
+
+[94m======== Testing: Find Purchase Order by Multiple Barcodes ========[0m
+[92m✓ PASS: Request succeeded as expected[0m
+[93m{
+  "status": "success",
+  "message": "No matching purchase orders found",
+  "results": [],
+  "count": 0,
+  "timestamp": "2025-05-28T15:00:04.579743"
+}[0m
+
+[94m======== Testing: Find Purchase Order by Invalid Barcode List ========[0m
+[92m✓ PASS: Request failed as expected with status 422[0m
+[93m{
+  "detail": [
+    {
+      "type": "value_error",
+      "loc": [
+        "body",
+        "barcode"
+      ],
+      "msg": "Value error, Barcode 123 must be between 8 and 14 digits",
+      "input": [
+        "1234567890123",
+        "123"
+      ],
+      "ctx": {
+        "error": {}
+      }
+    }
+  ]
+}[0m
+
+[94m================= TEST SUMMARY =================[0m
+Tests passed: 8/8
+[92m✓ All tests passed! Enhanced Purchase Order Search API is working.[0m
+Running test_get_purchase_order.py...
+[94m================= TESTING GET PURCHASE ORDER API =================[0m
+
+[94m======== Testing: API Health Check ========[0m
+[92m✓ PASS: Request succeeded as expected[0m
+[93m{
+  "status": "healthy",
+  "message": "API is running and database is connected",
+  "timestamp": "2025-05-28T15:00:04.994628"
+}[0m
+
+[94m======== Testing: Purchase Orders API Health Check ========[0m
+[92m✓ PASS: Request succeeded as expected[0m
+[93m{
+  "status": "healthy",
+  "message": "Purchase Order API endpoints are available",
+  "timestamp": "2025-05-28T15:00:05.006303"
+}[0m
+
+[94m======== Testing: Get Existing Purchase Order ========[0m
+[92m✓ PASS: Request succeeded as expected[0m
+[93m{
+  "status": "success",
+  "message": "Found 8 items in purchase order SVPO2000300015",
+  "purchase_order": {
+    "po_number": "SVPO2000300015",
+    "status": "In Progress",
+    "supplier_name": "Al Hussein",
+    "created_date": "2025-01-28T17:12:07.5146577Z",
+    "order_date": "2025-01-28T05:00:00.0000000Z",
+    "arrival_due_date": "2025-02-03T05:00:00.0000000Z",
+    "ship_to_warehouse": "AGP23"
+  },
+  "items": [
+    {
+      "sku": "FWAETHEREXM-100B",
+      "quantity": 96,
+      "description": "Fragrance World Aether Extrait de Parfum M 100ml Boxed"
+    },
+    {
+      "sku": "LATAFAM-100B",
+      "quantity": 96,
+      "description": "Lattafa Fakhar M Edp 100ml Boxed"
+    },
+    {
+      "sku": "FWAFTEFFEXTM-100B",
+      "quantity": 48,
+      "description": "Fragrance World After Effect Extrait De Parfum M 80ml Boxed"
+    },
+    {
+      "sku": "LATSOEDPW-100B",
+      "quantity": 48,
+      "description": "Lattafa Sondos EDP W 100ml Boxed"
+    },
+    {
+      "sku": "FWWINTM-100B",
+      "quantity": 96,
+      "description": "Fragrance World  Whiskey Intense M 100ml Boxed"
+    },
+    {
+      "sku": "RASITSESM-100B",
+      "quantity": 120,
+      "description": "Rasasi It's Essential M 100ml Boxed"
+    },
+    {
+      "sku": "LATAFAW-100B",
+      "quantity": 96,
+      "description": "Lattafa Fakhar EDP W 100ml Boxed"
+    },
+    {
+      "sku": "FRGWAPBSM-80B",
+      "quantity": 48,
+      "description": "Fragrance World Artisan Perfume Brown Sugar EDP M 100ml Boxed"
+    }
+  ],
+  "total_quantity": 648,
+  "timestamp": "2025-05-28T15:00:05.034805"
+}[0m
+[92m✓ PASS: Response contains items array[0m
+[92m✓ PASS: Response contains total_quantity[0m
+[92m✓ PASS: Contains expected number of items (found: 8, expected: 8)[0m
+
+[94m======== Testing: Get Non-existent Purchase Order ========[0m
+[92m✓ PASS: Request failed as expected with status 404[0m
+[93m{
+  "detail": {
+    "status": "error",
+    "message": "Purchase order NONEXISTENT-PO-123456789 not found in the system",
+    "error_code": "PO_NOT_FOUND",
+    "timestamp": "2025-05-28T15:00:05.057439"
+  }
+}[0m
+
+[94m======== Testing: Missing PO Number ========[0m
+[92m✓ PASS: Request failed as expected with status 422[0m
+[93m{
+  "detail": [
+    {
+      "type": "missing",
+      "loc": [
+        "body",
+        "po_number"
+      ],
+      "msg": "Field required",
+      "input": {}
+    }
+  ]
+}[0m
+
+[94m======== Testing: Empty PO Number ========[0m
+[92m✓ PASS: Request failed as expected with status 422[0m
+[93m{
+  "detail": [
+    {
+      "type": "value_error",
+      "loc": [
+        "body",
+        "po_number"
+      ],
+      "msg": "Value error, PO number cannot be empty",
+      "input": "",
+      "ctx": {
+        "error": {}
+      }
+    }
+  ]
+}[0m
+
+[94m================= TEST SUMMARY =================[0m
+Tests passed: 4/4
+[92m✓ All tests passed! Get Purchase Order API is working.[0m
+Running test_update_po_status.py...
+[94m================= TESTING UPDATE PO STATUS API =================[0m
+
+[94m======== Testing: API Health Check ========[0m
+[92m✓ PASS: Request succeeded as expected[0m
+[93m{
+  "status": "healthy",
+  "message": "API is running and database is connected",
+  "timestamp": "2025-05-28T15:00:05.497797"
+}[0m
+
+[94m======== Testing: Purchase Orders API Health Check ========[0m
+[92m✓ PASS: Request succeeded as expected[0m
+[93m{
+  "status": "healthy",
+  "message": "Purchase Order API endpoints are available",
+  "timestamp": "2025-05-28T15:00:05.504325"
+}[0m
+
+[94m======== Testing: Update PO Status to Complete ========[0m
+[92m✓ PASS: Request succeeded as expected[0m
+[93m{
+  "status": "success",
+  "message": "Purchase order PO-TEST-001 status updated to Completed",
+  "po_number": "PO-TEST-001",
+  "timestamp": "2025-05-28T15:00:05.528410",
+  "partner_api_notification": {
+    "success": true,
+    "timestamp": "2025-05-28T15:00:05.528350"
+  }
+}[0m
+
+[94m======== Testing: Update PO Status to Incomplete ========[0m
+[92m✓ PASS: Request succeeded as expected[0m
+[93m{
+  "status": "success",
+  "message": "Purchase order PO-TEST-002 status updated to In Progress",
+  "po_number": "PO-TEST-002",
+  "timestamp": "2025-05-28T15:00:05.538890"
+}[0m
+
+[94m======== Testing: Update Non-existent PO ========[0m
+[92m✓ PASS: Request failed as expected with status 404[0m
+[93m{
+  "detail": {
+    "status": "error",
+    "message": "Purchase order NONEXISTENT-PO not found in the system",
+    "error_code": "PO_NOT_FOUND",
+    "timestamp": "2025-05-28T15:00:05.549307"
+  }
+}[0m
+
+[94m======== Testing: Missing Status ========[0m
+[92m✓ PASS: Request failed as expected with status 422[0m
+[93m{
+  "detail": [
+    {
+      "type": "missing",
+      "loc": [
+        "body",
+        "status"
+      ],
+      "msg": "Field required",
+      "input": {
+        "po_number": "PO-TEST-001"
+      }
+    }
+  ]
+}[0m
+
+[94m======== Testing: Missing PO Number ========[0m
+[92m✓ PASS: Request failed as expected with status 422[0m
+[93m{
+  "detail": [
+    {
+      "type": "missing",
+      "loc": [
+        "body",
+        "po_number"
+      ],
+      "msg": "Field required",
+      "input": {
+        "status": "Complete"
+      }
+    }
+  ]
+}[0m
+
+[94m======== Testing: Invalid Status ========[0m
+[92m✓ PASS: Request failed as expected with status 422[0m
+[93m{
+  "detail": [
+    {
+      "type": "literal_error",
+      "loc": [
+        "body",
+        "status"
+      ],
+      "msg": "Input should be 'Complete' or 'Incomplete'",
+      "input": "Invalid",
+      "ctx": {
+        "expected": "'Complete' or 'Incomplete'"
+      }
+    }
+  ]
+}[0m
+
+[94m================= TEST SUMMARY =================[0m
+Tests passed: 6/6
+[92m✓ All tests passed! Update PO Status API is working.[0m
+Testing Replenishment APIs...
+
+Running test_ro_complete.py...
+[94m================= TESTING REPLENISHMENT COMPLETE API =================[0m
+
+[94m======== Testing: API Health Check ========[0m
+[92m✓ PASS: Request succeeded as expected[0m
+[93m{
+  "status": "healthy",
+  "message": "API is running and database is connected",
+  "timestamp": "2025-05-28T15:00:05.907569"
+}[0m
+
+[94m======== Testing: Replenishment API Health Check ========[0m
+[92m✓ PASS: Request succeeded as expected[0m
+[93m{
+  "status": "healthy",
+  "message": "Replenishment API endpoints are available",
+  "timestamp": "2025-05-28T15:00:05.915237"
+}[0m
+
+[94m======== Testing: Complete Invalid Order ID ========[0m
+[92m✓ PASS: Request failed as expected with status 404[0m
+[93m{
+  "detail": {
+    "status": "error",
+    "message": "Replenishment order NONEXISTENT-RO not found",
+    "error_code": "RO_NOT_FOUND",
+    "timestamp": "2025-05-28T15:00:05.930079"
+  }
+}[0m
+
+[94m======== Testing: Complete with Empty Order ID ========[0m
+[92m✓ PASS: Request failed as expected with status 422[0m
+[93m{
+  "detail": [
+    {
+      "type": "value_error",
+      "loc": [
+        "body",
+        "ro_id"
+      ],
+      "msg": "Value error, Replenishment Order ID cannot be empty",
+      "input": "",
+      "ctx": {
+        "error": {}
+      }
+    }
+  ]
+}[0m
+
+[94m======== Testing: Complete Valid Order (all items picked) ========[0m
+
+[94m======== Testing: Preparing an order for completion ========[0m
+[92m✓ PASS: Request succeeded as expected[0m
+[93m{
+  "status": "success",
+  "message": "No active replenishment orders found",
+  "orders": [],
+  "count": 0,
+  "timestamp": "2025-05-28T15:00:05.948305"
+}[0m
+[91m✗ FAIL: Could not get orders list for testing[0m
+[91m✗ FAIL: Could not prepare a test order[0m
+
+[94m======== Testing: Complete Already Completed Order ========[0m
+[92m✓ PASS: Request succeeded as expected[0m
+[93m{
+  "status": "success",
+  "message": "No active replenishment orders found",
+  "orders": [],
+  "count": 0,
+  "timestamp": "2025-05-28T15:00:05.960761"
+}[0m
+
+[94m======== Testing: Preparing an order for completion ========[0m
+[92m✓ PASS: Request succeeded as expected[0m
+[93m{
+  "status": "success",
+  "message": "No active replenishment orders found",
+  "orders": [],
+  "count": 0,
+  "timestamp": "2025-05-28T15:00:05.969776"
+}[0m
+[91m✗ FAIL: Could not get orders list for testing[0m
+[91m✗ FAIL: Could not prepare a completed order for testing[0m
+
+[94m================= TEST SUMMARY =================[0m
+API health check: ✓
+Complete with invalid order ID: ✓
+Complete with empty order ID: ✓
+Complete valid order: ✗
+Complete already completed order: ✗
+[91m✗ Some tests failed. Check the details above.[0m
+Running test_ro_get_orders.py...
+[94m================= TESTING REPLENISHMENT ORDER GET API =================[0m
+
+[94m======== Testing: API Health Check ========[0m
+[92m✓ PASS: Request succeeded as expected[0m
+[93m{
+  "status": "healthy",
+  "message": "API is running and database is connected",
+  "timestamp": "2025-05-28T15:00:06.269767"
+}[0m
+
+[94m======== Testing: Replenishment API Health Check ========[0m
+[92m✓ PASS: Request succeeded as expected[0m
+[93m{
+  "status": "healthy",
+  "message": "Replenishment API endpoints are available",
+  "timestamp": "2025-05-28T15:00:06.275748"
+}[0m
+
+[94m======== Testing: Get Active Replenishment Orders ========[0m
+[92m✓ PASS: Request succeeded as expected[0m
+[93m{
+  "status": "success",
+  "message": "No active replenishment orders found",
+  "orders": [],
+  "count": 0,
+  "timestamp": "2025-05-28T15:00:06.283490"
+}[0m
+
+[94m======== Testing: Verifying Replenishment Orders Response ========[0m
+[92m✓ PASS: Response contains all expected keys[0m
+[92m✓ PASS: Response contains orders list[0m
+[92m✓ PASS: No orders to verify[0m
+
+[94m================= TEST SUMMARY =================[0m
+API call successful: ✓
+Response data valid: ✓
+[92m✓ All tests passed! ro_get_orders API is working correctly.[0m
+Running test_ro_item_picked.py...
+[94m================= TESTING REPLENISHMENT ITEM PICKED API =================[0m
+
+[94m======== Testing: API Health Check ========[0m
+[92m✓ PASS: Request succeeded as expected[0m
+[93m{
+  "status": "healthy",
+  "message": "API is running and database is connected",
+  "timestamp": "2025-05-28T15:00:06.582520"
+}[0m
+
+[94m======== Testing: Replenishment API Health Check ========[0m
+[92m✓ PASS: Request succeeded as expected[0m
+[93m{
+  "status": "healthy",
+  "message": "Replenishment API endpoints are available",
+  "timestamp": "2025-05-28T15:00:06.587377"
+}[0m
+
+[94m======== Testing: Update Item Picked - Valid Data ========[0m
+[92m✓ PASS: Request succeeded as expected[0m
+[93m{
+  "status": "success",
+  "message": "No active replenishment orders found",
+  "orders": [],
+  "count": 0,
+  "timestamp": "2025-05-28T15:00:06.594652"
+}[0m
+[91m✗ FAIL: Could not get a valid order ID for testing[0m
+
+[94m======== Testing: Update Item Picked - Invalid RO ID ========[0m
+[92m✓ PASS: Request failed as expected with status 404[0m
+[93m{
+  "detail": {
+    "status": "error",
+    "message": "Item with SKU 212SM-50B at location 123-456-789 not found in replenishment order NONEXISTENT-RO",
+    "error_code": "ITEM_NOT_FOUND",
+    "timestamp": "2025-05-28T15:00:06.603613"
+  }
+}[0m
+
+[94m======== Testing: Update Item Picked - Invalid SKU ========[0m
+[92m✓ PASS: Request succeeded as expected[0m
+[93m{
+  "status": "success",
+  "message": "No active replenishment orders found",
+  "orders": [],
+  "count": 0,
+  "timestamp": "2025-05-28T15:00:06.612056"
+}[0m
+[91m✗ FAIL: Could not get a valid order ID for testing[0m
+
+[94m======== Testing: Update Item Picked - Negative Quantity ========[0m
+[92m✓ PASS: Request succeeded as expected[0m
+[93m{
+  "status": "success",
+  "message": "No active replenishment orders found",
+  "orders": [],
+  "count": 0,
+  "timestamp": "2025-05-28T15:00:06.621498"
+}[0m
+[91m✗ FAIL: Could not get a valid order ID for testing[0m
+
+[94m======== Testing: Complete Entire Order ========[0m
+[92m✓ PASS: Request succeeded as expected[0m
+[93m{
+  "status": "success",
+  "message": "No active replenishment orders found",
+  "orders": [],
+  "count": 0,
+  "timestamp": "2025-05-28T15:00:06.631589"
+}[0m
+[91m✗ FAIL: Could not get a valid order ID for testing[0m
+
+[94m================= TEST SUMMARY =================[0m
+API health check: ✓
+Update with valid data: ✗
+Update with invalid RO ID: ✓
+Update with invalid SKU: ✗
+Update with negative quantity: ✗
+Complete entire order: ✗
+[91m✗ Some tests failed. Check the details above.[0m
+Running test_ro_pick_cancelled.py...
+[94m================= TESTING REPLENISHMENT PICK CANCELLED API =================[0m
+
+[94m======== Testing: API Health Check ========[0m
+[92m✓ PASS: Request succeeded as expected[0m
+[93m{
+  "status": "healthy",
+  "message": "API is running and database is connected",
+  "timestamp": "2025-05-28T15:00:06.973423"
+}[0m
+
+[94m======== Testing: Replenishment API Health Check ========[0m
+[92m✓ PASS: Request succeeded as expected[0m
+[93m{
+  "status": "healthy",
+  "message": "Replenishment API endpoints are available",
+  "timestamp": "2025-05-28T15:00:06.979196"
+}[0m
+
+[94m======== Testing: Cancel Invalid Order ID ========[0m
+[92m✓ PASS: Request failed as expected with status 404[0m
+[93m{
+  "detail": {
+    "status": "error",
+    "message": "Replenishment order NONEXISTENT-RO not found",
+    "error_code": "RO_NOT_FOUND",
+    "timestamp": "2025-05-28T15:00:06.989153"
+  }
+}[0m
+
+[94m======== Testing: Cancel with Empty Order ID ========[0m
+[92m✓ PASS: Request failed as expected with status 422[0m
+[93m{
+  "detail": [
+    {
+      "type": "value_error",
+      "loc": [
+        "body",
+        "ro_id"
+      ],
+      "msg": "Value error, Replenishment Order ID cannot be empty",
+      "input": "",
+      "ctx": {
+        "error": {}
+      }
+    }
+  ]
+}[0m
+
+[94m======== Testing: Cancel Unassigned Order ========[0m
+[92m✓ PASS: Request succeeded as expected[0m
+[93m{
+  "status": "success",
+  "message": "No active replenishment orders found",
+  "orders": [],
+  "count": 0,
+  "timestamp": "2025-05-28T15:00:07.014786"
+}[0m
+[91m✗ FAIL: Could not get orders list for testing[0m
+
+[94m======== Testing: Cancel Valid In Process Order ========[0m
+
+[94m======== Testing: Finding an In Process order ========[0m
+[92m✓ PASS: Request succeeded as expected[0m
+[93m{
+  "status": "success",
+  "message": "No active replenishment orders found",
+  "orders": [],
+  "count": 0,
+  "timestamp": "2025-05-28T15:00:07.023425"
+}[0m
+[91m✗ FAIL: Could not get orders list for testing[0m
+[91m✗ FAIL: Could not find a valid order for testing[0m
+
+[94m================= TEST SUMMARY =================[0m
+API health check: ✓
+Cancel with invalid order ID: ✓
+Cancel with empty order ID: ✓
+Cancel Unassigned order (should fail): ✗
+Cancel valid In Process order: ✗
+[91m✗ Some tests failed. Check the details above.[0m
+Testing Products APIs...
+
+Running test_product_search.py...
+[94m================= TESTING PRODUCT SEARCH API WITH IMAGES =================[0m
+
+[94m======== Testing: API Health Check ========[0m
+[92m✓ PASS: Request succeeded as expected[0m
+[93m{
+  "status": "healthy",
+  "message": "API is running and database is connected",
+  "timestamp": "2025-05-28T15:00:07.342121"
+}[0m
+
+[94m======== Testing: Product API Health Check ========[0m
+[92m✓ PASS: Request succeeded as expected[0m
+[93m{
+  "status": "healthy",
+  "message": "Product search API endpoint is available",
+  "timestamp": "2025-05-28T15:00:07.347274"
+}[0m
+
+[94m======== Testing: Basic Product Search ========[0m
+[92m✓ PASS: Request succeeded as expected[0m
+[93m{
+  "status": "success",
+  "message": "Found 5 products matching the search criteria",
+  "search_criteria": {
+    "query": "Kolnisch",
+    "limit": 5
+  },
+  "count": 5,
+  "products": [
+    {
+      "sku": "4711M-100B",
+      "name": "4711 By Echt Kolnisch Wasser 100ml Splash Boxed",
+      "weight_value": "0.453",
+      "length": "0.00",
+      "width": "0.00",
+      "height": "0.00",
+      "dimension_unit": "cm",
+      "weight_unit": "g",
+      "created_date_utc": "2016-11-08T03:50:34.0000000Z",
+      "pictures": "",
+      "barcode": null
+    },
+    {
+      "sku": "4711M-150B",
+      "name": "4711 By Echt Kolnisch Wasser 150ml Splash Boxed",
+      "weight_value": "0.453",
+      "length": "0.00",
+      "width": "0.00",
+      "height": "0.00",
+      "dimension_unit": "cm",
+      "weight_unit": "g",
+      "created_date_utc": "2016-11-08T03:49:54.0000000Z",
+      "pictures": "",
+      "barcode": null
+    },
+    {
+      "sku": "4711M-200B",
+      "name": "Jumbo - 4711 By Echt Kolnisch Wasser 200ml Boxed",
+      "weight_value": "0.453",
+      "length": "0.00",
+      "width": "0.00",
+      "height": "0.00",
+      "dimension_unit": "cm",
+      "weight_unit": "g",
+      "created_date_utc": "2016-11-08T03:49:54.0000000Z",
+      "pictures": "",
+      "barcode": null
+    },
+    {
+      "sku": "4711M-300B",
+      "name": "Jumbo - 4711 By Echt Kolnisch Wasser M 300ml Boxed",
+      "weight_value": "0.453",
+      "length": "0.00",
+      "width": "0.00",
+      "height": "0.00",
+      "dimension_unit": "cm",
+      "weight_unit": "g",
+      "created_date_utc": "2016-11-08T03:49:55.0000000Z",
+      "pictures": "",
+      "barcode": null
+    },
+    {
+      "sku": "4711M-400B",
+      "name": "4711 By Echt Kolnisch Wasser 400ml Boxed",
+      "weight_value": "0.453",
+      "length": "0.00",
+      "width": "0.00",
+      "height": "0.00",
+      "dimension_unit": "cm",
+      "weight_unit": "g",
+      "created_date_utc": "2016-11-08T03:49:55.0000000Z",
+      "pictures": "",
+      "barcode": null
+    }
+  ],
+  "timestamp": "2025-05-28T15:00:07.365023"
+}[0m
+[92m✓ PASS: Found 5 products[0m
+[92m✓ PASS: All required response fields are present[0m
+[92m✓ PASS: Products have required fields (sku, name)[0m
+
+[94m======== Testing: Image URL Presence ========[0m
+[92m✓ PASS: Request succeeded as expected[0m
+[93m{
+  "status": "success",
+  "message": "Found 10 products matching the search criteria",
+  "search_criteria": {
+    "query": "4711M",
+    "limit": 10
+  },
+  "count": 10,
+  "products": [
+    {
+      "sku": "4711M-100B",
+      "name": "4711 By Echt Kolnisch Wasser 100ml Splash Boxed",
+      "weight_value": "0.453",
+      "length": "0.00",
+      "width": "0.00",
+      "height": "0.00",
+      "dimension_unit": "cm",
+      "weight_unit": "g",
+      "created_date_utc": "2016-11-08T03:50:34.0000000Z",
+      "pictures": "",
+      "barcode": null
+    },
+    {
+      "sku": "4711M-150B",
+      "name": "4711 By Echt Kolnisch Wasser 150ml Splash Boxed",
+      "weight_value": "0.453",
+      "length": "0.00",
+      "width": "0.00",
+      "height": "0.00",
+      "dimension_unit": "cm",
+      "weight_unit": "g",
+      "created_date_utc": "2016-11-08T03:49:54.0000000Z",
+      "pictures": "",
+      "barcode": null
+    },
+    {
+      "sku": "4711M-200B",
+      "name": "Jumbo - 4711 By Echt Kolnisch Wasser 200ml Boxed",
+      "weight_value": "0.453",
+      "length": "0.00",
+      "width": "0.00",
+      "height": "0.00",
+      "dimension_unit": "cm",
+      "weight_unit": "g",
+      "created_date_utc": "2016-11-08T03:49:54.0000000Z",
+      "pictures": "",
+      "barcode": null
+    },
+    {
+      "sku": "4711M-300B",
+      "name": "Jumbo - 4711 By Echt Kolnisch Wasser M 300ml Boxed",
+      "weight_value": "0.453",
+      "length": "0.00",
+      "width": "0.00",
+      "height": "0.00",
+      "dimension_unit": "cm",
+      "weight_unit": "g",
+      "created_date_utc": "2016-11-08T03:49:55.0000000Z",
+      "pictures": "",
+      "barcode": null
+    },
+    {
+      "sku": "4711M-400B",
+      "name": "4711 By Echt Kolnisch Wasser 400ml Boxed",
+      "weight_value": "0.453",
+      "length": "0.00",
+      "width": "0.00",
+      "height": "0.00",
+      "dimension_unit": "cm",
+      "weight_unit": "g",
+      "created_date_utc": "2016-11-08T03:49:55.0000000Z",
+      "pictures": "",
+      "barcode": null
+    },
+    {
+      "sku": "4711M-50B",
+      "name": "4711 By Echt Kolnisch Wasser 50ml Splash Boxed",
+      "weight_value": "0.453",
+      "length": "0.00",
+      "width": "0.00",
+      "height": "0.00",
+      "dimension_unit": "cm",
+      "weight_unit": "g",
+      "created_date_utc": "2017-02-21T16:52:55.0000000Z",
+      "pictures": "",
+      "barcode": null
+    },
+    {
+      "sku": "4711M-60B",
+      "name": "4711 By Echt Kolnisch Wasser 60ml Spray Boxed",
+      "weight_value": "0.453",
+      "length": "0.00",
+      "width": "0.00",
+      "height": "0.00",
+      "dimension_unit": "cm",
+      "weight_unit": "g",
+      "created_date_utc": "2016-11-08T03:49:55.0000000Z",
+      "pictures": "",
+      "barcode": null
+    },
+    {
+      "sku": "4711M-60T",
+      "name": "Tester - 4711 By Echt Kolnisch Wasser 60ml Spray Tester",
+      "weight_value": "0.453",
+      "length": "0.00",
+      "width": "0.00",
+      "height": "0.00",
+      "dimension_unit": "cm",
+      "weight_unit": "g",
+      "created_date_utc": "2016-11-08T03:49:55.0000000Z",
+      "pictures": "",
+      "barcode": null
+    },
+    {
+      "sku": "4711M-800B",
+      "name": "Jumbo - 4711 By Echt Kolnisch Wasser M 800ml Boxed",
+      "weight_value": "0.453",
+      "length": "0.00",
+      "width": "0.00",
+      "height": "0.00",
+      "dimension_unit": "cm",
+      "weight_unit": "g",
+      "created_date_utc": "2016-11-08T03:49:55.0000000Z",
+      "pictures": "",
+      "barcode": null
+    },
+    {
+      "sku": "4711M-90B",
+      "name": "4711 By Echt Kolnisch Wasser M 90ml Spray Boxed",
+      "weight_value": "0.453",
+      "length": "0.00",
+      "width": "0.00",
+      "height": "0.00",
+      "dimension_unit": "cm",
+      "weight_unit": "g",
+      "created_date_utc": "2016-11-08T03:49:55.0000000Z",
+      "pictures": "",
+      "barcode": null
+    }
+  ],
+  "timestamp": "2025-05-28T15:00:07.381875"
+}[0m
+[91m✗ FAIL: 0 out of 10 products have image_url[0m
+[92m✓ PASS: All image URLs are valid formats or 'NA'[0m
+
+[94m======== Testing: finalurl Priority for image_url ========[0m
+[92m✓ PASS: Request succeeded as expected[0m
+[93m{
+  "status": "success",
+  "message": "Found 10 products matching the search criteria",
+  "search_criteria": {
+    "query": "4711M",
+    "limit": 10
+  },
+  "count": 10,
+  "products": [
+    {
+      "sku": "4711M-100B",
+      "name": "4711 By Echt Kolnisch Wasser 100ml Splash Boxed",
+      "weight_value": "0.453",
+      "length": "0.00",
+      "width": "0.00",
+      "height": "0.00",
+      "dimension_unit": "cm",
+      "weight_unit": "g",
+      "created_date_utc": "2016-11-08T03:50:34.0000000Z",
+      "pictures": "",
+      "barcode": null
+    },
+    {
+      "sku": "4711M-150B",
+      "name": "4711 By Echt Kolnisch Wasser 150ml Splash Boxed",
+      "weight_value": "0.453",
+      "length": "0.00",
+      "width": "0.00",
+      "height": "0.00",
+      "dimension_unit": "cm",
+      "weight_unit": "g",
+      "created_date_utc": "2016-11-08T03:49:54.0000000Z",
+      "pictures": "",
+      "barcode": null
+    },
+    {
+      "sku": "4711M-200B",
+      "name": "Jumbo - 4711 By Echt Kolnisch Wasser 200ml Boxed",
+      "weight_value": "0.453",
+      "length": "0.00",
+      "width": "0.00",
+      "height": "0.00",
+      "dimension_unit": "cm",
+      "weight_unit": "g",
+      "created_date_utc": "2016-11-08T03:49:54.0000000Z",
+      "pictures": "",
+      "barcode": null
+    },
+    {
+      "sku": "4711M-300B",
+      "name": "Jumbo - 4711 By Echt Kolnisch Wasser M 300ml Boxed",
+      "weight_value": "0.453",
+      "length": "0.00",
+      "width": "0.00",
+      "height": "0.00",
+      "dimension_unit": "cm",
+      "weight_unit": "g",
+      "created_date_utc": "2016-11-08T03:49:55.0000000Z",
+      "pictures": "",
+      "barcode": null
+    },
+    {
+      "sku": "4711M-400B",
+      "name": "4711 By Echt Kolnisch Wasser 400ml Boxed",
+      "weight_value": "0.453",
+      "length": "0.00",
+      "width": "0.00",
+      "height": "0.00",
+      "dimension_unit": "cm",
+      "weight_unit": "g",
+      "created_date_utc": "2016-11-08T03:49:55.0000000Z",
+      "pictures": "",
+      "barcode": null
+    },
+    {
+      "sku": "4711M-50B",
+      "name": "4711 By Echt Kolnisch Wasser 50ml Splash Boxed",
+      "weight_value": "0.453",
+      "length": "0.00",
+      "width": "0.00",
+      "height": "0.00",
+      "dimension_unit": "cm",
+      "weight_unit": "g",
+      "created_date_utc": "2017-02-21T16:52:55.0000000Z",
+      "pictures": "",
+      "barcode": null
+    },
+    {
+      "sku": "4711M-60B",
+      "name": "4711 By Echt Kolnisch Wasser 60ml Spray Boxed",
+      "weight_value": "0.453",
+      "length": "0.00",
+      "width": "0.00",
+      "height": "0.00",
+      "dimension_unit": "cm",
+      "weight_unit": "g",
+      "created_date_utc": "2016-11-08T03:49:55.0000000Z",
+      "pictures": "",
+      "barcode": null
+    },
+    {
+      "sku": "4711M-60T",
+      "name": "Tester - 4711 By Echt Kolnisch Wasser 60ml Spray Tester",
+      "weight_value": "0.453",
+      "length": "0.00",
+      "width": "0.00",
+      "height": "0.00",
+      "dimension_unit": "cm",
+      "weight_unit": "g",
+      "created_date_utc": "2016-11-08T03:49:55.0000000Z",
+      "pictures": "",
+      "barcode": null
+    },
+    {
+      "sku": "4711M-800B",
+      "name": "Jumbo - 4711 By Echt Kolnisch Wasser M 800ml Boxed",
+      "weight_value": "0.453",
+      "length": "0.00",
+      "width": "0.00",
+      "height": "0.00",
+      "dimension_unit": "cm",
+      "weight_unit": "g",
+      "created_date_utc": "2016-11-08T03:49:55.0000000Z",
+      "pictures": "",
+      "barcode": null
+    },
+    {
+      "sku": "4711M-90B",
+      "name": "4711 By Echt Kolnisch Wasser M 90ml Spray Boxed",
+      "weight_value": "0.453",
+      "length": "0.00",
+      "width": "0.00",
+      "height": "0.00",
+      "dimension_unit": "cm",
+      "weight_unit": "g",
+      "created_date_utc": "2016-11-08T03:49:55.0000000Z",
+      "pictures": "",
+      "barcode": null
+    }
+  ],
+  "timestamp": "2025-05-28T15:00:07.403538"
+}[0m
+[91m✗ FAIL: No products found with both finalurl and image_url to test priority[0m
+
+[94m======== Testing: Image URL Fallback Logic ========[0m
+[92m✓ PASS: Request succeeded as expected[0m
+[93m{
+  "status": "success",
+  "message": "Found 10 products matching the search criteria",
+  "search_criteria": {
+    "query": "4711M",
+    "limit": 10
+  },
+  "count": 10,
+  "products": [
+    {
+      "sku": "4711M-100B",
+      "name": "4711 By Echt Kolnisch Wasser 100ml Splash Boxed",
+      "weight_value": "0.453",
+      "length": "0.00",
+      "width": "0.00",
+      "height": "0.00",
+      "dimension_unit": "cm",
+      "weight_unit": "g",
+      "created_date_utc": "2016-11-08T03:50:34.0000000Z",
+      "pictures": "",
+      "barcode": null
+    },
+    {
+      "sku": "4711M-150B",
+      "name": "4711 By Echt Kolnisch Wasser 150ml Splash Boxed",
+      "weight_value": "0.453",
+      "length": "0.00",
+      "width": "0.00",
+      "height": "0.00",
+      "dimension_unit": "cm",
+      "weight_unit": "g",
+      "created_date_utc": "2016-11-08T03:49:54.0000000Z",
+      "pictures": "",
+      "barcode": null
+    },
+    {
+      "sku": "4711M-200B",
+      "name": "Jumbo - 4711 By Echt Kolnisch Wasser 200ml Boxed",
+      "weight_value": "0.453",
+      "length": "0.00",
+      "width": "0.00",
+      "height": "0.00",
+      "dimension_unit": "cm",
+      "weight_unit": "g",
+      "created_date_utc": "2016-11-08T03:49:54.0000000Z",
+      "pictures": "",
+      "barcode": null
+    },
+    {
+      "sku": "4711M-300B",
+      "name": "Jumbo - 4711 By Echt Kolnisch Wasser M 300ml Boxed",
+      "weight_value": "0.453",
+      "length": "0.00",
+      "width": "0.00",
+      "height": "0.00",
+      "dimension_unit": "cm",
+      "weight_unit": "g",
+      "created_date_utc": "2016-11-08T03:49:55.0000000Z",
+      "pictures": "",
+      "barcode": null
+    },
+    {
+      "sku": "4711M-400B",
+      "name": "4711 By Echt Kolnisch Wasser 400ml Boxed",
+      "weight_value": "0.453",
+      "length": "0.00",
+      "width": "0.00",
+      "height": "0.00",
+      "dimension_unit": "cm",
+      "weight_unit": "g",
+      "created_date_utc": "2016-11-08T03:49:55.0000000Z",
+      "pictures": "",
+      "barcode": null
+    },
+    {
+      "sku": "4711M-50B",
+      "name": "4711 By Echt Kolnisch Wasser 50ml Splash Boxed",
+      "weight_value": "0.453",
+      "length": "0.00",
+      "width": "0.00",
+      "height": "0.00",
+      "dimension_unit": "cm",
+      "weight_unit": "g",
+      "created_date_utc": "2017-02-21T16:52:55.0000000Z",
+      "pictures": "",
+      "barcode": null
+    },
+    {
+      "sku": "4711M-60B",
+      "name": "4711 By Echt Kolnisch Wasser 60ml Spray Boxed",
+      "weight_value": "0.453",
+      "length": "0.00",
+      "width": "0.00",
+      "height": "0.00",
+      "dimension_unit": "cm",
+      "weight_unit": "g",
+      "created_date_utc": "2016-11-08T03:49:55.0000000Z",
+      "pictures": "",
+      "barcode": null
+    },
+    {
+      "sku": "4711M-60T",
+      "name": "Tester - 4711 By Echt Kolnisch Wasser 60ml Spray Tester",
+      "weight_value": "0.453",
+      "length": "0.00",
+      "width": "0.00",
+      "height": "0.00",
+      "dimension_unit": "cm",
+      "weight_unit": "g",
+      "created_date_utc": "2016-11-08T03:49:55.0000000Z",
+      "pictures": "",
+      "barcode": null
+    },
+    {
+      "sku": "4711M-800B",
+      "name": "Jumbo - 4711 By Echt Kolnisch Wasser M 800ml Boxed",
+      "weight_value": "0.453",
+      "length": "0.00",
+      "width": "0.00",
+      "height": "0.00",
+      "dimension_unit": "cm",
+      "weight_unit": "g",
+      "created_date_utc": "2016-11-08T03:49:55.0000000Z",
+      "pictures": "",
+      "barcode": null
+    },
+    {
+      "sku": "4711M-90B",
+      "name": "4711 By Echt Kolnisch Wasser M 90ml Spray Boxed",
+      "weight_value": "0.453",
+      "length": "0.00",
+      "width": "0.00",
+      "height": "0.00",
+      "dimension_unit": "cm",
+      "weight_unit": "g",
+      "created_date_utc": "2016-11-08T03:49:55.0000000Z",
+      "pictures": "",
+      "barcode": null
+    }
+  ],
+  "timestamp": "2025-05-28T15:00:07.421328"
+}[0m
+[92m✓ PASS: No products found with both finalurl and image_url to check[0m
+
+[94m======== Testing: Limit Parameter ========[0m
+[92m✓ PASS: Request succeeded as expected[0m
+[93m{
+  "status": "success",
+  "message": "Found 2 products matching the search criteria",
+  "search_criteria": {
+    "query": "Kolnisch",
+    "limit": 2
+  },
+  "count": 2,
+  "products": [
+    {
+      "sku": "4711M-100B",
+      "name": "4711 By Echt Kolnisch Wasser 100ml Splash Boxed",
+      "weight_value": "0.453",
+      "length": "0.00",
+      "width": "0.00",
+      "height": "0.00",
+      "dimension_unit": "cm",
+      "weight_unit": "g",
+      "created_date_utc": "2016-11-08T03:50:34.0000000Z",
+      "pictures": "",
+      "barcode": null
+    },
+    {
+      "sku": "4711M-150B",
+      "name": "4711 By Echt Kolnisch Wasser 150ml Splash Boxed",
+      "weight_value": "0.453",
+      "length": "0.00",
+      "width": "0.00",
+      "height": "0.00",
+      "dimension_unit": "cm",
+      "weight_unit": "g",
+      "created_date_utc": "2016-11-08T03:49:54.0000000Z",
+      "pictures": "",
+      "barcode": null
+    }
+  ],
+  "timestamp": "2025-05-28T15:00:07.437678"
+}[0m
+[92m✓ PASS: Response respects limit parameter (2 ≤ 2)[0m
+
+[94m================= TEST SUMMARY =================[0m
+Tests passed: 4/5
+[91m✗ Some tests failed. Check the details above.[0m
+Running barcode_lookup_test.py...
+Python path: /usr/bin/python3
+Python version: 3.11.2 (main, Apr 28 2025, 14:11:48) [GCC 12.2.0]
+[94m================= TESTING BARCODE API WITH SPECIFIC PRODUCT =================[0m
+[94mSKU: 4711M-50B[0m
+[94mExpected Product Name: 4711 By Echt Kolnisch Wasser 50ml Splash Boxed[0m
+
+[94m======== Testing: Barcode API Health Check ========[0m
+[92m✓ PASS: Request succeeded as expected[0m
+[93m{
+  "status": "healthy",
+  "message": "Barcode API endpoints are available",
+  "timestamp": "2025-05-28T15:00:07.736148"
+}[0m
+
+[94m======== Testing: Barcode Lookup with Product Name: 4711 By Echt Kolnisch Wasser 50ml Splash Boxed ========[0m
+Setting up test: Adding barcode 76366520992 for SKU 4711M-50B
+[92m✓ PASS: Request succeeded as expected[0m
+[93m{
+  "status": "success",
+  "message": "Barcode 76366520992 added successfully for SKU 4711M-50B",
+  "sku": "4711M-50B",
+  "barcode": "76366520992",
+  "alternate": 10,
+  "name": "4711 By Echt Kolnisch Wasser 50ml Splash Boxed",
+  "timestamp": "2025-05-28T15:00:07.765719"
+}[0m
+[92m✓ PASS: Add response has correct product name: 4711 By Echt Kolnisch Wasser 50ml Splash Boxed[0m
+[92m✓ PASS: Request succeeded as expected[0m
+[93m{
+  "status": "success",
+  "barcode": "76366520992",
+  "sku": "4711M-50B",
+  "alternate": 10,
+  "name": "4711 By Echt Kolnisch Wasser 50ml Splash Boxed",
+  "timestamp": "2025-05-28T15:00:07.788007"
+}[0m
+[92m✓ PASS: Response includes 'name' field with value: 4711 By Echt Kolnisch Wasser 50ml Splash Boxed[0m
+[92m✓ PASS: Product name matches expected value: 4711 By Echt Kolnisch Wasser 50ml Splash Boxed[0m
+[92m✓ PASS: SKU is correct: 4711M-50B[0m
+[92m✓ PASS: Barcode is correct: 76366520992[0m
+
+[94m======== Testing: Looking up any existing barcodes for this SKU ========[0m
+[92m✓ PASS: Request succeeded as expected[0m
+[93m{
+  "status": "success",
+  "message": "Barcode 41448168 added successfully for SKU 4711M-50B",
+  "sku": "4711M-50B",
+  "barcode": "41448168",
+  "alternate": 10,
+  "name": "4711 By Echt Kolnisch Wasser 50ml Splash Boxed",
+  "timestamp": "2025-05-28T15:00:07.816633"
+}[0m
+[92m✓ PASS: Request succeeded as expected[0m
+[93m{
+  "status": "success",
+  "barcode": "41448168",
+  "sku": "4711M-50B",
+  "alternate": 10,
+  "name": "4711 By Echt Kolnisch Wasser 50ml Splash Boxed",
+  "timestamp": "2025-05-28T15:00:07.835149"
+}[0m
+[92m✓ PASS: Found existing barcode with correct product name[0m
+
+[94m================= TEST SUMMARY =================[0m
+Tests passed: 2/2
+[92m✓ All tests passed! Barcode API correctly handles the specific product.[0m
+
+[94m================= IMPORTANT NOTES =================[0m
+[93mIf any tests failed, check the following:[0m
+1. Confirm that SKU 4711M-50B exists in the products table
+2. Confirm that the name in the database exactly matches: 4711 By Echt Kolnisch Wasser 50ml Splash Boxed
+3. Verify the Barcode API has been updated to include product names
+4. Check that the database connection is working correctly
+Testing Core APIs...
+
+Running test_check_sku_api.py...
+[94m================= TESTING CHECK SKU AGAINST PO API =================[0m
+
+[94m======== Testing: API Health Check ========[0m
+[92m✓ PASS: Request succeeded as expected[0m
+[93m{
+  "status": "healthy",
+  "message": "API is running and database is connected",
+  "timestamp": "2025-05-28T15:00:08.093007"
+}[0m
+
+[94m======== Testing: Purchase Orders API Health Check ========[0m
+[92m✓ PASS: Request succeeded as expected[0m
+[93m{
+  "status": "healthy",
+  "message": "Purchase Order API endpoints are available",
+  "timestamp": "2025-05-28T15:00:08.098204"
+}[0m
+
+[94m======== Testing: Check SKU In PO (Should return True) ========[0m
+[92m✓ PASS: Request succeeded as expected[0m
+[93m{
+  "status": "success",
+  "result": true,
+  "po_number": "PO-TEST-001",
+  "barcode": "1234567890123",
+  "sku": "4711M-50B",
+  "timestamp": "2025-05-28T15:00:08.120677"
+}[0m
+[92m✓ PASS: API returned TRUE as expected[0m
+
+[94m======== Testing: Check SKU Not In PO (Should return False) ========[0m
+[92m✓ PASS: Request succeeded as expected[0m
+[93m{
+  "status": "success",
+  "result": false,
+  "po_number": "PO-TEST-003",
+  "barcode": "1234567890123",
+  "sku": "4711M-50B",
+  "timestamp": "2025-05-28T15:00:08.142474"
+}[0m
+[92m✓ PASS: API returned FALSE as expected[0m
+
+[94m======== Testing: Check SKU with Non-existent Barcode ========[0m
+[92m✓ PASS: Request failed as expected with status 404[0m
+[93m{
+  "detail": {
+    "status": "error",
+    "message": "Barcode 9999999999999 not found in the system",
+    "error_code": "BARCODE_NOT_FOUND",
+    "timestamp": "2025-05-28T15:00:08.160141"
+  }
+}[0m
+
+[94m======== Testing: Missing PO Number ========[0m
+[92m✓ PASS: Request failed as expected with status 422[0m
+[93m{
+  "detail": [
+    {
+      "type": "missing",
+      "loc": [
+        "body",
+        "po_number"
+      ],
+      "msg": "Field required",
+      "input": {
+        "barcode": "1234567890123"
+      }
+    }
+  ]
+}[0m
+
+[94m======== Testing: Missing Barcode ========[0m
+[92m✓ PASS: Request failed as expected with status 422[0m
+[93m{
+  "detail": [
+    {
+      "type": "missing",
+      "loc": [
+        "body",
+        "barcode"
+      ],
+      "msg": "Field required",
+      "input": {
+        "po_number": "PO-TEST-001"
+      }
+    }
+  ]
+}[0m
+
+[94m======== Testing: Invalid Barcode Format ========[0m
+[92m✓ PASS: Request failed as expected with status 422[0m
+[93m{
+  "detail": [
+    {
+      "type": "value_error",
+      "loc": [
+        "body",
+        "barcode"
+      ],
+      "msg": "Value error, Barcode must be between 8 and 14 digits",
+      "input": "123",
+      "ctx": {
+        "error": {}
+      }
+    }
+  ]
+}[0m
+
+[94m================= TEST SUMMARY =================[0m
+Tests passed: 6/6
+[92m✓ All tests passed! Check SKU Against PO API is working.[0m
+Running test_unified_search.py...
+[94m================= TESTING UNIFIED PRODUCT SEARCH API =================[0m
+
+[94m======== Testing: API Health Check ========[0m
+[92m✓ PASS: Request succeeded as expected[0m
+[93m{
+  "status": "healthy",
+  "message": "API is running and database is connected",
+  "timestamp": "2025-05-28T15:00:08.414545"
+}[0m
+
+[94m======== Testing: Search by SKU Pattern ========[0m
+[92m✓ PASS: Request succeeded as expected[0m
+[93m{
+  "status": "success",
+  "message": "Found 5 products matching the search criteria",
+  "search_criteria": {
+    "query": "4711M",
+    "limit": 5
+  },
+  "count": 5,
+  "products": [
+    {
+      "sku": "4711M-100B",
+      "name": "4711 By Echt Kolnisch Wasser 100ml Splash Boxed",
+      "weight_value": "0.453",
+      "length": "0.00",
+      "width": "0.00",
+      "height": "0.00",
+      "dimension_unit": "cm",
+      "weight_unit": "g",
+      "created_date_utc": "2016-11-08T03:50:34.0000000Z",
+      "pictures": "",
+      "barcode": null
+    },
+    {
+      "sku": "4711M-150B",
+      "name": "4711 By Echt Kolnisch Wasser 150ml Splash Boxed",
+      "weight_value": "0.453",
+      "length": "0.00",
+      "width": "0.00",
+      "height": "0.00",
+      "dimension_unit": "cm",
+      "weight_unit": "g",
+      "created_date_utc": "2016-11-08T03:49:54.0000000Z",
+      "pictures": "",
+      "barcode": null
+    },
+    {
+      "sku": "4711M-200B",
+      "name": "Jumbo - 4711 By Echt Kolnisch Wasser 200ml Boxed",
+      "weight_value": "0.453",
+      "length": "0.00",
+      "width": "0.00",
+      "height": "0.00",
+      "dimension_unit": "cm",
+      "weight_unit": "g",
+      "created_date_utc": "2016-11-08T03:49:54.0000000Z",
+      "pictures": "",
+      "barcode": null
+    },
+    {
+      "sku": "4711M-300B",
+      "name": "Jumbo - 4711 By Echt Kolnisch Wasser M 300ml Boxed",
+      "weight_value": "0.453",
+      "length": "0.00",
+      "width": "0.00",
+      "height": "0.00",
+      "dimension_unit": "cm",
+      "weight_unit": "g",
+      "created_date_utc": "2016-11-08T03:49:55.0000000Z",
+      "pictures": "",
+      "barcode": null
+    },
+    {
+      "sku": "4711M-400B",
+      "name": "4711 By Echt Kolnisch Wasser 400ml Boxed",
+      "weight_value": "0.453",
+      "length": "0.00",
+      "width": "0.00",
+      "height": "0.00",
+      "dimension_unit": "cm",
+      "weight_unit": "g",
+      "created_date_utc": "2016-11-08T03:49:55.0000000Z",
+      "pictures": "",
+      "barcode": null
+    }
+  ],
+  "timestamp": "2025-05-28T15:00:08.428723"
+}[0m
+
+[94m======== Testing: Search by Description ========[0m
+[92m✓ PASS: Request succeeded as expected[0m
+[93m{
+  "status": "success",
+  "message": "Found 5 products matching the search criteria",
+  "search_criteria": {
+    "query": "Kolnisch",
+    "limit": 5
+  },
+  "count": 5,
+  "products": [
+    {
+      "sku": "4711M-100B",
+      "name": "4711 By Echt Kolnisch Wasser 100ml Splash Boxed",
+      "weight_value": "0.453",
+      "length": "0.00",
+      "width": "0.00",
+      "height": "0.00",
+      "dimension_unit": "cm",
+      "weight_unit": "g",
+      "created_date_utc": "2016-11-08T03:50:34.0000000Z",
+      "pictures": "",
+      "barcode": null
+    },
+    {
+      "sku": "4711M-150B",
+      "name": "4711 By Echt Kolnisch Wasser 150ml Splash Boxed",
+      "weight_value": "0.453",
+      "length": "0.00",
+      "width": "0.00",
+      "height": "0.00",
+      "dimension_unit": "cm",
+      "weight_unit": "g",
+      "created_date_utc": "2016-11-08T03:49:54.0000000Z",
+      "pictures": "",
+      "barcode": null
+    },
+    {
+      "sku": "4711M-200B",
+      "name": "Jumbo - 4711 By Echt Kolnisch Wasser 200ml Boxed",
+      "weight_value": "0.453",
+      "length": "0.00",
+      "width": "0.00",
+      "height": "0.00",
+      "dimension_unit": "cm",
+      "weight_unit": "g",
+      "created_date_utc": "2016-11-08T03:49:54.0000000Z",
+      "pictures": "",
+      "barcode": null
+    },
+    {
+      "sku": "4711M-300B",
+      "name": "Jumbo - 4711 By Echt Kolnisch Wasser M 300ml Boxed",
+      "weight_value": "0.453",
+      "length": "0.00",
+      "width": "0.00",
+      "height": "0.00",
+      "dimension_unit": "cm",
+      "weight_unit": "g",
+      "created_date_utc": "2016-11-08T03:49:55.0000000Z",
+      "pictures": "",
+      "barcode": null
+    },
+    {
+      "sku": "4711M-400B",
+      "name": "4711 By Echt Kolnisch Wasser 400ml Boxed",
+      "weight_value": "0.453",
+      "length": "0.00",
+      "width": "0.00",
+      "height": "0.00",
+      "dimension_unit": "cm",
+      "weight_unit": "g",
+      "created_date_utc": "2016-11-08T03:49:55.0000000Z",
+      "pictures": "",
+      "barcode": null
+    }
+  ],
+  "timestamp": "2025-05-28T15:00:08.441654"
+}[0m
+
+[94m======== Testing: Search by Size (50ml) ========[0m
+[92m✓ PASS: Request succeeded as expected[0m
+[93m{
+  "status": "success",
+  "message": "Found 5 products matching the search criteria",
+  "search_criteria": {
+    "query": "50ml",
+    "limit": 5
+  },
+  "count": 5,
+  "products": [
+    {
+      "sku": "212M-50B",
+      "name": "Carolina Herrera '212' M 50ml Spray Boxed",
+      "weight_value": "0.453",
+      "length": "0.00",
+      "width": "0.00",
+      "height": "0.00",
+      "dimension_unit": "cm",
+      "weight_unit": "g",
+      "created_date_utc": "2016-11-08T03:49:51.0000000Z",
+      "pictures": "",
+      "barcode": null
+    },
+    {
+      "sku": "212SM-50B",
+      "name": "Carolina Herrera 212 Sexy M 50ml Boxed",
+      "weight_value": "0.453",
+      "length": "0.00",
+      "width": "0.00",
+      "height": "0.00",
+      "dimension_unit": "cm",
+      "weight_unit": "g",
+      "created_date_utc": "2016-11-08T03:49:51.0000000Z",
+      "pictures": "",
+      "barcode": null
+    },
+    {
+      "sku": "212SM-50T",
+      "name": "Tester Carolina Herrera 212 Sexy M 50ml Boxed",
+      "weight_value": "0.453",
+      "length": "0.00",
+      "width": "0.00",
+      "height": "0.00",
+      "dimension_unit": "cm",
+      "weight_unit": "g",
+      "created_date_utc": "2019-01-26T21:32:20.0000000Z",
+      "pictures": "",
+      "barcode": null
+    },
+    {
+      "sku": "212SM2M-50S",
+      "name": "Set - Carolina Herrera 212 Sexy M 50ml 2Pc Set",
+      "weight_value": "0.453",
+      "length": "0.00",
+      "width": "0.00",
+      "height": "0.00",
+      "dimension_unit": "cm",
+      "weight_unit": "g",
+      "created_date_utc": "2016-11-08T03:49:51.0000000Z",
+      "pictures": "",
+      "barcode": null
+    },
+    {
+      "sku": "212VM-50B",
+      "name": "Carolina Herrera ''212 Vip'' M 50ml Boxed",
+      "weight_value": "0.453",
+      "length": "0.00",
+      "width": "0.00",
+      "height": "0.00",
+      "dimension_unit": "cm",
+      "weight_unit": "g",
+      "created_date_utc": "2016-11-08T03:49:51.0000000Z",
+      "pictures": "",
+      "barcode": null
+    }
+  ],
+  "timestamp": "2025-05-28T15:00:08.453966"
+}[0m
+
+[94m======== Testing: Search for Non-Existent Product ========[0m
+[92m✓ PASS: Request succeeded as expected[0m
+[93m{
+  "status": "success",
+  "message": "No products found matching the search criteria",
+  "search_criteria": {
+    "query": "NonExistentProduct12345",
+    "limit": 5
+  },
+  "count": 0,
+  "products": [],
+  "timestamp": "2025-05-28T15:00:08.551529"
+}[0m
+
+[94m======== Testing: Search with Empty Query ========[0m
+[92m✓ PASS: Request failed as expected with status 422[0m
+[93m{
+  "detail": [
+    {
+      "type": "string_too_short",
+      "loc": [
+        "body",
+        "query"
+      ],
+      "msg": "String should have at least 1 character",
+      "input": "",
+      "ctx": {
+        "min_length": 1
+      }
+    }
+  ]
+}[0m
+
+[94m================= TEST SUMMARY =================[0m
+Tests passed: 5/5
+[92m✓ All tests passed! Unified product search API is working.[0m

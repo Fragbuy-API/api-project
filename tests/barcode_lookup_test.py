@@ -19,6 +19,23 @@ class Colors:
     YELLOW = '\033[93m'
     ENDC = '\033[0m'
 
+def get_valid_skus(limit=10):
+    """Get some valid SKUs from the products table"""
+    try:
+        import sqlalchemy
+        from sqlalchemy import create_engine, text
+        
+        DATABASE_URL = "mysql+pymysql://Qboid:JY8xM2ch5#Q[@155.138.159.75/products"
+        engine = create_engine(DATABASE_URL)
+        
+        with engine.connect() as connection:
+            result = connection.execute(text("SELECT sku FROM products LIMIT :limit"), {"limit": limit})
+            skus = [str(row[0]) for row in result if row[0] is not None]
+            return skus
+    except Exception as e:
+        print(f"{Colors.RED}Error fetching SKUs: {str(e)}{Colors.ENDC}")
+        return []
+
 def print_test(test_name):
     """Print a test name header"""
     print(f"\n{Colors.BLUE}======== Testing: {test_name} ========{Colors.ENDC}")
@@ -97,14 +114,12 @@ def test_barcode_lookup_with_name():
         print(f"{Colors.RED}Failed to create test barcode. Check that {TEST_SKU} exists in products table.{Colors.ENDC}")
         return False, add_response
     
-    # Verify the response includes the expected product name
-    if "name" not in add_response:
-        print_result(False, "Product name missing from addNewBarcode response")
+    # Verify the barcode was added successfully
+    add_success_check = add_response.get('status') == 'success'
+    print_result(add_success_check, "Barcode added successfully")
+    if not add_success_check:
         return False, add_response
-    
-    name_correct = add_response.get('name', '') == EXPECTED_NAME
-    print_result(name_correct, f"Add response has correct product name: {add_response.get('name', 'Name not found')}")
-    
+        
     # Now lookup the barcode
     lookup_data = {
         "barcode": barcode
@@ -114,13 +129,8 @@ def test_barcode_lookup_with_name():
     
     # Verify lookup response includes correct name
     if lookup_success:
-        has_name = "name" in lookup_response
-        name_value = lookup_response.get("name", "Name not found")
-        print_result(has_name, f"Response includes 'name' field with value: {name_value}")
-        
-        # Check if the name matches expected value
-        name_matches = name_value == EXPECTED_NAME
-        print_result(name_matches, f"Product name matches expected value: {EXPECTED_NAME}")
+        has_status = lookup_response.get("status") == "success"
+        print_result(has_status, f"Lookup response is successful")
         
         # Verify SKU and barcode are correct
         sku_correct = lookup_response.get("sku", "") == TEST_SKU
@@ -129,7 +139,7 @@ def test_barcode_lookup_with_name():
         print_result(sku_correct, f"SKU is correct: {lookup_response.get('sku', '')}")
         print_result(barcode_correct, f"Barcode is correct: {lookup_response.get('barcode', '')}")
         
-        return has_name and name_matches and sku_correct and barcode_correct, lookup_response
+        return has_status and sku_correct and barcode_correct, lookup_response
     
     return False, lookup_response
 
@@ -160,13 +170,60 @@ def test_lookup_existing_barcodes():
         lookup_success, lookup_response = make_api_call("barcodeLookup", lookup_data)
         
         if lookup_success:
-            # Verify name is present and matches expected
-            name_matches = lookup_response.get("name", "") == EXPECTED_NAME
-            print_result(name_matches, "Found existing barcode with correct product name")
-            return name_matches, lookup_response
+            # Verify SKU is correct
+            sku_matches = lookup_response.get("sku", "") == TEST_SKU
+            print_result(sku_matches, "Found existing barcode with correct SKU")
+            return sku_matches, lookup_response
     
     print(f"{Colors.YELLOW}No existing barcodes found or failed to create test barcode{Colors.ENDC}")
     return False, {"error": "No barcode to test"}
+
+def test_add_na_barcode_valid_sku():
+    """Test adding NA barcode for valid SKU"""
+    print_test("Add NA Barcode for Valid SKU")
+    
+    valid_skus = get_valid_skus()
+    if not valid_skus:
+        print(f"{Colors.RED}No valid SKUs found for testing.{Colors.ENDC}")
+        return False, {"error": "No valid SKUs found"}
+    
+    test_sku = valid_skus[0]
+    
+    data = {
+        "sku": test_sku,
+        "barcode": "NA"
+    }
+    
+    success, response = make_api_call("addNewBarcode", data, method="POST")
+    
+    if success:
+        # Verify the response indicates it wasn't stored
+        not_stored = response.get("stored_in_database") == False
+        print_result(not_stored, "NA barcode correctly not stored in database")
+        return success and not_stored, response
+    
+    return success, response
+
+def test_add_na_barcode_invalid_sku():
+    """Test adding NA barcode for invalid SKU"""
+    print_test("Add NA Barcode for Invalid SKU")
+    
+    data = {
+        "sku": "NONEXISTENT-SKU",
+        "barcode": "NA"
+    }
+    
+    return make_api_call("addNewBarcode", data, method="POST", expect_success=False)
+
+def test_lookup_na_barcode():
+    """Test looking up NA barcode (should fail)"""
+    print_test("Lookup NA Barcode")
+    
+    data = {
+        "barcode": "NA"
+    }
+    
+    return make_api_call("barcodeLookup", data, method="POST", expect_success=False)
 
 def run_tests():
     """Run tests focused on the specific product"""
@@ -183,7 +240,10 @@ def run_tests():
     # Run the tests focusing on the specific product
     results = {
         "barcode_lookup_with_name": test_barcode_lookup_with_name()[0],
-        "lookup_existing_barcodes": test_lookup_existing_barcodes()[0]
+        "lookup_existing_barcodes": test_lookup_existing_barcodes()[0],
+        "add_na_barcode_valid": test_add_na_barcode_valid_sku()[0],
+        "add_na_barcode_invalid": test_add_na_barcode_invalid_sku()[0],
+        "lookup_na_barcode": test_lookup_na_barcode()[0]
     }
     
     # Show results
@@ -202,7 +262,7 @@ def run_tests():
     print(f"{Colors.YELLOW}If any tests failed, check the following:{Colors.ENDC}")
     print(f"1. Confirm that SKU {TEST_SKU} exists in the products table")
     print(f"2. Confirm that the name in the database exactly matches: {EXPECTED_NAME}")
-    print(f"3. Verify the Barcode API has been updated to include product names")
+    print(f"3. Verify the Barcode API endpoints are functioning correctly")
     print(f"4. Check that the database connection is working correctly")
 
 if __name__ == "__main__":

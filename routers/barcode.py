@@ -9,7 +9,7 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 # Import database connection
-from api.database import execute_with_retry
+from database import execute_with_retry
 from models.barcode import BarcodeLookup, NewBarcode
 
 router = APIRouter(
@@ -20,17 +20,14 @@ router = APIRouter(
 @router.post("/barcodeLookup")
 async def lookup_barcode(lookup: BarcodeLookup):
     """
-    Lookup a barcode in the database and return associated SKU and product description if found.
+    Lookup a barcode in the database and return associated SKU if found.
     """
     logger.info(f"Barcode lookup request received for: {lookup.barcode}")
     
     try:
-        # Query the barcode in the barcodes table and join with products table
+        # Query the barcode in the barcodes table
         query = text("""
-            SELECT b.sku, b.alternate, p.description 
-            FROM barcodes b
-            LEFT JOIN products p ON b.sku = p.sku
-            WHERE b.barcode = :barcode
+            SELECT sku, alternate FROM barcodes WHERE barcode = :barcode
         """)
         
         logger.info(f"Executing database query for barcode: {lookup.barcode}")
@@ -53,15 +50,13 @@ async def lookup_barcode(lookup: BarcodeLookup):
         # Return the SKU information with proper type handling
         sku = str(row[0]) if row[0] is not None else ""
         alternate = int(row[1]) if row[1] is not None else 0
-        product_description = str(row[2]) if row[2] is not None else ""
         
-        logger.info(f"Barcode found: {lookup.barcode}, SKU: {sku}, Description: {product_description}")
+        logger.info(f"Barcode found: {lookup.barcode}, SKU: {sku}")
         return {
             "status": "success",
             "barcode": lookup.barcode,
             "sku": sku,
             "alternate": alternate,
-            "name": product_description,  # Still use "name" in the response for consistency
             "timestamp": datetime.now().isoformat()
         }
     
@@ -86,11 +81,46 @@ async def lookup_barcode(lookup: BarcodeLookup):
 async def add_new_barcode(new_barcode: NewBarcode):
     """
     Add a new barcode for a SKU with the correct alternate number.
+    If barcode is "NA", validate SKU exists but don't store the barcode.
     If it's a new SKU, alternate = 1. Otherwise, increment from the highest existing alternate.
     """
     logger.info(f"Add new barcode request received: SKU={new_barcode.sku}, Barcode={new_barcode.barcode}")
     
     try:
+        # Handle "NA" barcode case - validate SKU exists but don't store
+        if new_barcode.barcode.upper() == "NA":
+            # Check if the SKU exists in the products table
+            check_sku_query = text("""
+                SELECT sku FROM products WHERE sku = :sku
+            """)
+            
+            logger.info(f"Checking if SKU exists for NA barcode: {new_barcode.sku}")
+            result = execute_with_retry(check_sku_query, {'sku': new_barcode.sku})
+            existing_sku = result.fetchone()
+            
+            if existing_sku is None:
+                logger.info(f"SKU not found in products table: {new_barcode.sku}")
+                raise HTTPException(
+                    status_code=400,
+                    detail={
+                        "status": "error",
+                        "message": f"SKU {new_barcode.sku} does not exist in the products table. Cannot process NA barcode.",
+                        "error_code": "INVALID_SKU",
+                        "timestamp": datetime.now().isoformat()
+                    }
+                )
+            
+            logger.info(f"NA barcode received for valid SKU: {new_barcode.sku} - not stored in database")
+            return {
+                "status": "success",
+                "message": f"NA barcode received for SKU {new_barcode.sku}. Barcode not stored - will be edited manually later.",
+                "sku": new_barcode.sku,
+                "barcode": new_barcode.barcode,
+                "stored_in_database": False,
+                "timestamp": datetime.now().isoformat()
+            }
+        
+        # Continue with existing logic for regular barcodes
         # First check if the barcode already exists
         check_barcode_query = text("""
             SELECT sku FROM barcodes WHERE barcode = :barcode
@@ -115,7 +145,7 @@ async def add_new_barcode(new_barcode: NewBarcode):
             
         # Check if the SKU exists in the products table
         check_sku_query = text("""
-            SELECT sku, description FROM products WHERE sku = :sku
+            SELECT sku FROM products WHERE sku = :sku
         """)
         
         logger.info(f"Checking if SKU exists in products table: {new_barcode.sku}")
@@ -133,9 +163,6 @@ async def add_new_barcode(new_barcode: NewBarcode):
                     "timestamp": datetime.now().isoformat()
                 }
             )
-        
-        # Get the product description for the response
-        product_description = str(existing_sku[1]) if existing_sku[1] is not None else ""
         
         # Find the highest alternate number for the SKU
         alternate_query = text("""
@@ -179,7 +206,7 @@ async def add_new_barcode(new_barcode: NewBarcode):
             "sku": new_barcode.sku,
             "barcode": new_barcode.barcode,
             "alternate": alternate_number,
-            "name": product_description,  # Still use "name" in the response for consistency
+            "stored_in_database": True,
             "timestamp": datetime.now().isoformat()
         }
     

@@ -7,8 +7,13 @@ class BarcodeLookup(BaseModel):
     
     @validator('barcode')
     def validate_barcode(cls, v):
+        # Allow "NA" as a special case for unavailable barcodes
+        if v.upper() == "NA":
+            return v.upper()
+        
+        # Otherwise, validate as normal 8-14 digit barcode
         if not re.match(r'^[0-9]{8,14}$', v):
-            raise ValueError('Barcode must be between 8 and 14 digits')
+            raise ValueError('Barcode must be between 8 and 14 digits or "NA" for not available')
         return v
 
 class NewBarcode(BaseModel):
@@ -23,6 +28,11 @@ class NewBarcode(BaseModel):
     
     @validator('barcode')
     def validate_barcode(cls, v):
+        # Allow "NA" as a special case for unavailable barcodes
+        if v.upper() == "NA":
+            return v.upper()
+        
+        # Otherwise, validate as normal 8-14 digit barcode
         if not re.match(r'^[0-9]{8,14}$', v):
-            raise ValueError('Barcode must be between 8 and 14 digits')
+            raise ValueError('Barcode must be between 8 and 14 digits or "NA" for not available')
         return v
