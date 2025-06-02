@@ -61,7 +61,7 @@ class CheckSkuAgainstPoRequest(BaseModel):
 
 class UpdatePoStatusRequest(BaseModel):
     po_number: str = Field(..., max_length=50)
-    status: Literal["Complete", "Incomplete"] = Field(...)
+    status: Literal["Complete", "Incomplete", "Unassigned"] = Field(...)
     
     @validator('po_number')
     def validate_po_number(cls, v):

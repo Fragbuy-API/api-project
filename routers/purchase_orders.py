@@ -318,7 +318,12 @@ async def update_po_status(request: UpdatePoStatusRequest):
             WHERE po_number = :po_number
         """)
         
-        new_status = "Completed" if request.status == "Complete" else "In Progress"
+        if request.status == "Complete":
+            new_status = "Completed"
+        elif request.status == "Incomplete":
+            new_status = "In Progress"
+        else:  # "Unassigned"
+            new_status = "Unassigned"
         
         execute_with_retry(update_query, {
             'po_number': request.po_number,
@@ -355,6 +360,7 @@ async def update_po_status(request: UpdatePoStatusRequest):
             "status": "success",
             "message": f"Purchase order {request.po_number} status updated to {new_status}",
             "po_number": request.po_number,
+            "new_status": new_status,
             "timestamp": datetime.now().isoformat()
         }
         
