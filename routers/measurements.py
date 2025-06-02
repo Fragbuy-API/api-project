@@ -14,11 +14,15 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from models.measurement import ProductData
 from api.database import execute_with_retry
+from services.measurement_processor import MeasurementProcessor
 
 router = APIRouter(
     prefix="/api/v1",
     tags=["measurements"]
 )
+
+# Initialize the measurement processor
+measurement_processor = MeasurementProcessor(execute_with_retry)
 
 @router.post("/measurement")
 async def receive_measurement(product: ProductData):
@@ -130,11 +134,61 @@ async def receive_measurement(product: ProductData):
         # Execute the query with retry logic
         execute_with_retry(query, params)
         
-        return {
+        # NEW: Enhanced measurement processing
+        processing_results = None
+        try:
+            # Prepare measurement data for processing
+            measurement_data = {
+                "barcode": product.barcode,
+                "weight": product.weight,
+                "l": product.l,
+                "w": product.w,
+                "h": product.h,
+                "attributes": product.attributes
+            }
+            
+            # Process the measurement data
+            processing_results = measurement_processor.process_measurement(measurement_data)
+            
+        except Exception as processing_error:
+            # Log processing error but don't fail the entire request
+            print(f"Measurement processing error: {str(processing_error)}")
+            processing_results = {
+                "barcode": product.barcode,
+                "sku_found": False,
+                "errors": [f"Processing failed: {str(processing_error)}"],
+                "updates_made": []
+            }
+        
+        # Build response with processing information
+        response = {
             "status": "success",
             "message": f"Data received and stored successfully for barcode {product.barcode}",
-            "timestamp": datetime.now().isoformat()
+            "timestamp": datetime.now().isoformat(),
+            "images_saved": {
+                "main_image": image_path is not None,
+                "segmentation": imageseg_path is not None,
+                "color_image": imagecolor_path is not None
+            }
         }
+        
+        # Add processing results if available
+        if processing_results:
+            response["processing"] = {
+                "sku_lookup": {
+                    "success": processing_results.get("sku_found", False),
+                    "sku": processing_results.get("sku")
+                },
+                "updates": {
+                    "dimensions_updated": processing_results.get("dimensions_updated", False),
+                    "weight_updated": processing_results.get("weight_updated", False),
+                    "attributes_updated": processing_results.get("attributes_updated", False),
+                    "fields_updated": processing_results.get("updates_made", [])
+                },
+                "errors": processing_results.get("errors", [])
+            }
+        
+        return response
     
     except Exception as e:
         # Enhanced error handling
