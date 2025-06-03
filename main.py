@@ -10,6 +10,7 @@ import time
 # Import routers
 from routers import measurements, putaway, bulk_storage, barcode, product, purchase_orders, replenishment, art_orders, warehouse_locations, proship
 from routers.filesystem import router as fs_router
+from routers.measurements_debug import router as debug_router
 
 app = FastAPI(
     title="Fragbuy API Project",
@@ -154,6 +155,7 @@ app.include_router(art_orders.router)
 app.include_router(warehouse_locations.router)
 app.include_router(proship.router)
 app.include_router(fs_router)
+app.include_router(debug_router)  # Debug endpoint for measurement analysis
 
 if __name__ == "__main__":
     import uvicorn
