@@ -1,5 +1,5 @@
 from fastapi import APIRouter, HTTPException
-from sqlalchemy import text
+from sqlalchemy import text, exc
 from datetime import datetime
 import logging
 import traceback
@@ -11,6 +11,13 @@ logger = logging.getLogger(__name__)
 # Import database connection
 from database import execute_with_retry
 from models.proship import ParentOrderUpdateRequest, OrderCancelledRequest
+
+# Import standardized error handling
+from error_handlers import (
+    handle_database_error, handle_server_error, handle_not_found_error, handle_business_logic_error,
+    log_operation_start, log_operation_success, log_operation_warning,
+    ErrorCodes, create_error_response
+)
 
 router = APIRouter(
     prefix="/api/v1",
@@ -25,7 +32,7 @@ async def update_parent_orders(request: ParentOrderUpdateRequest):
     This endpoint accepts a list of orderId and parentOrderId pairs and updates
     the database to set the parentOrderId for each specified order.
     """
-    logger.info(f"Parent order update request received for {len(request.items)} orders")
+    log_operation_start("parent order update", order_count=len(request.items))
     
     try:
         # Initialize counters for response
@@ -43,7 +50,7 @@ async def update_parent_orders(request: ParentOrderUpdateRequest):
                 
                 result = execute_with_retry(check_query, {'orderId': item.orderId})
                 if result.fetchone()[0] == 0:
-                    logger.warning(f"Order not found: {item.orderId}")
+                    log_operation_warning("parent order update", f"order not found: {item.orderId}")
                     failed_count += 1
                     failed_orders.append({
                         "orderId": item.orderId,
@@ -63,21 +70,23 @@ async def update_parent_orders(request: ParentOrderUpdateRequest):
                     'parentOrderId': item.parentOrderId
                 })
                 
-                logger.info(f"Successfully updated parentOrderId for order {item.orderId}")
+                logger.debug(f"Successfully updated parentOrderId for order {item.orderId}")
                 updated_count += 1
                 
             except Exception as e:
-                error_msg = str(e)
-                logger.error(f"Error updating order {item.orderId}: {error_msg}")
+                log_operation_warning("parent order update", f"failed to update order {item.orderId}: {str(e)}")
                 failed_count += 1
                 failed_orders.append({
                     "orderId": item.orderId,
-                    "reason": error_msg
+                    "reason": str(e)
                 })
         
         # Prepare the response
+        response_status = "success" if failed_count == 0 else "partial_success"
+        log_operation_success("parent order update", f"completed: {updated_count} updated, {failed_count} failed")
+        
         return {
-            "status": "success" if failed_count == 0 else "partial_success",
+            "status": response_status,
             "message": f"Updated {updated_count} orders, {failed_count} failed",
             "updatedCount": updated_count,
             "failedCount": failed_count,
@@ -85,20 +94,12 @@ async def update_parent_orders(request: ParentOrderUpdateRequest):
             "timestamp": datetime.now().isoformat()
         }
     
+    except HTTPException:
+        raise
+    except exc.SQLAlchemyError as e:
+        raise handle_database_error(e, "parent order update")
     except Exception as e:
-        error_msg = str(e)
-        error_trace = traceback.format_exc()
-        logger.error(f"Error in update_parent_orders: {error_msg}\n{error_trace}")
-        
-        raise HTTPException(
-            status_code=500,
-            detail={
-                "status": "error",
-                "message": f"Server error: {error_msg}",
-                "error_code": "SERVER_ERROR",
-                "timestamp": datetime.now().isoformat()
-            }
-        )
+        raise handle_server_error(e, "parent order update")
 
 @router.post("/order_cancelled")
 async def check_order_cancelled(request: OrderCancelledRequest):
@@ -108,7 +109,7 @@ async def check_order_cancelled(request: OrderCancelledRequest):
     This endpoint accepts an orderId and returns a boolean value indicating
     whether the order status is "cancelled".
     """
-    logger.info(f"Order cancelled check request received for order ID: {request.orderId}")
+    log_operation_start("order cancelled check", order_id=request.orderId)
     
     try:
         # Query the order status from the database
@@ -121,22 +122,13 @@ async def check_order_cancelled(request: OrderCancelledRequest):
         
         # Check if order exists
         if row is None:
-            logger.warning(f"Order not found: {request.orderId}")
-            raise HTTPException(
-                status_code=404,
-                detail={
-                    "status": "error",
-                    "message": f"Order {request.orderId} not found",
-                    "error_code": "ORDER_NOT_FOUND",
-                    "timestamp": datetime.now().isoformat()
-                }
-            )
+            raise handle_not_found_error("Order", request.orderId, ErrorCodes.ORDER_NOT_FOUND)
         
         # Check if order status is "cancelled"
         order_status = row[0]
         is_cancelled = order_status.lower() == "cancelled"
         
-        logger.info(f"Order {request.orderId} has status '{order_status}', is_cancelled={is_cancelled}")
+        log_operation_success("order cancelled check", f"order {request.orderId} status: {order_status}, cancelled: {is_cancelled}")
         
         # Return the result
         return {
@@ -149,38 +141,24 @@ async def check_order_cancelled(request: OrderCancelledRequest):
     
     except HTTPException:
         raise
+    except exc.SQLAlchemyError as e:
+        raise handle_database_error(e, "order cancelled check")
     except Exception as e:
-        error_msg = str(e)
-        error_trace = traceback.format_exc()
-        logger.error(f"Error in check_order_cancelled: {error_msg}\n{error_trace}")
-        
-        raise HTTPException(
-            status_code=500,
-            detail={
-                "status": "error",
-                "message": f"Server error: {error_msg}",
-                "error_code": "SERVER_ERROR",
-                "timestamp": datetime.now().isoformat()
-            }
-        )
+        raise handle_server_error(e, "order cancelled check")
 
 @router.get("/proship-health")
 async def proship_health():
     """
     Health check endpoint for the ProShip integration
     """
+    log_operation_start("ProShip health check")
+    
     try:
+        log_operation_success("ProShip health check", "all endpoints available")
         return {
             "status": "healthy",
             "message": "ProShip integration API endpoints are available",
             "timestamp": datetime.now().isoformat()
         }
     except Exception as e:
-        raise HTTPException(
-            status_code=500,
-            detail={
-                "status": "error",
-                "message": str(e),
-                "timestamp": datetime.now().isoformat()
-            }
-        )
+        raise handle_server_error(e, "ProShip health check")

@@ -1,5 +1,5 @@
 from fastapi import APIRouter, HTTPException
-from sqlalchemy import text
+from sqlalchemy import text, exc
 from datetime import datetime
 import logging
 import traceback
@@ -12,6 +12,13 @@ logger = logging.getLogger(__name__)
 from database import execute_with_retry
 from models.product import ProductSearch
 
+# Import standardized error handling
+from error_handlers import (
+    handle_database_error, handle_server_error, handle_business_logic_error,
+    log_operation_start, log_operation_success, log_operation_warning,
+    ErrorCodes, create_error_response
+)
+
 router = APIRouter(
     prefix="/api/v1",
     tags=["product"]
@@ -23,7 +30,7 @@ async def search_product(search: ProductSearch):
     Search products using a single query term that searches both SKU and description columns.
     Returns matching products from the products table, using only columns that exist.
     """
-    logger.info(f"Product search request received with query: {search.query}")
+    log_operation_start("product search", query=search.query, limit=search.limit)
     
     try:
         # First, get the actual columns in the products table
@@ -113,7 +120,7 @@ async def search_product(search: ProductSearch):
         
         # Check if any products were found
         if not products:
-            logger.info(f"No products found matching query: {search.query}")
+            log_operation_success("product search", f"no products found for query: {search.query}")
             
             return {
                 "status": "success",
@@ -124,7 +131,7 @@ async def search_product(search: ProductSearch):
                 "timestamp": datetime.now().isoformat()
             }
         
-        logger.info(f"Found {len(products)} products matching the search criteria")
+        log_operation_success("product search", f"found {len(products)} products matching the search criteria")
         
         # Return the results
         return {
@@ -138,20 +145,10 @@ async def search_product(search: ProductSearch):
     
     except HTTPException:
         raise
+    except exc.SQLAlchemyError as e:
+        raise handle_database_error(e, "product search")
     except Exception as e:
-        error_msg = str(e)
-        error_trace = traceback.format_exc()
-        logger.error(f"Error in product search: {error_msg}\n{error_trace}")
-        
-        raise HTTPException(
-            status_code=500,
-            detail={
-                "status": "error",
-                "message": f"Server error: {error_msg}",
-                "error_code": "SERVER_ERROR",
-                "timestamp": datetime.now().isoformat()
-            }
-        )
+        raise handle_server_error(e, "product search")
 
 # Health check endpoint
 @router.get("/product-health")
@@ -159,18 +156,14 @@ async def product_health():
     """
     Health check endpoint for the product search API
     """
+    log_operation_start("product health check")
+    
     try:
+        log_operation_success("product health check", "all endpoints available")
         return {
             "status": "healthy",
             "message": "Product search API endpoint is available",
             "timestamp": datetime.now().isoformat()
         }
     except Exception as e:
-        raise HTTPException(
-            status_code=500,
-            detail={
-                "status": "error",
-                "message": str(e),
-                "timestamp": datetime.now().isoformat()
-            }
-        )
+        raise handle_server_error(e, "product health check")

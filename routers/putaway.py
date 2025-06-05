@@ -13,6 +13,13 @@ logger = logging.getLogger(__name__)
 from models.putaway import PutawayOrder
 from api.database import execute_with_retry
 
+# Import standardized error handling
+from error_handlers import (
+    handle_database_error, handle_business_logic_error, handle_server_error,
+    log_operation_start, log_operation_success, log_operation_warning,
+    ErrorCodes, create_error_response
+)
+
 router = APIRouter(
     prefix="/api/v1",
     tags=["putaway"]
@@ -20,34 +27,30 @@ router = APIRouter(
 
 @router.post("/putawayOrder")
 async def create_putaway_order(order: PutawayOrder):
+    log_operation_start("putaway order creation", tote=order.tote, items_count=len(order.items))
+    
     try:
         # Check if tote already exists
         check_query = text("""
             SELECT COUNT(*) FROM putaway_orders WHERE tote = :tote
         """)
         result = execute_with_retry(check_query, {'tote': order.tote})
-        #if result.fetchone()[0] > 0:
-        #    raise HTTPException(
-        #        status_code=400,
-        #        detail={
-        #            "status": "error",
-        #            "message": f"Tote {order.tote} already exists in the system",
-        #            "error_code": "DUPLICATE_TOTE",
-        #            "timestamp": datetime.now().isoformat()
-        #        }
-        #    )
+        if result.fetchone()[0] > 0:
+            logger.warning(f"Attempt to create putaway order with duplicate tote: {order.tote}")
+            raise handle_business_logic_error(
+                f"Tote {order.tote} already exists in the system",
+                ErrorCodes.DUPLICATE_TOTE,
+                400
+            )
 
         # Calculate total quantity for validation
         total_quantity = sum(item.quantity for item in order.items)
         if total_quantity > 100000:  # Example business rule
-            raise HTTPException(
-                status_code=400,
-                detail={
-                    "status": "error",
-                    "message": "Total quantity exceeds maximum allowed (100,000)",
-                    "error_code": "QUANTITY_EXCEEDED",
-                    "timestamp": datetime.now().isoformat()
-                }
+            logger.warning(f"Putaway order total quantity {total_quantity} exceeds maximum (100,000)")
+            raise handle_business_logic_error(
+                "Total quantity exceeds maximum allowed (100,000)",
+                ErrorCodes.QUANTITY_EXCEEDED,
+                400
             )
 
         # Add inventory check placeholder here, before inserting records
@@ -61,15 +64,11 @@ async def create_putaway_order(order: PutawayOrder):
             sufficient_stock = False
             
         if not sufficient_stock:
-            logger.info(f"Insufficient stock for putaway order with tote {order.tote}")
-            raise HTTPException(
-                status_code=400,
-                detail={
-                    "status": "error",
-                    "message": "Insufficient stock to fulfill this putaway order",
-                    "error_code": "INSUFFICIENT_STOCK",
-                    "timestamp": datetime.now().isoformat()
-                }
+            logger.warning(f"Insufficient stock for putaway order with tote {order.tote}")
+            raise handle_business_logic_error(
+                "Insufficient stock to fulfill this putaway order",
+                ErrorCodes.INSUFFICIENT_STOCK,
+                400
             )
         
         # Insert the main order record
@@ -107,19 +106,23 @@ async def create_putaway_order(order: PutawayOrder):
                 })
             except IntegrityError as e:
                 # Rollback the entire order if any item fails
-                execute_with_retry(
-                    text("DELETE FROM putaway_orders WHERE id = :id"),
-                    {'id': order_id}
+                logger.error(f"Integrity error inserting item with SKU {item.sku}: {str(e)}")
+                try:
+                    execute_with_retry(
+                        text("DELETE FROM putaway_orders WHERE id = :id"),
+                        {'id': order_id}
+                    )
+                    logger.info(f"Rolled back putaway order {order_id} due to item insertion failure")
+                except Exception as rollback_error:
+                    logger.error(f"Failed to rollback putaway order {order_id}: {str(rollback_error)}")
+                
+                raise handle_business_logic_error(
+                    f"Error inserting item with SKU {item.sku}",
+                    ErrorCodes.ITEM_INSERT_FAILED,
+                    400
                 )
-                raise HTTPException(
-                    status_code=400,
-                    detail={
-                        "status": "error",
-                        "message": f"Error inserting item with SKU {item.sku}",
-                        "error_code": "ITEM_INSERT_FAILED",
-                        "timestamp": datetime.now().isoformat()
-                    }
-                )
+        
+        log_operation_success("putaway order creation", f"created order {order_id} for tote {order.tote} with {len(order.items)} items")
         
         return {
             "status": "success",
@@ -133,22 +136,14 @@ async def create_putaway_order(order: PutawayOrder):
     except HTTPException:
         raise
     except SQLAlchemyError as e:
-        raise HTTPException(
-            status_code=500,
-            detail={
-                "status": "error",
-                "message": "Database error occurred",
-                "error_code": "DATABASE_ERROR",
-                "timestamp": datetime.now().isoformat()
-            }
-        )
+        raise handle_database_error(e, "putaway order creation")
     except Exception as e:
+        logger.error(f"Unexpected error during putaway order creation: {str(e)}\n{traceback.format_exc()}")
         raise HTTPException(
             status_code=500,
-            detail={
-                "status": "error",
-                "message": str(e),
-                "error_code": "GENERAL_ERROR",
-                "timestamp": datetime.now().isoformat()
-            }
+            detail=create_error_response(
+                status_code=500,
+                message=f"Server error during putaway order creation: {str(e)}",
+                error_code=ErrorCodes.SERVER_ERROR
+            )
         )

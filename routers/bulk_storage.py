@@ -13,6 +13,13 @@ logger = logging.getLogger(__name__)
 from models.bulk_storage import BulkStorageOrder
 from api.database import execute_with_retry
 
+# Import standardized error handling
+from error_handlers import (
+    handle_database_error, handle_business_logic_error, handle_server_error,
+    log_operation_start, log_operation_success, log_operation_warning,
+    ErrorCodes, create_error_response
+)
+
 # Rest of the file remains the same
 
 router = APIRouter(
@@ -22,6 +29,8 @@ router = APIRouter(
 
 @router.post("/bulkStorage")
 async def create_bulk_storage(order: BulkStorageOrder):
+    log_operation_start("bulk storage order creation", location=order.location, items_count=len(order.items))
+    
     try:
         # Check if location already has a pending order
         check_query = text("""
@@ -29,27 +38,21 @@ async def create_bulk_storage(order: BulkStorageOrder):
         """)
         result = execute_with_retry(check_query, {'location': order.location})
         if result.fetchone()[0] > 0:
-            raise HTTPException(
-                status_code=400,
-                detail={
-                    "status": "error",
-                    "message": f"Location {order.location} already has a pending order",
-                    "error_code": "DUPLICATE_LOCATION",
-                    "timestamp": datetime.now().isoformat()
-                }
+            logger.warning(f"Attempt to create bulk storage order at location with pending order: {order.location}")
+            raise handle_business_logic_error(
+                f"Location {order.location} already has a pending order",
+                ErrorCodes.DUPLICATE_LOCATION,
+                400
             )
 
         # Calculate total quantity for validation
         total_quantity = sum(item.quantity for item in order.items)
         if total_quantity > 1000000:  # Higher limit for bulk storage
-            raise HTTPException(
-                status_code=400,
-                detail={
-                    "status": "error",
-                    "message": "Total quantity exceeds maximum allowed (1,000,000)",
-                    "error_code": "QUANTITY_EXCEEDED",
-                    "timestamp": datetime.now().isoformat()
-                }
+            logger.warning(f"Bulk storage order total quantity {total_quantity} exceeds maximum (1,000,000)")
+            raise handle_business_logic_error(
+                "Total quantity exceeds maximum allowed (1,000,000)",
+                ErrorCodes.QUANTITY_EXCEEDED,
+                400
             )
 
         # Add inventory check placeholder here, before inserting records
@@ -63,15 +66,11 @@ async def create_bulk_storage(order: BulkStorageOrder):
             sufficient_stock = False
             
         if not sufficient_stock:
-            logger.info(f"Insufficient stock for bulk storage order with location {order.location}")
-            raise HTTPException(
-                status_code=400,
-                detail={
-                    "status": "error",
-                    "message": "Insufficient stock to fulfill this bulk storage order",
-                    "error_code": "INSUFFICIENT_STOCK",
-                    "timestamp": datetime.now().isoformat()
-                }
+            logger.warning(f"Insufficient stock for bulk storage order at location {order.location}")
+            raise handle_business_logic_error(
+                "Insufficient stock to fulfill this bulk storage order",
+                ErrorCodes.INSUFFICIENT_STOCK,
+                400
             )
         
         # Insert the main order record
@@ -109,19 +108,23 @@ async def create_bulk_storage(order: BulkStorageOrder):
                 })
             except IntegrityError as e:
                 # Rollback the entire order if any item fails
-                execute_with_retry(
-                    text("DELETE FROM bulk_storage_orders WHERE id = :id"),
-                    {'id': order_id}
+                logger.error(f"Integrity error inserting item with SKU {item.sku}: {str(e)}")
+                try:
+                    execute_with_retry(
+                        text("DELETE FROM bulk_storage_orders WHERE id = :id"),
+                        {'id': order_id}
+                    )
+                    logger.info(f"Rolled back bulk storage order {order_id} due to item insertion failure")
+                except Exception as rollback_error:
+                    logger.error(f"Failed to rollback bulk storage order {order_id}: {str(rollback_error)}")
+                
+                raise handle_business_logic_error(
+                    f"Error inserting item with SKU {item.sku}",
+                    ErrorCodes.ITEM_INSERT_FAILED,
+                    400
                 )
-                raise HTTPException(
-                    status_code=400,
-                    detail={
-                        "status": "error",
-                        "message": f"Error inserting item with SKU {item.sku}",
-                        "error_code": "ITEM_INSERT_FAILED",
-                        "timestamp": datetime.now().isoformat()
-                    }
-                )
+        
+        log_operation_success("bulk storage order creation", f"created order {order_id} for location {order.location} with {len(order.items)} items")
         
         return {
             "status": "success",
@@ -135,22 +138,14 @@ async def create_bulk_storage(order: BulkStorageOrder):
     except HTTPException:
         raise
     except SQLAlchemyError as e:
-        raise HTTPException(
-            status_code=500,
-            detail={
-                "status": "error",
-                "message": "Database error occurred",
-                "error_code": "DATABASE_ERROR",
-                "timestamp": datetime.now().isoformat()
-            }
-        )
+        raise handle_database_error(e, "bulk storage order creation")
     except Exception as e:
+        logger.error(f"Unexpected error during bulk storage order creation: {str(e)}\n{traceback.format_exc()}")
         raise HTTPException(
             status_code=500,
-            detail={
-                "status": "error",
-                "message": str(e),
-                "error_code": "GENERAL_ERROR",
-                "timestamp": datetime.now().isoformat()
-            }
+            detail=create_error_response(
+                status_code=500,
+                message=f"Server error during bulk storage order creation: {str(e)}",
+                error_code=ErrorCodes.SERVER_ERROR
+            )
         )

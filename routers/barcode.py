@@ -1,5 +1,5 @@
 from fastapi import APIRouter, HTTPException
-from sqlalchemy import text
+from sqlalchemy import text, exc
 from datetime import datetime
 import logging
 import traceback
@@ -12,6 +12,13 @@ logger = logging.getLogger(__name__)
 from database import execute_with_retry
 from models.barcode import BarcodeLookup, NewBarcode
 
+# Import standardized error handling
+from error_handlers import (
+    handle_database_error, handle_server_error, handle_not_found_error, handle_business_logic_error,
+    log_operation_start, log_operation_success, log_operation_warning,
+    ErrorCodes, create_error_response
+)
+
 router = APIRouter(
     prefix="/api/v1",
     tags=["barcode"]
@@ -22,7 +29,7 @@ async def lookup_barcode(lookup: BarcodeLookup):
     """
     Lookup a barcode in the database and return associated SKU if found.
     """
-    logger.info(f"Barcode lookup request received for: {lookup.barcode}")
+    log_operation_start("barcode lookup", barcode=lookup.barcode)
     
     try:
         # Query the barcode in the barcodes table
@@ -36,22 +43,13 @@ async def lookup_barcode(lookup: BarcodeLookup):
         
         # Check if barcode was found
         if row is None:
-            logger.info(f"Barcode not found: {lookup.barcode}")
-            raise HTTPException(
-                status_code=404,
-                detail={
-                    "status": "error",
-                    "message": f"Barcode {lookup.barcode} not found in the system",
-                    "error_code": "BARCODE_NOT_FOUND",
-                    "timestamp": datetime.now().isoformat()
-                }
-            )
+            raise handle_not_found_error("Barcode", lookup.barcode, ErrorCodes.BARCODE_NOT_FOUND)
         
         # Return the SKU information with proper type handling
         sku = str(row[0]) if row[0] is not None else ""
         alternate = int(row[1]) if row[1] is not None else 0
         
-        logger.info(f"Barcode found: {lookup.barcode}, SKU: {sku}")
+        log_operation_success("barcode lookup", f"found SKU {sku} for barcode {lookup.barcode}")
         return {
             "status": "success",
             "barcode": lookup.barcode,
@@ -62,20 +60,10 @@ async def lookup_barcode(lookup: BarcodeLookup):
     
     except HTTPException:
         raise
+    except exc.SQLAlchemyError as e:
+        raise handle_database_error(e, "barcode lookup")
     except Exception as e:
-        error_msg = str(e)
-        error_trace = traceback.format_exc()
-        logger.error(f"Error in barcode lookup: {error_msg}\n{error_trace}")
-        
-        raise HTTPException(
-            status_code=500,
-            detail={
-                "status": "error",
-                "message": f"Server error: {error_msg}",
-                "error_code": "SERVER_ERROR",
-                "timestamp": datetime.now().isoformat()
-            }
-        )
+        raise handle_server_error(e, "barcode lookup")
 
 @router.post("/addNewBarcode")
 async def add_new_barcode(new_barcode: NewBarcode):
@@ -84,7 +72,7 @@ async def add_new_barcode(new_barcode: NewBarcode):
     If barcode is "NA", validate SKU exists but don't store the barcode.
     If it's a new SKU, alternate = 1. Otherwise, increment from the highest existing alternate.
     """
-    logger.info(f"Add new barcode request received: SKU={new_barcode.sku}, Barcode={new_barcode.barcode}")
+    log_operation_start("add new barcode", sku=new_barcode.sku, barcode=new_barcode.barcode)
     
     try:
         # Handle "NA" barcode case - validate SKU exists but don't store
@@ -99,15 +87,10 @@ async def add_new_barcode(new_barcode: NewBarcode):
             existing_sku = result.fetchone()
             
             if existing_sku is None:
-                logger.info(f"SKU not found in products table: {new_barcode.sku}")
-                raise HTTPException(
-                    status_code=400,
-                    detail={
-                        "status": "error",
-                        "message": f"SKU {new_barcode.sku} does not exist in the products table. Cannot process NA barcode.",
-                        "error_code": "INVALID_SKU",
-                        "timestamp": datetime.now().isoformat()
-                    }
+                raise handle_business_logic_error(
+                    f"SKU {new_barcode.sku} does not exist in the products table. Cannot process NA barcode.",
+                    ErrorCodes.INVALID_SKU,
+                    400
                 )
             
             logger.info(f"NA barcode received for valid SKU: {new_barcode.sku} - not stored in database")
@@ -132,15 +115,10 @@ async def add_new_barcode(new_barcode: NewBarcode):
         
         if existing_barcode is not None:
             existing_sku = str(existing_barcode[0]) if existing_barcode[0] is not None else ""
-            logger.info(f"Barcode already exists: {new_barcode.barcode} for SKU {existing_sku}")
-            raise HTTPException(
-                status_code=400,
-                detail={
-                    "status": "error",
-                    "message": f"Barcode {new_barcode.barcode} already exists in the system for SKU {existing_sku}",
-                    "error_code": "DUPLICATE_BARCODE",
-                    "timestamp": datetime.now().isoformat()
-                }
+            raise handle_business_logic_error(
+                f"Barcode {new_barcode.barcode} already exists in the system for SKU {existing_sku}",
+                ErrorCodes.DUPLICATE_BARCODE,
+                400
             )
             
         # Check if the SKU exists in the products table
@@ -153,15 +131,10 @@ async def add_new_barcode(new_barcode: NewBarcode):
         existing_sku = result.fetchone()
         
         if existing_sku is None:
-            logger.info(f"SKU not found in products table: {new_barcode.sku}")
-            raise HTTPException(
-                status_code=400,
-                detail={
-                    "status": "error",
-                    "message": f"SKU {new_barcode.sku} does not exist in the products table. Cannot add barcode.",
-                    "error_code": "INVALID_SKU",
-                    "timestamp": datetime.now().isoformat()
-                }
+            raise handle_business_logic_error(
+                f"SKU {new_barcode.sku} does not exist in the products table. Cannot add barcode.",
+                ErrorCodes.INVALID_SKU,
+                400
             )
         
         # Find the highest alternate number for the SKU
@@ -199,7 +172,7 @@ async def add_new_barcode(new_barcode: NewBarcode):
             'alternate': alternate_number
         })
         
-        logger.info(f"Successfully added barcode: {new_barcode.barcode} for SKU: {new_barcode.sku}")
+        log_operation_success("add new barcode", f"added barcode {new_barcode.barcode} for SKU {new_barcode.sku}")
         return {
             "status": "success",
             "message": f"Barcode {new_barcode.barcode} added successfully for SKU {new_barcode.sku}",
@@ -212,20 +185,10 @@ async def add_new_barcode(new_barcode: NewBarcode):
     
     except HTTPException:
         raise
+    except exc.SQLAlchemyError as e:
+        raise handle_database_error(e, "add new barcode")
     except Exception as e:
-        error_msg = str(e)
-        error_trace = traceback.format_exc()
-        logger.error(f"Error in add new barcode: {error_msg}\n{error_trace}")
-        
-        raise HTTPException(
-            status_code=500,
-            detail={
-                "status": "error",
-                "message": f"Server error: {error_msg}",
-                "error_code": "SERVER_ERROR",
-                "timestamp": datetime.now().isoformat()
-            }
-        )
+        raise handle_server_error(e, "add new barcode")
 
 # Health check endpoint for the barcode router
 @router.get("/barcode-health")
@@ -233,18 +196,14 @@ async def barcode_health():
     """
     Health check endpoint for the barcode router
     """
+    log_operation_start("barcode health check")
+    
     try:
+        log_operation_success("barcode health check", "all endpoints available")
         return {
             "status": "healthy",
             "message": "Barcode API endpoints are available",
             "timestamp": datetime.now().isoformat()
         }
     except Exception as e:
-        raise HTTPException(
-            status_code=500,
-            detail={
-                "status": "error",
-                "message": str(e),
-                "timestamp": datetime.now().isoformat()
-            }
-        )
+        raise handle_server_error(e, "barcode health check")

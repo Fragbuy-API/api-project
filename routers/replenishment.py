@@ -1,5 +1,5 @@
 from fastapi import APIRouter, HTTPException
-from sqlalchemy import text
+from sqlalchemy import text, exc
 from datetime import datetime
 import logging
 import traceback
@@ -12,6 +12,13 @@ logger = logging.getLogger(__name__)
 from database import execute_with_retry
 from models.replenishment import ReplenishmentOrderRequest, ReplenishmentItemPickedRequest, ReplenishmentCancelRequest, ReplenishmentCompleteRequest
 
+# Import standardized error handling
+from error_handlers import (
+    handle_database_error, handle_server_error, handle_not_found_error, handle_business_logic_error,
+    log_operation_start, log_operation_success, log_operation_warning,
+    ErrorCodes, create_error_response
+)
+
 router = APIRouter(
     prefix="/api/v1",
     tags=["replenishment"]
@@ -23,7 +30,7 @@ async def ro_get_orders():
     Get all replenishment orders that don't have status 'Completed'.
     Returns additional information including the number of SKUs in each order.
     """
-    logger.info("ro_get_orders request received")
+    log_operation_start("get replenishment orders")
     
     try:
         # Query to get orders and count of SKUs
@@ -50,7 +57,7 @@ async def ro_get_orders():
         rows = result.fetchall()
         
         if not rows:
-            logger.info("No active replenishment orders found")
+            log_operation_success("get replenishment orders", "no active replenishment orders found")
             return {
                 "status": "success",
                 "message": "No active replenishment orders found",
@@ -71,7 +78,7 @@ async def ro_get_orders():
             }
             orders.append(order)
         
-        logger.info(f"Found {len(orders)} active replenishment orders")
+        log_operation_success("get replenishment orders", f"found {len(orders)} active replenishment orders")
         return {
             "status": "success",
             "message": f"Found {len(orders)} active replenishment orders",
@@ -80,20 +87,10 @@ async def ro_get_orders():
             "timestamp": datetime.now().isoformat()
         }
     
+    except exc.SQLAlchemyError as e:
+        raise handle_database_error(e, "get replenishment orders")
     except Exception as e:
-        error_msg = str(e)
-        error_trace = traceback.format_exc()
-        logger.error(f"Error in ro_get_orders: {error_msg}\n{error_trace}")
-        
-        raise HTTPException(
-            status_code=500,
-            detail={
-                "status": "error",
-                "message": f"Server error: {error_msg}",
-                "error_code": "SERVER_ERROR",
-                "timestamp": datetime.now().isoformat()
-            }
-        )
+        raise handle_server_error(e, "get replenishment orders")
 
 @router.post("/ro_retrieve_order")
 async def ro_retrieve_order(request: ReplenishmentOrderRequest):
@@ -102,7 +99,7 @@ async def ro_retrieve_order(request: ReplenishmentOrderRequest):
     Returns all items in the order from the replen_order_items table.
     Also changes the order status to "In Process" if it's currently "Unassigned".
     """
-    logger.info(f"ro_retrieve_order request received for order ID: {request.ro_id}")
+    log_operation_start("retrieve replenishment order", ro_id=request.ro_id)
     
     try:
         # First check if the order exists
@@ -116,16 +113,7 @@ async def ro_retrieve_order(request: ReplenishmentOrderRequest):
         order_row = order_result.fetchone()
         
         if not order_row:
-            logger.info(f"Replenishment order not found: {request.ro_id}")
-            raise HTTPException(
-                status_code=404,
-                detail={
-                    "status": "error",
-                    "message": f"Replenishment order {request.ro_id} not found",
-                    "error_code": "RO_NOT_FOUND",
-                    "timestamp": datetime.now().isoformat()
-                }
-            )
+            raise handle_not_found_error("Replenishment order", request.ro_id, ErrorCodes.RO_NOT_FOUND)
         
         current_status = order_row[2]
         
@@ -188,7 +176,7 @@ async def ro_retrieve_order(request: ReplenishmentOrderRequest):
         if status_changed:
             message += ". Status changed from Unassigned to In Process"
         
-        logger.info(f"Successfully retrieved order {request.ro_id} with {len(items)} items")
+        log_operation_success("retrieve replenishment order", f"retrieved order {request.ro_id} with {len(items)} items")
         return {
             "status": "success",
             "message": message,
@@ -199,20 +187,10 @@ async def ro_retrieve_order(request: ReplenishmentOrderRequest):
     
     except HTTPException:
         raise
+    except exc.SQLAlchemyError as e:
+        raise handle_database_error(e, "retrieve replenishment order")
     except Exception as e:
-        error_msg = str(e)
-        error_trace = traceback.format_exc()
-        logger.error(f"Error in ro_retrieve_order: {error_msg}\n{error_trace}")
-        
-        raise HTTPException(
-            status_code=500,
-            detail={
-                "status": "error",
-                "message": f"Server error: {error_msg}",
-                "error_code": "SERVER_ERROR",
-                "timestamp": datetime.now().isoformat()
-            }
-        )
+        raise handle_server_error(e, "retrieve replenishment order")
 
 @router.post("/ro_item_picked")
 async def ro_item_picked(request: ReplenishmentItemPickedRequest):
@@ -221,7 +199,7 @@ async def ro_item_picked(request: ReplenishmentItemPickedRequest):
     Uses ro_id, sku, and rack_location to identify the item.
     Optionally accepts a note explaining quantity changes.
     """
-    logger.info(f"ro_item_picked request received: RO={request.ro_id}, SKU={request.sku}, Location={request.rack_location}, Qty={request.qty_picked}")
+    log_operation_start("update item picked", ro_id=request.ro_id, sku=request.sku, rack_location=request.rack_location, qty_picked=request.qty_picked)
     
     try:
         # First check if the order and item exist with the specific rack_location
@@ -243,15 +221,10 @@ async def ro_item_picked(request: ReplenishmentItemPickedRequest):
         item_row = item_result.fetchone()
         
         if not item_row:
-            logger.info(f"Item not found: RO={request.ro_id}, SKU={request.sku}, Location={request.rack_location}")
-            raise HTTPException(
-                status_code=404,
-                detail={
-                    "status": "error",
-                    "message": f"Item with SKU {request.sku} at location {request.rack_location} not found in replenishment order {request.ro_id}",
-                    "error_code": "ITEM_NOT_FOUND",
-                    "timestamp": datetime.now().isoformat()
-                }
+            raise handle_not_found_error(
+                f"Item with SKU {request.sku} at location {request.rack_location}",
+                f"replenishment order {request.ro_id}",
+                ErrorCodes.ITEM_NOT_FOUND
             )
         
         item_id = item_row[0]
@@ -260,14 +233,9 @@ async def ro_item_picked(request: ReplenishmentItemPickedRequest):
         
         # Check if order is already completed
         if ro_status == 'Completed':
-            raise HTTPException(
-                status_code=400,
-                detail={
-                    "status": "error",
-                    "message": f"Replenishment order {request.ro_id} is already marked as Completed",
-                    "error_code": "ORDER_ALREADY_COMPLETED",
-                    "timestamp": datetime.now().isoformat()
-                }
+            raise handle_business_logic_error(
+                f"Replenishment order {request.ro_id} is already marked as Completed",
+                ErrorCodes.ORDER_ALREADY_COMPLETED
             )
         
         # PLACEHOLDER: Check inventory for sufficient stock
@@ -280,27 +248,9 @@ async def ro_item_picked(request: ReplenishmentItemPickedRequest):
             sufficient_stock = False
 
         if not sufficient_stock:
-            logger.info(f"Insufficient stock for SKU={request.sku} at location {request.rack_location}")
-            raise HTTPException(
-                status_code=400,
-                detail={
-                    "status": "error",
-                    "message": "Insufficient stock",
-                    "error_code": "INSUFFICIENT_STOCK",
-                    "timestamp": datetime.now().isoformat()
-                }
-            )
-        
-        if not sufficient_stock:
-            logger.info(f"Insufficient stock for SKU={request.sku} at location {request.rack_location}")
-            raise HTTPException(
-                status_code=400,
-                detail={
-                    "status": "error",
-                    "message": "Insufficient stock",
-                    "error_code": "INSUFFICIENT_STOCK",
-                    "timestamp": datetime.now().isoformat()
-                }
+            raise handle_business_logic_error(
+                f"Insufficient stock of SKU {request.sku} at location {request.rack_location}",
+                ErrorCodes.INSUFFICIENT_STOCK
             )
         
         # Update the qty_picked value and add the note if provided
@@ -382,24 +332,15 @@ async def ro_item_picked(request: ReplenishmentItemPickedRequest):
         if request.note:
             response["note"] = request.note
         
+        log_operation_success("update item picked", f"updated item {request.sku} in RO {request.ro_id}")
         return response
     
     except HTTPException:
         raise
+    except exc.SQLAlchemyError as e:
+        raise handle_database_error(e, "update item picked")
     except Exception as e:
-        error_msg = str(e)
-        error_trace = traceback.format_exc()
-        logger.error(f"Error in ro_item_picked: {error_msg}\n{error_trace}")
-        
-        raise HTTPException(
-            status_code=500,
-            detail={
-                "status": "error",
-                "message": f"Server error: {error_msg}",
-                "error_code": "SERVER_ERROR",
-                "timestamp": datetime.now().isoformat()
-            }
-        )
+        raise handle_server_error(e, "update item picked")
 
 @router.post("/ro_pick_cancelled")
 async def ro_pick_cancelled(request: ReplenishmentCancelRequest):
@@ -407,7 +348,7 @@ async def ro_pick_cancelled(request: ReplenishmentCancelRequest):
     Cancel picking for a replenishment order by changing its status
     from "In Process" back to "Unassigned".
     """
-    logger.info(f"ro_pick_cancelled request received for order ID: {request.ro_id}")
+    log_operation_start("cancel replenishment picking", ro_id=request.ro_id)
     
     try:
         # First check if the order exists and is in the correct state
@@ -421,30 +362,15 @@ async def ro_pick_cancelled(request: ReplenishmentCancelRequest):
         order_row = order_result.fetchone()
         
         if not order_row:
-            logger.info(f"Replenishment order not found: {request.ro_id}")
-            raise HTTPException(
-                status_code=404,
-                detail={
-                    "status": "error",
-                    "message": f"Replenishment order {request.ro_id} not found",
-                    "error_code": "RO_NOT_FOUND",
-                    "timestamp": datetime.now().isoformat()
-                }
-            )
+            raise handle_not_found_error("Replenishment order", request.ro_id, ErrorCodes.RO_NOT_FOUND)
         
         current_status = order_row[0]
         
         # Check if order is in the correct state to be cancelled
         if current_status != "In Process":
-            logger.info(f"Cannot cancel order {request.ro_id} with status {current_status}")
-            raise HTTPException(
-                status_code=400,
-                detail={
-                    "status": "error",
-                    "message": f"Cannot cancel order with status {current_status}. Only orders with status 'In Process' can be cancelled.",
-                    "error_code": "INVALID_STATUS_FOR_CANCEL",
-                    "timestamp": datetime.now().isoformat()
-                }
+            raise handle_business_logic_error(
+                f"Cannot cancel order with status {current_status}. Only orders with status 'In Process' can be cancelled.",
+                ErrorCodes.INVALID_STATUS_FOR_CANCEL
             )
         
         # Update the order status
@@ -465,7 +391,7 @@ async def ro_pick_cancelled(request: ReplenishmentCancelRequest):
         
         execute_with_retry(reset_query, {'ro_id': request.ro_id})
         
-        logger.info(f"Successfully cancelled picking for order {request.ro_id}")
+        log_operation_success("cancel replenishment picking", f"cancelled picking for order {request.ro_id}")
         return {
             "status": "success",
             "message": f"Replenishment order {request.ro_id} has been reset to Unassigned status",
@@ -477,20 +403,10 @@ async def ro_pick_cancelled(request: ReplenishmentCancelRequest):
     
     except HTTPException:
         raise
+    except exc.SQLAlchemyError as e:
+        raise handle_database_error(e, "cancel replenishment picking")
     except Exception as e:
-        error_msg = str(e)
-        error_trace = traceback.format_exc()
-        logger.error(f"Error in ro_pick_cancelled: {error_msg}\n{error_trace}")
-        
-        raise HTTPException(
-            status_code=500,
-            detail={
-                "status": "error",
-                "message": f"Server error: {error_msg}",
-                "error_code": "SERVER_ERROR",
-                "timestamp": datetime.now().isoformat()
-            }
-        )
+        raise handle_server_error(e, "cancel replenishment picking")
 
 
 @router.post("/ro_complete")
@@ -499,7 +415,7 @@ async def ro_complete(request: ReplenishmentCompleteRequest):
     Mark a replenishment order as Completed after user confirmation.
     Called after all items have been picked and the user confirms completion.
     """
-    logger.info(f"ro_complete request received for order ID: {request.ro_id}")
+    log_operation_start("complete replenishment order", ro_id=request.ro_id)
     
     try:
         # First check if the order exists 
@@ -513,22 +429,13 @@ async def ro_complete(request: ReplenishmentCompleteRequest):
         order_row = order_result.fetchone()
         
         if not order_row:
-            logger.info(f"Replenishment order not found: {request.ro_id}")
-            raise HTTPException(
-                status_code=404,
-                detail={
-                    "status": "error",
-                    "message": f"Replenishment order {request.ro_id} not found",
-                    "error_code": "RO_NOT_FOUND",
-                    "timestamp": datetime.now().isoformat()
-                }
-            )
+            raise handle_not_found_error("Replenishment order", request.ro_id, ErrorCodes.RO_NOT_FOUND)
         
         current_status = order_row[0]
         
         # Check if order is already completed
         if current_status == "Completed":
-            logger.info(f"Order {request.ro_id} is already completed")
+            log_operation_success("complete replenishment order", f"order {request.ro_id} already completed")
             return {
                 "status": "success",
                 "message": f"Replenishment order {request.ro_id} is already marked as Completed",
@@ -555,7 +462,7 @@ async def ro_complete(request: ReplenishmentCompleteRequest):
         
         # If not all items have been picked, return a warning
         if total_items > picked_items:
-            logger.warning(f"Not all items have been picked for order {request.ro_id}")
+            log_operation_warning("complete replenishment order", f"not all items picked for order {request.ro_id} ({picked_items}/{total_items})")
             return {
                 "status": "warning",
                 "message": f"Not all items have been picked for order {request.ro_id}. {picked_items} of {total_items} items have been picked.",
@@ -572,7 +479,7 @@ async def ro_complete(request: ReplenishmentCompleteRequest):
         
         execute_with_retry(update_query, {'ro_id': request.ro_id})
         
-        logger.info(f"Successfully marked order {request.ro_id} as Completed")
+        log_operation_success("complete replenishment order", f"marked order {request.ro_id} as Completed")
         return {
             "status": "success",
             "message": f"Replenishment order {request.ro_id} has been marked as Completed",
@@ -584,20 +491,10 @@ async def ro_complete(request: ReplenishmentCompleteRequest):
     
     except HTTPException:
         raise
+    except exc.SQLAlchemyError as e:
+        raise handle_database_error(e, "complete replenishment order")
     except Exception as e:
-        error_msg = str(e)
-        error_trace = traceback.format_exc()
-        logger.error(f"Error in ro_complete: {error_msg}\n{error_trace}")
-        
-        raise HTTPException(
-            status_code=500,
-            detail={
-                "status": "error",
-                "message": f"Server error: {error_msg}",
-                "error_code": "SERVER_ERROR",
-                "timestamp": datetime.now().isoformat()
-            }
-        )
+        raise handle_server_error(e, "complete replenishment order")
 
 @router.get("/replenishment-health")
 async def replenishment_health():
@@ -611,11 +508,12 @@ async def replenishment_health():
             "timestamp": datetime.now().isoformat()
         }
     except Exception as e:
+        logger.error(f"Health check failed: {str(e)}")
         raise HTTPException(
             status_code=500,
-            detail={
-                "status": "error",
-                "message": str(e),
-                "timestamp": datetime.now().isoformat()
-            }
+            detail=create_error_response(
+                status_code=500,
+                message=f"Health check failed: {str(e)}",
+                error_code=ErrorCodes.SERVER_ERROR
+            )
         )

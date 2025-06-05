@@ -1,5 +1,5 @@
 from fastapi import APIRouter, HTTPException
-from sqlalchemy import text
+from sqlalchemy import text, exc
 from datetime import datetime
 import logging
 import traceback
@@ -11,6 +11,13 @@ logger = logging.getLogger(__name__)
 # Import database connection
 from api.database import execute_with_retry
 from models.purchase_orders import FindPurchaseOrderRequest, CheckSkuAgainstPoRequest, UpdatePoStatusRequest, GetPurchaseOrderRequest
+
+# Import standardized error handling
+from error_handlers import (
+    handle_database_error, handle_server_error, handle_not_found_error, handle_business_logic_error,
+    log_operation_start, log_operation_success, log_operation_warning,
+    ErrorCodes, create_error_response
+)
 
 router = APIRouter(
     prefix="/api/v1",
@@ -30,7 +37,7 @@ async def find_purchase_order(request: FindPurchaseOrderRequest):
     If multiple barcodes are provided, returns only POs containing ALL the SKUs associated with those barcodes.
     Only returns POs with status not "Completed" or "Cancelled".
     """
-    logger.info(f"Find purchase order request received: PO={request.po_number}, Barcode(s)={request.barcode}")
+    log_operation_start("find purchase order", po_number=request.po_number, barcode=request.barcode)
     
     try:
         if request.po_number is not None:
@@ -65,16 +72,7 @@ async def find_purchase_order(request: FindPurchaseOrderRequest):
                 sku_row = barcode_result.fetchone()
                 
                 if sku_row is None:
-                    logger.info(f"Barcode not found: {request.barcode}")
-                    raise HTTPException(
-                        status_code=404,
-                        detail={
-                            "status": "error",
-                            "message": f"Barcode {request.barcode} not found in the system",
-                            "error_code": "BARCODE_NOT_FOUND",
-                            "timestamp": datetime.now().isoformat()
-                        }
-                    )
+                    raise handle_not_found_error("Barcode", request.barcode, ErrorCodes.BARCODE_NOT_FOUND)
                 
                 sku = str(sku_row[0]) if sku_row[0] is not None else ""
                 logger.info(f"Found SKU for barcode {request.barcode}: {sku}")
@@ -108,16 +106,7 @@ async def find_purchase_order(request: FindPurchaseOrderRequest):
                     sku_row = barcode_result.fetchone()
                     
                     if sku_row is None:
-                        logger.info(f"Barcode not found: {barcode}")
-                        raise HTTPException(
-                            status_code=404,
-                            detail={
-                                "status": "error",
-                                "message": f"Barcode {barcode} not found in the system",
-                                "error_code": "BARCODE_NOT_FOUND",
-                                "timestamp": datetime.now().isoformat()
-                            }
-                        )
+                        raise handle_not_found_error("Barcode", barcode, ErrorCodes.BARCODE_NOT_FOUND)
                     
                     sku = str(sku_row[0]) if sku_row[0] is not None else ""
                     skus.append(sku)
@@ -148,7 +137,7 @@ async def find_purchase_order(request: FindPurchaseOrderRequest):
         # Process the results
         rows = result.fetchall()
         if not rows:
-            logger.info("No matching purchase orders found")
+            log_operation_success("find purchase order", "no matching purchase orders found")
             return {
                 "status": "success",
                 "message": "No matching purchase orders found",
@@ -176,7 +165,7 @@ async def find_purchase_order(request: FindPurchaseOrderRequest):
                 # Continue with next row rather than failing completely
                 continue
         
-        logger.info(f"Found {len(purchase_orders)} matching purchase orders")
+        log_operation_success("find purchase order", f"found {len(purchase_orders)} matching purchase orders")
         return {
             "status": "success",
             "message": f"Found {len(purchase_orders)} matching purchase orders",
@@ -187,22 +176,10 @@ async def find_purchase_order(request: FindPurchaseOrderRequest):
         
     except HTTPException:
         raise
+    except exc.SQLAlchemyError as e:
+        raise handle_database_error(e, "find purchase order")
     except Exception as e:
-        error_msg = str(e)
-        error_trace = traceback.format_exc()
-        logger.error(f"Error in find purchase order: {error_msg}\n{error_trace}")
-        
-        # Return a detailed error response
-        raise HTTPException(
-            status_code=500,
-            detail={
-                "status": "error",
-                "message": f"Server error: {error_msg}",
-                "error_code": "SERVER_ERROR",
-                "error_trace": error_trace,
-                "timestamp": datetime.now().isoformat()
-            }
-        )
+        raise handle_server_error(e, "find purchase order")
     
 @router.post("/check_sku_against_po")
 async def check_sku_against_po(request: CheckSkuAgainstPoRequest):
@@ -211,7 +188,7 @@ async def check_sku_against_po(request: CheckSkuAgainstPoRequest):
     
     Returns TRUE if the SKU is in the PO, FALSE if not.
     """
-    logger.info(f"Check SKU against PO request received: PO={request.po_number}, Barcode={request.barcode}")
+    log_operation_start("check SKU against PO", po_number=request.po_number, barcode=request.barcode)
     
     try:
         # First get the SKU associated with the barcode
@@ -223,16 +200,7 @@ async def check_sku_against_po(request: CheckSkuAgainstPoRequest):
         sku_row = barcode_result.fetchone()
         
         if sku_row is None:
-            logger.info(f"Barcode not found: {request.barcode}")
-            raise HTTPException(
-                status_code=404,
-                detail={
-                    "status": "error",
-                    "message": f"Barcode {request.barcode} not found in the system",
-                    "error_code": "BARCODE_NOT_FOUND",
-                    "timestamp": datetime.now().isoformat()
-                }
-            )
+            raise handle_not_found_error("Barcode", request.barcode, ErrorCodes.BARCODE_NOT_FOUND)
         
         sku = str(sku_row[0]) if sku_row[0] is not None else ""
         logger.info(f"Found SKU for barcode {request.barcode}: {sku}")
@@ -252,7 +220,7 @@ async def check_sku_against_po(request: CheckSkuAgainstPoRequest):
         count = int(count_row[0]) if count_row is not None and count_row[0] is not None else 0
         
         result = count > 0
-        logger.info(f"SKU {sku} is{'' if result else ' not'} in PO {request.po_number}")
+        log_operation_success("check SKU against PO", f"SKU {sku} {'found' if result else 'not found'} in PO {request.po_number}")
         
         return {
             "status": "success",
@@ -265,20 +233,10 @@ async def check_sku_against_po(request: CheckSkuAgainstPoRequest):
         
     except HTTPException:
         raise
+    except exc.SQLAlchemyError as e:
+        raise handle_database_error(e, "check SKU against PO")
     except Exception as e:
-        error_msg = str(e)
-        error_trace = traceback.format_exc()
-        logger.error(f"Error in check_sku_against_po: {error_msg}\n{error_trace}")
-        
-        raise HTTPException(
-            status_code=500,
-            detail={
-                "status": "error",
-                "message": f"Server error: {error_msg}",
-                "error_code": "SERVER_ERROR",
-                "timestamp": datetime.now().isoformat()
-            }
-        )
+        raise handle_server_error(e, "check SKU against PO")
 
 @router.post("/update_po_status")
 async def update_po_status(request: UpdatePoStatusRequest):
@@ -287,7 +245,7 @@ async def update_po_status(request: UpdatePoStatusRequest):
     
     If the status is set to Complete, a notification will be sent to the partner API.
     """
-    logger.info(f"Update PO status request received: PO={request.po_number}, Status={request.status}")
+    log_operation_start("update PO status", po_number=request.po_number, status=request.status)
     
     try:
         # First check if the PO exists
@@ -300,16 +258,7 @@ async def update_po_status(request: UpdatePoStatusRequest):
         count = int(count_row[0]) if count_row is not None and count_row[0] is not None else 0
         
         if count == 0:
-            logger.info(f"PO not found: {request.po_number}")
-            raise HTTPException(
-                status_code=404,
-                detail={
-                    "status": "error",
-                    "message": f"Purchase order {request.po_number} not found in the system",
-                    "error_code": "PO_NOT_FOUND",
-                    "timestamp": datetime.now().isoformat()
-                }
-            )
+            raise handle_not_found_error("Purchase order", request.po_number, ErrorCodes.PO_NOT_FOUND)
         
         # Update the status in our database
         update_query = text("""
@@ -355,6 +304,8 @@ async def update_po_status(request: UpdatePoStatusRequest):
                     "timestamp": datetime.now().isoformat()
                 }
         
+        log_operation_success("update PO status", f"updated PO {request.po_number} to {new_status}")
+        
         # Return success response
         response = {
             "status": "success",
@@ -372,20 +323,10 @@ async def update_po_status(request: UpdatePoStatusRequest):
         
     except HTTPException:
         raise
+    except exc.SQLAlchemyError as e:
+        raise handle_database_error(e, "update PO status")
     except Exception as e:
-        error_msg = str(e)
-        error_trace = traceback.format_exc()
-        logger.error(f"Error in update_po_status: {error_msg}\n{error_trace}")
-        
-        raise HTTPException(
-            status_code=500,
-            detail={
-                "status": "error",
-                "message": f"Server error: {error_msg}",
-                "error_code": "SERVER_ERROR",
-                "timestamp": datetime.now().isoformat()
-            }
-        )
+        raise handle_server_error(e, "update PO status")
     
 @router.post("/get_purchase_order")
 async def get_purchase_order(request: GetPurchaseOrderRequest):
@@ -395,7 +336,7 @@ async def get_purchase_order(request: GetPurchaseOrderRequest):
     Returns information about all items in the purchase order including SKU, 
     quantity, and product description from the products table.
     """
-    logger.info(f"Get purchase order details request received: PO={request.po_number}")
+    log_operation_start("get purchase order details", po_number=request.po_number)
     
     try:
         # First check if the PO exists in the po_lines table
@@ -408,16 +349,7 @@ async def get_purchase_order(request: GetPurchaseOrderRequest):
         count = int(count_row[0]) if count_row is not None and count_row[0] is not None else 0
         
         if count == 0:
-            logger.info(f"PO not found in po_lines: {request.po_number}")
-            raise HTTPException(
-                status_code=404,
-                detail={
-                    "status": "error",
-                    "message": f"Purchase order {request.po_number} not found in the system",
-                    "error_code": "PO_NOT_FOUND",
-                    "timestamp": datetime.now().isoformat()
-                }
-            )
+            raise handle_not_found_error("Purchase order", request.po_number, ErrorCodes.PO_NOT_FOUND)
         
         # Get the line items with product descriptions
         query = text("""
@@ -487,6 +419,8 @@ async def get_purchase_order(request: GetPurchaseOrderRequest):
             logger.warning(f"Failed to get PO details from purchase_orders table: {str(e)}")
             # Leave po_info as an empty dict
         
+        log_operation_success("get purchase order details", f"retrieved {len(line_items)} items for PO {request.po_number}")
+        
         response = {
             "status": "success",
             "message": f"Found {len(line_items)} items in purchase order {request.po_number}",
@@ -500,20 +434,10 @@ async def get_purchase_order(request: GetPurchaseOrderRequest):
         
     except HTTPException:
         raise
+    except exc.SQLAlchemyError as e:
+        raise handle_database_error(e, "get purchase order details")
     except Exception as e:
-        error_msg = str(e)
-        error_trace = traceback.format_exc()
-        logger.error(f"Error in get_purchase_order: {error_msg}\n{error_trace}")
-        
-        raise HTTPException(
-            status_code=500,
-            detail={
-                "status": "error",
-                "message": f"Server error: {error_msg}",
-                "error_code": "SERVER_ERROR",
-                "timestamp": datetime.now().isoformat()
-            }
-        )
+        raise handle_server_error(e, "get purchase order details")
 
 # Health check endpoint for the purchase order router
 @router.get("/purchase-orders-health")
@@ -528,11 +452,12 @@ async def purchase_order_health():
             "timestamp": datetime.now().isoformat()
         }
     except Exception as e:
+        logger.error(f"Health check failed: {str(e)}")
         raise HTTPException(
             status_code=500,
-            detail={
-                "status": "error",
-                "message": str(e),
-                "timestamp": datetime.now().isoformat()
-            }
+            detail=create_error_response(
+                status_code=500,
+                message=f"Health check failed: {str(e)}",
+                error_code=ErrorCodes.SERVER_ERROR
+            )
         )

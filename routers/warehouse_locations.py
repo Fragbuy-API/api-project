@@ -1,5 +1,5 @@
 from fastapi import APIRouter, HTTPException, Query
-from sqlalchemy import text
+from sqlalchemy import text, exc
 from datetime import datetime
 import logging
 import traceback
@@ -10,6 +10,13 @@ logger = logging.getLogger(__name__)
 
 # Import database connection
 from database import execute_with_retry
+
+# Import standardized error handling
+from error_handlers import (
+    handle_database_error, handle_server_error, handle_not_found_error, handle_business_logic_error,
+    log_operation_start, log_operation_success, log_operation_warning,
+    ErrorCodes, create_error_response
+)
 
 router = APIRouter(
     prefix="/api/v1",
@@ -22,7 +29,7 @@ async def get_warehouse_locations(warehouse: str = Query(None, description="Filt
     Get all warehouse locations, with optional filtering by warehouse.
     Returns location data in JSON format.
     """
-    logger.info(f"Warehouse locations request received. Filter warehouse: {warehouse}")
+    log_operation_start("warehouse locations", warehouse_filter=warehouse)
     
     try:
         # Build query based on filter
@@ -34,7 +41,7 @@ async def get_warehouse_locations(warehouse: str = Query(None, description="Filt
                 ORDER BY warehouse, location_code
             """)
             params = {'warehouse': warehouse}
-            logger.info(f"Filtering by warehouse: {warehouse}")
+            logger.debug(f"Filtering by warehouse: {warehouse}")
         else:
             query = text("""
                 SELECT warehouse, location_code, location_name
@@ -42,7 +49,7 @@ async def get_warehouse_locations(warehouse: str = Query(None, description="Filt
                 ORDER BY warehouse, location_code
             """)
             params = {}
-            logger.info("No filter applied, returning all locations")
+            logger.debug("No filter applied, returning all locations")
         
         # Execute the query
         result = execute_with_retry(query, params)
@@ -59,7 +66,7 @@ async def get_warehouse_locations(warehouse: str = Query(None, description="Filt
         
         # Check if any locations were found
         if not locations:
-            logger.info("No warehouse locations found")
+            log_operation_success("warehouse locations", "no locations found matching criteria")
             
             return {
                 "status": "success",
@@ -69,7 +76,7 @@ async def get_warehouse_locations(warehouse: str = Query(None, description="Filt
                 "timestamp": datetime.now().isoformat()
             }
         
-        logger.info(f"Found {len(locations)} warehouse locations")
+        log_operation_success("warehouse locations", f"found {len(locations)} locations")
         
         # Return the results
         return {
@@ -82,20 +89,10 @@ async def get_warehouse_locations(warehouse: str = Query(None, description="Filt
     
     except HTTPException:
         raise
+    except exc.SQLAlchemyError as e:
+        raise handle_database_error(e, "warehouse locations retrieval")
     except Exception as e:
-        error_msg = str(e)
-        error_trace = traceback.format_exc()
-        logger.error(f"Error retrieving warehouse locations: {error_msg}\n{error_trace}")
-        
-        raise HTTPException(
-            status_code=500,
-            detail={
-                "status": "error",
-                "message": f"Server error: {error_msg}",
-                "error_code": "SERVER_ERROR",
-                "timestamp": datetime.now().isoformat()
-            }
-        )
+        raise handle_server_error(e, "warehouse locations retrieval")
 
 # Health check endpoint
 @router.get("/warehouse-locations-health")
@@ -103,18 +100,14 @@ async def warehouse_locations_health():
     """
     Health check endpoint for the warehouse locations API
     """
+    log_operation_start("warehouse locations health check")
+    
     try:
+        log_operation_success("warehouse locations health check", "endpoint available")
         return {
             "status": "healthy",
             "message": "Warehouse locations API endpoint is available",
             "timestamp": datetime.now().isoformat()
         }
     except Exception as e:
-        raise HTTPException(
-            status_code=500,
-            detail={
-                "status": "error",
-                "message": str(e),
-                "timestamp": datetime.now().isoformat()
-            }
-        )
+        raise handle_server_error(e, "warehouse locations health check")

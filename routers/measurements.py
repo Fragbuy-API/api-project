@@ -1,5 +1,5 @@
 from fastapi import APIRouter, HTTPException
-from sqlalchemy import text
+from sqlalchemy import text, exc
 from datetime import datetime
 import json
 import base64
@@ -8,6 +8,8 @@ import re
 from pathlib import Path
 import glob
 import sys
+import logging
+import traceback
 
 # Add the parent directory to the Python path
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -15,6 +17,17 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from models.measurement import ProductData
 from api.database import execute_with_retry
 from services.measurement_processor import MeasurementProcessor
+
+# Import standardized error handling
+from error_handlers import (
+    handle_database_error, handle_server_error, handle_business_logic_error,
+    log_operation_start, log_operation_success, log_operation_warning,
+    ErrorCodes, create_error_response
+)
+
+# Setup logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 router = APIRouter(
     prefix="/api/v1",
@@ -26,6 +39,8 @@ measurement_processor = MeasurementProcessor(execute_with_retry)
 
 @router.post("/measurement")
 async def receive_measurement(product: ProductData):
+    log_operation_start("measurement processing", barcode=product.barcode, device=product.device)
+    
     try:
         # Extract SKU from attributes if available
         sku = product.attributes.get('sku', 'UNKNOWN')
@@ -133,6 +148,7 @@ async def receive_measurement(product: ProductData):
         
         # Execute the query with retry logic
         execute_with_retry(query, params)
+        logger.info(f"Successfully stored measurement data for barcode {product.barcode}")
         
         # NEW: Enhanced measurement processing
         processing_results = None
@@ -149,10 +165,11 @@ async def receive_measurement(product: ProductData):
             
             # Process the measurement data
             processing_results = measurement_processor.process_measurement(measurement_data)
+            logger.info(f"Measurement processing completed for barcode {product.barcode}")
             
         except Exception as processing_error:
             # Log processing error but don't fail the entire request
-            print(f"Measurement processing error: {str(processing_error)}")
+            log_operation_warning("measurement processing", f"Processing failed for barcode {product.barcode}: {str(processing_error)}")
             processing_results = {
                 "barcode": product.barcode,
                 "sku_found": False,
@@ -188,27 +205,37 @@ async def receive_measurement(product: ProductData):
                 "errors": processing_results.get("errors", [])
             }
         
+        log_operation_success("measurement processing", f"completed for barcode {product.barcode}")
         return response
     
-    except Exception as e:
-        # Enhanced error handling
+    except exc.SQLAlchemyError as e:
+        logger.error(f"Database error during measurement processing: {str(e)}")
+        raise handle_database_error(e, "measurement data storage")
+    except (ValueError, TypeError) as e:
+        # Image processing or data format errors
         if "image" in str(e).lower() or "base64" in str(e).lower():
-            raise HTTPException(
-                status_code=400,
-                detail={
-                    "status": "error",
-                    "message": f"Image processing error: {str(e)}",
-                    "timestamp": datetime.now().isoformat()
-                }
+            logger.error(f"Image processing error for barcode {product.barcode}: {str(e)}")
+            raise handle_business_logic_error(
+                f"Image processing error: {str(e)}",
+                ErrorCodes.VALIDATION_ERROR,
+                400
             )
-        
+        else:
+            logger.error(f"Data validation error for barcode {product.barcode}: {str(e)}")
+            raise handle_business_logic_error(
+                f"Data validation error: {str(e)}",
+                ErrorCodes.VALIDATION_ERROR,
+                400
+            )
+    except Exception as e:
+        logger.error(f"Unexpected error during measurement processing: {str(e)}\n{traceback.format_exc()}")
         raise HTTPException(
             status_code=500,
-            detail={
-                "status": "error",
-                "message": str(e),
-                "timestamp": datetime.now().isoformat()
-            }
+            detail=create_error_response(
+                status_code=500,
+                message=f"Server error during measurement processing: {str(e)}",
+                error_code=ErrorCodes.SERVER_ERROR
+            )
         )
 
 def cleanup_old_images(sku_dir):
@@ -217,6 +244,7 @@ def cleanup_old_images(sku_dir):
     A 'set' consists of images with the same timestamp prefix.
     """
     try:
+        logger.debug(f"Starting image cleanup for directory: {sku_dir}")
         # Get all unique timestamps from filenames
         timestamps = set()
         for file in os.listdir(sku_dir):
@@ -236,10 +264,12 @@ def cleanup_old_images(sku_dir):
             for ts in timestamps_to_delete:
                 for file in glob.glob(os.path.join(sku_dir, f"{ts}_*")):
                     os.remove(file)
-                    print(f"Deleted old image: {file}")
+                    logger.info(f"Deleted old image: {file}")
+            
+            logger.info(f"Image cleanup completed: removed {len(timestamps_to_delete)} old timestamp sets")
     
     except Exception as e:
-        print(f"Error during image cleanup: {str(e)}")
+        logger.error(f"Error during image cleanup: {str(e)}")
         # Log the error but don't let it disrupt the main process
 
 @router.get("/product_image/{sku}/{image_filename}")
@@ -247,10 +277,17 @@ async def get_product_image(sku: str, image_filename: str):
     """
     Retrieve a product image by SKU and filename.
     """
+    log_operation_start("image retrieval", sku=sku, filename=image_filename)
+    
     try:
         # Validate the filename to prevent directory traversal attacks
         if '..' in image_filename or '/' in image_filename:
-            raise HTTPException(status_code=400, detail="Invalid filename")
+            logger.warning(f"Invalid filename attempted: {image_filename}")
+            raise handle_business_logic_error(
+                "Invalid filename - path traversal not allowed",
+                ErrorCodes.VALIDATION_ERROR,
+                400
+            )
             
         # Build the full path
         base_storage_dir = os.path.join(os.path.dirname(__file__), "..", "image_storage")
@@ -258,12 +295,22 @@ async def get_product_image(sku: str, image_filename: str):
         
         # Check if file exists
         if not os.path.isfile(file_path):
-            raise HTTPException(status_code=404, detail="Image not found")
+            logger.info(f"Image not found: {file_path}")
+            raise HTTPException(
+                status_code=404,
+                detail=create_error_response(
+                    status_code=404,
+                    message=f"Image {image_filename} not found for SKU {sku}",
+                    error_code="IMAGE_NOT_FOUND"
+                )
+            )
             
         # Determine content type
         content_type = "image/jpeg"  # Assume JPEG by default
         if image_filename.lower().endswith(".png"):
             content_type = "image/png"
+            
+        log_operation_success("image retrieval", f"serving {image_filename} for SKU {sku}")
             
         # Return the image file
         from fastapi.responses import FileResponse
@@ -272,4 +319,12 @@ async def get_product_image(sku: str, image_filename: str):
     except HTTPException:
         raise
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        logger.error(f"Error retrieving image {image_filename} for SKU {sku}: {str(e)}")
+        raise HTTPException(
+            status_code=500,
+            detail=create_error_response(
+                status_code=500,
+                message=f"Server error retrieving image: {str(e)}",
+                error_code=ErrorCodes.SERVER_ERROR
+            )
+        )

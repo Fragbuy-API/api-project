@@ -1,5 +1,5 @@
 from fastapi import APIRouter, HTTPException
-from sqlalchemy import text
+from sqlalchemy import text, exc
 from datetime import datetime
 import logging
 import traceback
@@ -11,6 +11,13 @@ logger = logging.getLogger(__name__)
 # Import database connection
 from database import execute_with_retry
 from models.art_order import ArtOrder
+
+# Import standardized error handling
+from error_handlers import (
+    handle_database_error, handle_server_error, handle_not_found_error, handle_business_logic_error,
+    log_operation_start, log_operation_success, log_operation_warning,
+    ErrorCodes, create_error_response
+)
 
 router = APIRouter(
     prefix="/api/v1",
@@ -29,7 +36,7 @@ async def create_art_order(order: ArtOrder):
     
     For Remove and Transfer operations, it checks if there is sufficient stock.
     """
-    logger.info(f"ART order request received: Type={order.type}, SKU={order.sku}, Quantity={order.quantity}")
+    log_operation_start("ART order", operation_type=order.type, sku=order.sku, quantity=order.quantity)
     
     try:
         # Check if SKU exists in the products table
@@ -39,16 +46,8 @@ async def create_art_order(order: ArtOrder):
         
         result = execute_with_retry(check_sku_query, {'sku': order.sku})
         if result.fetchone()[0] == 0:
-            logger.warning(f"SKU not found in products table: {order.sku}")
-            raise HTTPException(
-                status_code=404,
-                detail={
-                    "status": "error",
-                    "message": f"SKU {order.sku} does not exist in the products table",
-                    "error_code": "INVALID_SKU",
-                    "timestamp": datetime.now().isoformat()
-                }
-            )
+            raise handle_not_found_error("SKU", order.sku, ErrorCodes.INVALID_SKU, 
+                                       f"SKU {order.sku} does not exist in the products table")
         
         # Check for sufficient stock for Remove or Transfer operations
         if order.type in ["Remove", "Transfer"]:
@@ -60,22 +59,17 @@ async def create_art_order(order: ArtOrder):
                 sufficient_stock = False
                 
             if not sufficient_stock:
-                logger.warning(f"Insufficient stock for {order.type} operation: SKU={order.sku}, Location={order.from_location}")
-                raise HTTPException(
-                    status_code=400,
-                    detail={
-                        "status": "error",
-                        "message": f"Insufficient stock of SKU {order.sku} at location {order.from_location}",
-                        "error_code": "INSUFFICIENT_STOCK",
-                        "timestamp": datetime.now().isoformat()
-                    }
+                raise handle_business_logic_error(
+                    f"Insufficient stock of SKU {order.sku} at location {order.from_location}",
+                    ErrorCodes.INSUFFICIENT_STOCK,
+                    400
                 )
         
         # PLACEHOLDER: In a real implementation, we would update inventory here
         # For Add: Add inventory to to_location
         # For Remove: Remove inventory from from_location
         # For Transfer: Move inventory from from_location to to_location
-        logger.info(f"PLACEHOLDER: Would update inventory for {order.type} operation")
+        log_operation_warning("inventory update", f"PLACEHOLDER: Would update inventory for {order.type} operation")
         
         # Insert a record of this operation for tracking
         insert_query = text("""
@@ -97,9 +91,9 @@ async def create_art_order(order: ArtOrder):
                 'created_at': datetime.now()
             })
             operation_id = result.fetchone()[0]
-            logger.info(f"Inserted record in art_operations table with ID: {operation_id}")
+            log_operation_success("ART tracking", f"recorded operation with ID: {operation_id}")
         except Exception as e:
-            logger.error(f"Failed to insert record in art_operations table: {str(e)}")
+            log_operation_warning("ART tracking", f"failed to insert tracking record: {str(e)}")
             # Continue processing even if record insertion fails
             # This is just for tracking and doesn't affect the actual operation
             operation_id = None
@@ -131,43 +125,30 @@ async def create_art_order(order: ArtOrder):
             response["reason"] = order.reason
         if operation_id:
             response["operation_id"] = operation_id
-            
+        
+        log_operation_success("ART order", f"{order.type} operation completed for SKU {order.sku}")
         return response
     
     except HTTPException:
         raise
+    except exc.SQLAlchemyError as e:
+        raise handle_database_error(e, "ART order processing")
     except Exception as e:
-        error_msg = str(e)
-        error_trace = traceback.format_exc()
-        logger.error(f"Error in create_art_order: {error_msg}\n{error_trace}")
-        
-        raise HTTPException(
-            status_code=500,
-            detail={
-                "status": "error",
-                "message": f"Server error: {error_msg}",
-                "error_code": "SERVER_ERROR",
-                "timestamp": datetime.now().isoformat()
-            }
-        )
+        raise handle_server_error(e, "ART order processing")
 
 @router.get("/art-orders-health")
 async def art_orders_health():
     """
     Health check endpoint for the ART Orders router
     """
+    log_operation_start("ART health check")
+    
     try:
+        log_operation_success("ART health check", "all endpoints available")
         return {
             "status": "healthy",
             "message": "ART Orders API endpoints are available",
             "timestamp": datetime.now().isoformat()
         }
     except Exception as e:
-        raise HTTPException(
-            status_code=500,
-            detail={
-                "status": "error",
-                "message": str(e),
-                "timestamp": datetime.now().isoformat()
-            }
-        )
+        raise handle_server_error(e, "ART health check")
