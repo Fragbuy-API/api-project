@@ -1,5 +1,5 @@
 from fastapi import FastAPI, HTTPException, Request, Response
-from fastapi.middleware.base import BaseHTTPMiddleware
+from starlette.middleware.base import BaseHTTPMiddleware
 from sqlalchemy import create_engine, text, exc
 from sqlalchemy.pool import QueuePool
 import json
