@@ -72,19 +72,35 @@ def check_purchase_orders_health():
     return make_api_call("purchase-orders-health", {}, method="GET")
 
 # Test scenarios for update_po_status API
-def test_update_to_complete():
-    print_test("Update PO Status to Complete")
+def test_update_to_completed():
+    print_test("Update PO Status to Completed")
     data = {
         "po_number": "PO-TEST-001",
-        "status": "Complete"
+        "status": "Completed"
     }
     return make_api_call("update_po_status", data)
 
-def test_update_to_incomplete():
-    print_test("Update PO Status to Incomplete")
+def test_update_to_cancelled():
+    print_test("Update PO Status to Cancelled")
     data = {
         "po_number": "PO-TEST-002",
-        "status": "Incomplete"
+        "status": "Cancelled"
+    }
+    return make_api_call("update_po_status", data)
+
+def test_update_to_none_received():
+    print_test("Update PO Status to NoneReceived")
+    data = {
+        "po_number": "PO-TEST-003",
+        "status": "NoneReceived"
+    }
+    return make_api_call("update_po_status", data)
+
+def test_update_to_partially_received():
+    print_test("Update PO Status to PartiallyReceived")
+    data = {
+        "po_number": "PO-TEST-004",
+        "status": "PartiallyReceived"
     }
     return make_api_call("update_po_status", data)
 
@@ -118,6 +134,22 @@ def test_invalid_status():
     }
     return make_api_call("update_po_status", data, expect_success=False)
 
+def test_old_invalid_complete_status():
+    print_test("Old Invalid 'Complete' Status (should fail validation)")
+    data = {
+        "po_number": "PO-TEST-001",
+        "status": "Complete"
+    }
+    return make_api_call("update_po_status", data, expect_success=False)
+
+def test_old_invalid_in_progress_status():
+    print_test("Old Invalid 'In Progress' Status (should fail validation)")
+    data = {
+        "po_number": "PO-TEST-001",
+        "status": "In Progress"
+    }
+    return make_api_call("update_po_status", data, expect_success=False)
+
 if __name__ == "__main__":
     print(f"{Colors.BLUE}================= TESTING UPDATE PO STATUS API ================={Colors.ENDC}")
     
@@ -134,12 +166,16 @@ if __name__ == "__main__":
     
     # Run the tests
     results = {
-        "update_to_complete": test_update_to_complete()[0],
-        "update_to_incomplete": test_update_to_incomplete()[0],
+        "update_to_completed": test_update_to_completed()[0],
+        "update_to_cancelled": test_update_to_cancelled()[0],
+        "update_to_none_received": test_update_to_none_received()[0],
+        "update_to_partially_received": test_update_to_partially_received()[0],
         "nonexistent_po": test_nonexistent_po()[0],
         "missing_status": test_missing_status()[0],
         "missing_po_number": test_missing_po_number()[0],
-        "invalid_status": test_invalid_status()[0]
+        "invalid_status": test_invalid_status()[0],
+        "old_invalid_complete": test_old_invalid_complete_status()[0],
+        "old_invalid_in_progress": test_old_invalid_in_progress_status()[0]
     }
     
     # Print summary
