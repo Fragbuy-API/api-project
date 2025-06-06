@@ -15,7 +15,7 @@ import traceback
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from models.measurement import ProductData
-from api.database import execute_with_retry
+from database import execute_with_retry, check_request_idempotency, log_api_request
 from services.measurement_processor import MeasurementProcessor
 
 # Import standardized error handling
@@ -42,6 +42,19 @@ async def receive_measurement(product: ProductData):
     log_operation_start("measurement processing", barcode=product.barcode, device=product.device)
     
     try:
+        # Check for duplicate request if request_id is provided
+        if product.request_id:
+            existing_record_id = check_request_idempotency(product.request_id)
+            if existing_record_id:
+                log_operation_warning("measurement processing", f"Duplicate request_id {product.request_id} detected - returning success")
+                return {
+                    "status": "success",
+                    "message": f"Request {product.request_id} already processed (idempotent response)",
+                    "timestamp": datetime.now().isoformat(),
+                    "duplicate_request": True,
+                    "original_record_id": existing_record_id
+                }
+        
         # Extract SKU from attributes if available
         sku = product.attributes.get('sku', 'UNKNOWN')
         
@@ -117,17 +130,18 @@ async def receive_measurement(product: ProductData):
         # Prepare the SQL query
         query = text("""
             INSERT INTO api_received_data 
-            (timestamp, sku, barcode, weight_value, weight_unit, 
+            (request_id, timestamp, sku, barcode, weight_value, weight_unit, 
              length, width, height, dimension_unit, shape, 
              device, note, attributes, image_original, imageseg, imagecolor)
             VALUES 
-            (:timestamp, :sku, :barcode, :weight_value, :weight_unit,
+            (:request_id, :timestamp, :sku, :barcode, :weight_value, :weight_unit,
              :length, :width, :height, :dimension_unit, :shape,
              :device, :note, :attributes, :image, :imageseg, :imagecolor)
         """)
         
         # Prepare the parameters
         params = {
+            'request_id': product.request_id,
             'timestamp': datetime.now(),
             'sku': sku,
             'barcode': product.barcode,

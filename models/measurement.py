@@ -3,6 +3,7 @@ from typing import Optional, Dict, Any
 import re
 
 class ProductData(BaseModel):
+    request_id: Optional[str] = Field(None, max_length=50, description="Unique identifier for request deduplication")
     timestamp: Optional[str] = None
     l: Optional[int] = Field(None, ge=1, le=10000)  # Length in mm
     w: Optional[int] = Field(None, ge=1, le=10000)  # Width in mm
@@ -16,6 +17,12 @@ class ProductData(BaseModel):
     image: Optional[str] = None
     imageseg: Optional[str] = None
     imagecolor: Optional[str] = None
+
+    @validator('request_id')
+    def validate_request_id(cls, v):
+        if v is not None and not re.match(r'^[A-Za-z0-9\-_]{1,50}$', v):
+            raise ValueError('Request ID must contain only letters, numbers, hyphens and underscores')
+        return v
 
     @validator('barcode')
     def validate_barcode(cls, v):

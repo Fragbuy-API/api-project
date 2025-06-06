@@ -1,4 +1,5 @@
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Request, Response
+from fastapi.middleware.base import BaseHTTPMiddleware
 from sqlalchemy import create_engine, text, exc
 from sqlalchemy.pool import QueuePool
 import json
@@ -6,14 +7,18 @@ from datetime import datetime
 import time
 import logging
 import traceback
+import uuid
 
 # Import routers
-from routers import measurements, putaway, bulk_storage, barcode, product, purchase_orders, replenishment, art_orders, warehouse_locations, proship
+from routers import measurements, putaway, bulk_storage, barcode, product, purchase_orders, replenishment, art_orders, warehouse_locations, proship, monitoring
 from routers.filesystem import router as fs_router
 from routers.measurements_debug import router as debug_router
 
 # Import models
 from models.measurement import ProductData
+
+# Import database functions
+from database import log_api_request, get_api_error_rates, get_endpoint_performance_stats, get_recent_errors
 
 # Import standardized error handling
 from error_handlers import (
@@ -28,6 +33,70 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
+# Request logging middleware
+class RequestLoggingMiddleware(BaseHTTPMiddleware):
+    async def dispatch(self, request: Request, call_next):
+        start_time = time.time()
+        
+        # Generate request ID if not present
+        request_id = request.headers.get("X-Request-ID") or str(uuid.uuid4())
+        
+        # Get client info
+        client_ip = request.client.host if request.client else "unknown"
+        user_agent = request.headers.get("User-Agent", "unknown")
+        
+        # Add request ID to headers for downstream use
+        request.state.request_id = request_id
+        
+        try:
+            # Process the request
+            response = await call_next(request)
+            
+            # Calculate response time
+            response_time_ms = int((time.time() - start_time) * 1000)
+            
+            # Log the request
+            try:
+                log_api_request(
+                    endpoint=str(request.url.path),
+                    method=request.method,
+                    status_code=response.status_code,
+                    response_time_ms=response_time_ms,
+                    request_id=request_id,
+                    error_message=None,
+                    ip_address=client_ip,
+                    user_agent=user_agent
+                )
+            except Exception as e:
+                logger.error(f"Failed to log request: {str(e)}")
+            
+            # Add request ID to response headers
+            response.headers["X-Request-ID"] = request_id
+            
+            return response
+            
+        except Exception as e:
+            # Calculate response time
+            response_time_ms = int((time.time() - start_time) * 1000)
+            
+            # Log the error request
+            try:
+                log_api_request(
+                    endpoint=str(request.url.path),
+                    method=request.method,
+                    status_code=500,
+                    response_time_ms=response_time_ms,
+                    request_id=request_id,
+                    error_message=str(e),
+                    ip_address=client_ip,
+                    user_agent=user_agent
+                )
+            except Exception as log_error:
+                logger.error(f"Failed to log error request: {str(log_error)}")
+            
+            # Re-raise the exception
+            raise e
+
 # FastAPI application setup
 app = FastAPI(
     title="Qboid API Project",
@@ -35,6 +104,9 @@ app = FastAPI(
     version="1.0.0",
     openapi_url="/openapi.json",
 )
+
+# Add request logging middleware
+app.add_middleware(RequestLoggingMiddleware)
 
 # Database connection with pooling and reconnection settings
 DATABASE_URL = "mysql+pymysql://Qboid:JY8xM2ch5#Q[@155.138.159.75/products"
@@ -199,7 +271,7 @@ async def receive_measurement(product: ProductData):
 
 @app.get("/api/v1/health")
 async def health_check():
-    """Comprehensive health check endpoint with detailed error handling"""
+    """Comprehensive health check endpoint with detailed error handling and monitoring data"""
     log_operation_start("health check")
     
     try:
@@ -220,14 +292,53 @@ async def health_check():
                 )
             )
         
-        log_operation_success("health check", "API and database are healthy")
+        # Get monitoring data
+        error_rates = get_api_error_rates(hours=1)
+        endpoint_stats = get_endpoint_performance_stats()
+        recent_errors = get_recent_errors(limit=5)
         
-        return {
-            "status": "healthy",
+        # Determine overall health status
+        overall_status = "healthy"
+        health_issues = []
+        
+        # Check error rates
+        if isinstance(error_rates, dict) and 'error_rate_percent' in error_rates:
+            if error_rates['error_rate_percent'] > 10:  # More than 10% errors
+                overall_status = "degraded"
+                health_issues.append(f"High error rate: {error_rates['error_rate_percent']}%")
+            elif error_rates['error_rate_percent'] > 5:  # More than 5% errors
+                if overall_status == "healthy":
+                    overall_status = "warning"
+                health_issues.append(f"Elevated error rate: {error_rates['error_rate_percent']}%")
+        
+        # Check average response time
+        if isinstance(error_rates, dict) and 'avg_response_time_ms' in error_rates:
+            if error_rates['avg_response_time_ms'] > 2000:  # More than 2 seconds
+                overall_status = "degraded"
+                health_issues.append(f"Slow response time: {error_rates['avg_response_time_ms']}ms")
+            elif error_rates['avg_response_time_ms'] > 1000:  # More than 1 second
+                if overall_status == "healthy":
+                    overall_status = "warning"
+                health_issues.append(f"Elevated response time: {error_rates['avg_response_time_ms']}ms")
+        
+        log_operation_success("health check", f"API and database are {overall_status}")
+        
+        response = {
+            "status": overall_status,
             "message": "API is running and database is connected",
             "database": "connected",
-            "timestamp": datetime.now().isoformat()
+            "timestamp": datetime.now().isoformat(),
+            "monitoring": {
+                "error_rates_1h": error_rates,
+                "endpoint_performance_24h": endpoint_stats,
+                "recent_errors": recent_errors
+            }
         }
+        
+        if health_issues:
+            response["health_issues"] = health_issues
+        
+        return response
         
     except exc.SQLAlchemyError as e:
         logger.error(f"Health check failed - database error: {str(e)}")
@@ -269,6 +380,7 @@ try:
     app.include_router(art_orders.router)  
     app.include_router(warehouse_locations.router)
     app.include_router(proship.router)
+    app.include_router(monitoring.router)  # Monitoring and metrics endpoints
     app.include_router(fs_router)
     app.include_router(debug_router)  # Debug endpoint for measurement analysis
     logger.info("All API routers included successfully")
