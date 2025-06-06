@@ -267,12 +267,8 @@ async def update_po_status(request: UpdatePoStatusRequest):
             WHERE po_number = :po_number
         """)
         
-        if request.status == "Complete":
-            new_status = "Completed"
-        elif request.status == "Incomplete":
-            new_status = "In Progress"
-        else:  # "Unassigned"
-            new_status = "Unassigned"
+        # Use the status directly without mapping
+        new_status = request.status
         
         execute_with_retry(update_query, {
             'po_number': request.po_number,
@@ -281,9 +277,9 @@ async def update_po_status(request: UpdatePoStatusRequest):
         
         logger.info(f"Updated status for PO {request.po_number} to {new_status}")
         
-        # If the status is Complete, notify the partner API
+        # If the status is Completed, notify the partner API
         partner_api_notification = None
-        if request.status == "Complete":
+        if request.status == "Completed":
             try:
                 # Placeholder for partner API integration
                 # This will be replaced with actual API call in the future

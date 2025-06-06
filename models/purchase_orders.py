@@ -189,7 +189,7 @@ class CheckSkuAgainstPoRequest(BaseModel):
 
 class UpdatePoStatusRequest(BaseModel):
     po_number: str = Field(..., max_length=50, description="Purchase order number (exact match required)")
-    status: Literal["Complete", "Incomplete", "Unassigned"] = Field(..., description="New status for the purchase order")
+    status: Literal["NoneReceived", "In Progress", "Completed", "PartiallyReceived"] = Field(..., description="New status for the purchase order")
     
     @validator('po_number')
     def validate_po_number(cls, v):
