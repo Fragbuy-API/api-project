@@ -38,19 +38,19 @@ class ProductData(BaseModel):
 
     @validator('attributes')
     def validate_attributes(cls, v):
-        # Check required attributes
-        required_attrs = ['ovpk', 'batt', 'hazmat', 'qty']
+        # Check required attributes (only qty is mandatory)
+        required_attrs = ['qty']
         for attr in required_attrs:
             if attr not in v:
                 raise ValueError(f'Required attribute {attr} is missing')
         
-        # Validate boolean attributes
+        # Validate boolean attributes (optional - default to false if missing)
         bool_attrs = ['ovpk', 'batt', 'hazmat']
         for attr in bool_attrs:
-            if v.get(attr) not in ['true', 'false']:
+            if attr in v and v.get(attr) not in ['true', 'false']:
                 raise ValueError(f'Attribute {attr} must be "true" or "false"')
                 
-        # Validate quantity
+        # Validate quantity (required)
         if 'qty' in v:
             try:
                 qty = int(v['qty'])
@@ -59,7 +59,7 @@ class ProductData(BaseModel):
             except ValueError:
                 raise ValueError('Quantity must be a valid integer')
                 
-        # Validate SKU if present
+        # Validate SKU if present (optional)
         if 'sku' in v:
             if not re.match(r'^[A-Za-z0-9\-_]{1,50}$', v['sku']):
                 raise ValueError('SKU must contain only letters, numbers, hyphens and underscores')
