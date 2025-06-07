@@ -204,6 +204,140 @@ def test_dimension_comparison():
     
     return success, response
 
+# NEW TESTS FOR OPTIONAL QTY FUNCTIONALITY
+
+def test_measurement_without_qty():
+    """Test measurement submission without qty field (should succeed)"""
+    print_test("Measurement Without qty Field")
+    
+    test_data = {
+        "l": 150,
+        "w": 50,
+        "h": 200,
+        "weight": 300,
+        "barcode": "1234567890123",
+        "shape": "rectangular",
+        "device": "qboid-scanner-01",
+        "note": "Test without qty",
+        "attributes": {
+            "ovpk": "false",
+            "batt": "true",
+            "hazmat": "false",
+            "sku": "TEST-SKU-NO-QTY"
+            # qty field completely omitted
+        }
+    }
+    
+    success, response = make_api_call("measurement", test_data)
+    print_result(success, "Measurement accepted without qty field")
+    
+    return success, response
+
+def test_measurement_with_valid_qty():
+    """Test measurement with valid qty (regression test)"""
+    print_test("Measurement With Valid qty")
+    
+    test_data = {
+        "l": 100,
+        "w": 100,
+        "h": 100,
+        "weight": 200,
+        "barcode": "1234567890123",
+        "shape": "cube",
+        "device": "qboid-scanner-01",
+        "note": "Test with valid qty",
+        "attributes": {
+            "ovpk": "true",
+            "batt": "false",
+            "hazmat": "false",
+            "qty": "5",  # Valid qty provided
+            "sku": "TEST-SKU-WITH-QTY"
+        }
+    }
+    
+    success, response = make_api_call("measurement", test_data)
+    print_result(success, "Measurement accepted with valid qty")
+    
+    return success, response
+
+def test_measurement_invalid_qty_still_fails():
+    """Test that invalid qty values still fail validation"""
+    print_test("Measurement With Invalid qty (should fail)")
+    
+    test_data = {
+        "l": 75,
+        "w": 75,
+        "h": 75,
+        "weight": 150,
+        "barcode": "1234567890123",
+        "shape": "cube",
+        "device": "qboid-scanner-01",
+        "attributes": {
+            "ovpk": "false",
+            "batt": "false",
+            "hazmat": "false",
+            "qty": "20000",  # Invalid - exceeds maximum
+            "sku": "TEST-SKU-INVALID-QTY"
+        }
+    }
+    
+    success, response = make_api_call("measurement", test_data, expect_success=False)
+    print_result(success, "Invalid qty properly rejected")
+    
+    return success, response
+
+def test_measurement_zero_qty_fails():
+    """Test that zero qty fails validation"""
+    print_test("Measurement With Zero qty (should fail)")
+    
+    test_data = {
+        "l": 50,
+        "w": 50,
+        "h": 50,
+        "weight": 100,
+        "barcode": "1234567890123",
+        "shape": "small-cube",
+        "device": "qboid-scanner-01",
+        "attributes": {
+            "ovpk": "false",
+            "batt": "false",
+            "hazmat": "false",
+            "qty": "0",  # Invalid - below minimum
+            "sku": "TEST-SKU-ZERO-QTY"
+        }
+    }
+    
+    success, response = make_api_call("measurement", test_data, expect_success=False)
+    print_result(success, "Zero qty properly rejected")
+    
+    return success, response
+
+def test_measurement_non_numeric_qty_fails():
+    """Test that non-numeric qty fails validation"""
+    print_test("Measurement With Non-numeric qty (should fail)")
+    
+    test_data = {
+        "l": 80,
+        "w": 80,
+        "h": 80,
+        "weight": 160,
+        "barcode": "1234567890123",
+        "shape": "cube",
+        "device": "qboid-scanner-01",
+        "attributes": {
+            "ovpk": "false",
+            "batt": "false",
+            "hazmat": "false",
+            "qty": "not-a-number",  # Invalid - not numeric
+            "sku": "TEST-SKU-TEXT-QTY"
+        }
+    }
+    
+    success, response = make_api_call("measurement", test_data, expect_success=False)
+    print_result(success, "Non-numeric qty properly rejected")
+    
+    return success, response
+
 if __name__ == "__main__":
     print(f"{Colors.BLUE}================= TESTING ENHANCED MEASUREMENT PROCESSING ================={Colors.ENDC}")
     
@@ -218,7 +352,13 @@ if __name__ == "__main__":
         "basic_processing": test_enhanced_measurement_processing()[0],
         "barcode_not_found": test_barcode_not_found()[0],
         "empty_attributes": test_empty_attributes()[0],
-        "dimension_comparison": test_dimension_comparison()[0]
+        "dimension_comparison": test_dimension_comparison()[0],
+        # New optional qty tests
+        "measurement_without_qty": test_measurement_without_qty()[0],
+        "measurement_with_valid_qty": test_measurement_with_valid_qty()[0],
+        "invalid_qty_fails": test_measurement_invalid_qty_still_fails()[0],
+        "zero_qty_fails": test_measurement_zero_qty_fails()[0],
+        "non_numeric_qty_fails": test_measurement_non_numeric_qty_fails()[0]
     }
     
     # Print summary

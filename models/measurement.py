@@ -38,11 +38,8 @@ class ProductData(BaseModel):
 
     @validator('attributes')
     def validate_attributes(cls, v):
-        # Check required attributes (only qty is mandatory)
-        required_attrs = ['qty']
-        for attr in required_attrs:
-            if attr not in v:
-                raise ValueError(f'Required attribute {attr} is missing')
+        # No required attributes - qty is now optional
+        # Note: ovpk, batt, hazmat, qty, and sku are all optional
         
         # Validate boolean attributes (optional - default to false if missing)
         bool_attrs = ['ovpk', 'batt', 'hazmat']
@@ -50,14 +47,14 @@ class ProductData(BaseModel):
             if attr in v and v.get(attr) not in ['true', 'false']:
                 raise ValueError(f'Attribute {attr} must be "true" or "false"')
                 
-        # Validate quantity (required)
+        # Validate quantity (optional)
         if 'qty' in v:
             try:
                 qty = int(v['qty'])
                 if qty < 1 or qty > 10000:
                     raise ValueError('Quantity must be between 1 and 10000')
-            except ValueError:
-                raise ValueError('Quantity must be a valid integer')
+            except (ValueError, TypeError):
+                raise ValueError('Quantity must be a valid integer between 1 and 10000')
                 
         # Validate SKU if present (optional)
         if 'sku' in v:
